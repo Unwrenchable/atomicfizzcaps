@@ -225,7 +225,7 @@ document.getElementById("gpsBtn").onclick = () => {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     userMarker = L.circleMarker([pos.coords.latitude, pos.coords.longitude], {radius:12,color:'#0f0'}).addTo(map).bindPopup("You are here");
 
-    const spots = [    const spots = [
+    const spots = [
       {n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
       {n:"Primm (Buffalo Bill's)",lat:35.6145,lng:-115.3845},
       {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222},
@@ -297,6 +297,7 @@ document.getElementById("gpsBtn").onclick = () => {
 </script>
 </body>
 </html>
+
 
 
 
