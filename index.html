@@ -225,7 +225,7 @@ document.getElementById("gpsBtn").onclick = () => {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     userMarker = L.circleMarker([pos.coords.latitude, pos.coords.longitude], {radius:12,color:'#0f0'}).addTo(map).bindPopup("You are here");
 
-    const spots = [
+    const spots = [    const spots = [
       {n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
       {n:"Primm (Buffalo Bill's)",lat:35.6145,lng:-115.3845},
       {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222},
@@ -263,19 +263,21 @@ document.getElementById("gpsBtn").onclick = () => {
       {n:"Ivanpah Solar",lat:35.2000,lng:-115.4667},
       {n:"Cottonwood Cove",lat:35.9990,lng:-114.5000},
       {n:"Vault 34 (Lake Mead)",lat:36.1750,lng:-114.7500},
-      {n:"Jacobstown (Mt Charleston)",lat:36.3000,lng:-115.6500},
-      {n:"Dead Wind Cavern (Goodsprings)",lat:35.8000,lng:-115.4000},
+      {n:"Jacobstown",lat:36.3000,lng:-115.6500},
+      {n:"Dead Wind Cavern",lat:35.8000,lng:-115.4000},
       {n:"REPCONN Headquarters",lat:36.0500,lng:-115.1000},
-      {n:"Followers Outpost (Freeside)",lat:36.1700,lng:-115.1400},
       {n:"188 Trading Post",lat:35.9500,lng:-115.2000},
-      {n:"Griffin Wares Sacked Caravan",lat:35.9000,lng:-115.2500},
-      {n:"Nevada Highway Patrol Station",lat:35.9500,lng:-115.1500},
+      {n:"Griffin Wares Caravan",lat:35.9000,lng:-115.2500},
+      {n:"Nevada Highway Patrol",lat:35.9500,lng:-115.1500},
       {n:"Sunset Sarsaparilla HQ",lat:36.0000,lng:-115.2000},
       {n:"HELIOS One Entrance",lat:35.7600,lng:-114.9500},
       {n:"Camp Searchlight Church",lat:35.4600,lng:-114.9200},
       {n:"Quarry Junction",lat:35.9200,lng:-115.1800},
-      {n:"Primm's Vikki & Vance Museum",lat:35.6150,lng:-115.3850}
+      {n:"Vikki & Vance Museum",lat:35.6150,lng:-115.3850},
+      {n:"Mesquite Mountains",lat:35.8500,lng:-115.9500},
+      {n:"Devil's Gullet",lat:35.7000,lng:-115.3000}
     ];
+    
 
     navigator.geolocation.watchPosition(async p => {
       userMarker.setLatLng([p.coords.latitude, p.coords.longitude]);
@@ -295,5 +297,6 @@ document.getElementById("gpsBtn").onclick = () => {
 </script>
 </body>
 </html>
+
 
 
