@@ -108,7 +108,7 @@ CAPS: <span id="caps">0</span>
 
 <script>
 // UPDATE THIS LINE WITH YOUR VERCEL URL:
-const BACKEND_URL = "https://atomic-fizz-backend-xxxx.vercel.app"; // ← YOUR URL HERE!
+const BACKEND_URL = "https://atomic-fizz-backend-vszj.vercel.app/"; 
 const connection = new solanaWeb3.Connection("https://api.devnet.solana.com");
 let wallet, map, userMarker, claimed = new Set(), playerState = {hp:100, gear:[], stimpaks:[]};
 
@@ -226,12 +226,62 @@ document.getElementById("gpsBtn").onclick = () => {
     userMarker = L.circleMarker([pos.coords.latitude, pos.coords.longitude], {radius:12,color:'#0f0'}).addTo(map).bindPopup("You are here");
 
     const spots = [
-      {n:"Sloan Station",lat:35.94361,lng:-115.21722},
-      {n:"Black Mountain",lat:35.9310,lng:-115.0440},
+      {n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
+      {n:"Primm (Buffalo Bill's)",lat:35.6145,lng:-115.3845},
+      {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222},
+      {n:"Boulder City Hotel",lat:35.97750,lng:-114.83639},
       {n:"Hoover Dam",lat:36.016045,lng:-114.737839},
-      {n:"Lucky 38",lat:36.147247,lng:-115.156029},
-      {n:"New Vegas Strip",lat:36.112740,lng:-115.174301},
-      // Add all 36 spots here...
+      {n:"Lucky 38 (The Strat)",lat:36.147247,lng:-115.156029},
+      {n:"New Vegas Strip (Bellagio)",lat:36.112740,lng:-115.174301},
+      {n:"Freeside (Fremont St)",lat:36.170719,lng:-115.143929},
+      {n:"Red Rock Canyon",lat:36.13514,lng:-115.4283},
+      {n:"Bonnie Springs Ranch",lat:36.06007,lng:-115.45027},
+      {n:"Callville Bay Marina",lat:36.14400,lng:-114.72200},
+      {n:"Black Mountain",lat:35.9310,lng:-115.0440},
+      {n:"Sloan Station",lat:35.94361,lng:-115.21722},
+      {n:"Jean Airport",lat:35.7677,lng:-115.3245},
+      {n:"Searchlight",lat:35.46434,lng:-114.91844},
+      {n:"McCarran Airport",lat:36.0801,lng:-115.1522},
+      {n:"Nellis AFB",lat:36.2361,lng:-115.0342},
+      {n:"Helios One (Nevada Solar One)",lat:35.7580,lng:-114.9530},
+      {n:"Old Mormon Fort",lat:36.1694,lng:-115.1305},
+      {n:"Ultra-Luxe (Caesars Palace)",lat:36.0972,lng:-115.1787},
+      {n:"Gomorrah (Dunes site)",lat:36.1100,lng:-115.1720},
+      {n:"Silver Rush (Golden Nugget)",lat:36.1498,lng:-115.1390},
+      {n:"Atomic Wrangler (Vegas Vic)",lat:36.1499,lng:-115.1383},
+      {n:"Repconn Test Site (Pepcon)",lat:36.0360,lng:-115.0880},
+      {n:"Hawthorne Army Depot",lat:38.5297,lng:-118.6417},
+      {n:"Novac (Little A'Le'Inn)",lat:37.6447,lng:-115.7461},
+      {n:"Nelson Ghost Town",lat:35.4189,lng:-114.7133},
+      {n:"Cottonwood Cove",lat:35.9990,lng:-114.5000},
+      {n:"Westside Co-op",lat:36.1750,lng:-115.1750},
+      {n:"Rhyolite Ghost Town",lat:36.9033,lng:-116.8283},
+      {n:"Gold Center Ruins",lat:36.9500,lng:-116.7500},
+      {n:"Ivanpah Solar",lat:35.2000,lng:-115.4667},
+      {n:"Mt. Charleston",lat:36.2650,lng:-115.6500},
+      {n:"Westgate (Vault 21)",lat:36.1311,lng:-115.1564},
+      {n:"Luxor Pyramid",lat:36.0965,lng:-115.1769},
+      {n:"Golden Nugget",lat:36.1498,lng:-115.1390},
+      {n:"Nellis Solar Array",lat:36.2460,lng:-115.0320},
+      {n:"Coca Cola Store",lat:36.1025,lng:-115.1738},
+      {n:"Whiskey Pete's",lat:35.6167,lng:-115.3900},
+      {n:"Primm Valley Resort",lat:35.6160,lng:-115.3900},
+      {n:"Mt. Soledad Cross",lat:36.2650,lng:-115.6500},
+      {n:"Jean Airport",lat:35.7677,lng:-115.3245},
+      {n:"Searchlight",lat:35.46434,lng:-114.91844},
+      {n:"Boulder City Hotel",lat:35.97750,lng:-114.83639},
+      {n:"Bonnie Springs Ranch",lat:36.06007,lng:-115.45027},
+      {n:"Callville Bay Marina",lat:36.14400,lng:-114.72200},
+      {n:"Black Mountain",lat:35.9310,lng:-115.0440},
+      {n:"Sloan Station",lat:35.94361,lng:-115.21722},
+      {n:"Jean NV",lat:35.77901,lng:-115.32431},
+      {n:"Historic West Las Vegas",lat:36.1750,lng:-115.1750},
+      {n:"Miguel Pawn Shop",lat:36.1750,lng:-115.1750},
+      {n:"Nevada Solar One",lat:35.7580,lng:-114.9530},
+      {n:"Pepcon Factory",lat:36.0360,lng:-115.0880},
+      {n:"Solar One Barstow",lat:34.9467,lng:-116.8667},
+      {n:"World of Coca-Cola",lat:36.1025,lng:-115.1738}}
+      
     ];
 
     navigator.geolocation.watchPosition(async p => {
@@ -252,4 +302,3 @@ document.getElementById("gpsBtn").onclick = () => {
 </script>
 </body>
 </html>
-
