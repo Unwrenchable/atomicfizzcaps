@@ -344,7 +344,113 @@ document.getElementById("fleeBtn").onclick = () => {
   alert("🏃 Fled from combat!");
 };
 
+document.getElementById("raidOverlay").style.display = "none";
+  currentRaid = null;
+  alert("🏃 Fled from combat!");
+};
+
 document.getElementById("reviveBtn").onclick = () => {
   if(playerState.stimpaks?.length > 0) {
     const stimpak = playerState.stimpaks.shift();
-    playerState.hp = stimpak.name.includes('Super') ? playerState.maxHp :
+    playerState.hp = stimpak.name.includes('Super') ? playerState.maxHp : Math.min(playerState.maxHp, playerState.hp + 60);
+    playerState.gear?.forEach(g => g.durability = Math.min(100, g.durability + 20));
+    document.getElementById("deathOverlay").style.display = "none";
+    updateUI();
+    alert(`💉 REVIVED with ${stimpak.name}!`);
+  } else alert("❌ NO STIMPAKS!");
+};
+
+function closeLevelUp() {document.getElementById("levelUpOverlay").style.display="none";}
+function closeLoot() {document.getElementById("lootOverlay").style.display="none";}
+
+function claimLoot(spotName) {
+  if(claimed.has(spotName)) return;
+  if(Math.random() < 0.35) {startCombat(spotName);return;}
+  
+  const xpGain = 15 + playerState.level*5 + Math.random()*10;
+  awardXp(xpGain, "Loot");
+  const capsGain = 10 + Math.random()*20;
+  playerState.caps += capsGain;
+  if(Math.random() < 0.4) {
+    const gearTypes = [
+      {name:"10mm Pistol", atk:8, def:0},
+      {name:"Leather Armor", atk:0, def:6},
+      {name:"Hunting Rifle", atk:12, def:0},
+      {name:"Metal Armor", atk:0, def:10}
+    ];
+    const gear = gearTypes[Math.floor(Math.random()*gearTypes.length)];
+    playerState.gear.push({...gear, durability: 75 + Math.random()*25});
+  }
+  
+  claimed.add(spotName);
+  document.getElementById("lootResult").innerHTML = `+${Math.round(xpGain)} XP<br>+${Math.round(capsGain)} CAPS`;
+  document.getElementById("lootOverlay").style.display = "flex";
+  updateUI();
+  
+  const idx = spotMarkers.findIndex(m=>m.spotName===spotName);
+  if(idx>-1 && map) {map.removeLayer(spotMarkers[idx]);spotMarkers.splice(idx,1);}
+}
+
+function backToMain() {
+  document.getElementById("mapContainer").style.display = "none";
+  document.getElementById("backBtn").style.display = "none";
+  document.getElementById("mainContainer").style.display = "flex";
+  if(map) {map.remove(); map = null;}
+}
+
+document.getElementById("gpsBtn").onclick = () => {
+  document.getElementById("mainContainer").style.display = "none";
+  document.getElementById("mapContainer").style.display = "block";
+  document.getElementById("backBtn").style.display = "block";
+  
+  map = L.map('map', {zoomControl:true,attributionControl:false}).setView([36.1146,-115.1728],9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);
+  
+  userMarker = L.circleMarker([36.1146,-115.1728],{
+    radius:12,color:'#0f0',fillColor:'#0f0',fillOpacity:0.8
+  }).addTo(map).bindPopup("🟢 YOU ARE HERE");
+  
+  spotMarkers = [];
+  falloutSpots.forEach(spot => {
+    if(claimed.has(spot.n)) return;
+    const marker = L.circleMarker([spot.lat,spot.lng],{
+      radius:8,color:'#ff6200',fillColor:'#ff6200',fillOpacity:0.8,weight:2
+    })
+    .bindPopup(`<b>${spot.n}</b><br>👆 Tap to LOOT!`)
+    .addTo(map)
+    .on('click', ()=>{
+      map.setView([spot.lat,spot.lng],16);
+      claimLoot(spot.n);
+    });
+    marker.spotName = spot.n;
+    spotMarkers.push(marker);
+  });
+  
+  if(navigator.geolocation) {
+    navigator.geolocation.watchPosition(pos=>{
+      const lat=pos.coords.latitude,lng=pos.coords.longitude;
+      userMarker.setLatLng([lat,lng]);
+      map.setView([lat,lng],14);
+      let near = "";
+      falloutSpots.forEach(spot=>{
+        if(claimed.has(spot.n)) return;
+        const dist = map.distance([lat,lng],[spot.lat,spot.lng]);
+        if(dist < 60) claimLoot(spot.n);
+        else if(dist < 300) near += `${spot.n} – ${Math.round(dist)}m<br>`;
+      });
+      document.getElementById("nearby").innerHTML = near ? "🎯 NEARBY LOOT:<br>" + near : "🚶 Walk closer to loot!";
+    }, err => {
+      document.getElementById("nearby").innerHTML = `<span style="color:#ff9500;">📍 GPS OFF - Tap markers manually!</span>`;
+    }, {enableHighAccuracy:true,timeout:10000,maximumAge:10000});
+  } else {
+    document.getElementById("nearby").innerHTML = `<span style="color:#ff9500;">📍 Tap orange markers to LOOT!</span>`;
+  }
+  
+  setTimeout(() => map.invalidateSize(), 500);
+  alert(`🎯 RADIATION SCANNER ACTIVE!\n✅ ${spotMarkers.length} LOOT SPOTS\n🟢=You | 🟠=Loot\n👆 TAP ORANGE DOTS!`);
+};
+
+console.log(`🎯 ATOMIC FIZZ v3.3 LOADED - ${falloutSpots.length} LOCATIONS READY!`);
+</script>
+</body>
+</html>
