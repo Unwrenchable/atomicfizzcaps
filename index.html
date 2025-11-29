@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+j<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -453,6 +453,48 @@ document.getElementById("gpsBtn").onclick = () => {
 };
 
 console.log(`🎯 ATOMIC FIZZ v3.3 LOADED - ${falloutSpots.length} LOCATIONS READY!`);
+// MISSING FUNCTIONS - ADD THESE
+function loadPlayerState() { 
+  playerState = {level:1,xp:0,xpToNext:100,maxHp:100,hp:100,gear:[],stimpaks:[],caps:0}; 
+  updateUI(); 
+}
+function updateUI() {
+  document.getElementById("lvl").textContent = playerState.level;
+  document.getElementById("xpText").textContent = playerState.xp;
+  document.getElementById("xpMax").textContent = playerState.xpToNext;
+  document.getElementById("xpBar").style.width = "0%";
+  document.getElementById("hpText").textContent = `${playerState.hp}/${playerState.maxHp}`;
+  document.getElementById("hpBar").style.width = "100%";
+  document.getElementById("caps").textContent = playerState.caps||0;
+  document.getElementById("gearList").innerHTML = '<p style="color:#f66;">NO GEAR – LOOT NOW!</p>';
+  document.getElementById("stimpakInventory").innerHTML = '<p style="color:#f66;">NO STIMPAKS</p>';
+}
+function claimLoot(spotName) { 
+  alert(`🎯 LOOTED ${spotName}!`); 
+  claimed.add(spotName); 
+}
+function closeLoot() { 
+  document.getElementById("lootOverlay").style.display = "none"; 
+}
+function closeLevelUp() { 
+  document.getElementById("levelUpOverlay").style.display = "none"; 
+}
+
+// FIX SCANNER BUTTON
+document.getElementById("gpsBtn").onclick = () => {
+  document.getElementById("mapContainer").style.display = "block";
+  map = L.map('map').setView([36.1146, -115.1728], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  userMarker = L.circleMarker([36.1146, -115.1728], {radius:12,color:'#0f0'}).addTo(map).bindPopup("You are here");
+  
+  // SHOW LOCATIONS LIST
+  let near = "";
+  falloutSpots.forEach(spot => near += `${spot.n}<br>`);
+  document.getElementById("nearby").innerHTML = "🎯 50 LOCATIONS:<br>" + near;
+  
+  alert("🗺️ MAP LOADED! Scroll to see list. Tap to loot!");
+};
+
 </script>
 </body>
 </html>
