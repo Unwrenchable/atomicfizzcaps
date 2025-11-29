@@ -260,7 +260,7 @@ document.getElementById("gpsBtn").onclick = () => {
   locations.forEach(loc => {
     const color = claimed.has(loc.n) ? "#444" : "#ff6200";
     L.circleMarker([loc.lat, loc.lng], {
-      radius: 200,
+      radius: 12,
       color: color,
       fillColor: color,
       fillOpacity: 0.9,
