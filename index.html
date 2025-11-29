@@ -397,16 +397,20 @@ function backToMain() {
 }
 
 document.getElementById("gpsBtn").onclick = () => {
-  document.getElementById("mainContainer").style.display = "none";
   document.getElementById("mapContainer").style.display = "block";
-  document.getElementById("backBtn").style.display = "block";
+  map = L.map('map').setView([36.1146, -115.1728], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  userMarker = L.circleMarker([36.1146, -115.1728], {radius:12,color:'#0f0'}).addTo(map).bindPopup("You are here");
   
-  map = L.map('map', {zoomControl:true,attributionControl:false}).setView([36.1146,-115.1728],9);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);
+  // Show 50 locations in nearby list
+  let near = "";
+  falloutSpots.forEach(spot => {
+    near += `${spot.n} – LOOTABLE<br>`;
+  });
+  document.getElementById("nearby").innerHTML = "🎯 50 LOCATIONS LOADED:<br>" + near;
   
-  userMarker = L.circleMarker([36.1146,-115.1728],{
-    radius:12,color:'#0f0',fillColor:'#0f0',fillOpacity:0.8
-  }).addTo(map).bindPopup("🟢 YOU ARE HERE");
+  alert("🗺️ MAP LOADED! Scroll to see nearby list. Tap to loot!");
+};
   
   spotMarkers = [];
   falloutSpots.forEach(spot => {
