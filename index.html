@@ -190,7 +190,10 @@ function updateUI() {
   document.getElementById("hpBar").style.width = "100%";
   document.getElementById("caps").textContent = playerState.caps||0;
   document.getElementById("gearList").innerHTML = '<p style="color:#f66;">NO GEAR – LOOT NOW!</p>';
-  document.getElementById("stimpakInventory").innerHTML = '<p style="color:#f66;">NO STIMPAKS</p>';
+  document.getElementById("stimpakInventory").innerHTML =
+  playerState.stimpaks.length > 0
+       ? `💉 ${playerState.stimpaks.length} Stimpak${playerState.stimpaks.length > 1 ? 's' : ''}`
+       : '<p style="color:#f66;">NO STIMPAKS</p>';
 }
 function claimLoot(spotName) {
   alert(`🎯 LOOTED ${spotName}! +50 CAPS`);
@@ -305,32 +308,39 @@ function backToMain() {
   if(map) { map.remove(); map = null; }
 }
 
-// 💉 STIMPAK PAYMENTS (ETH + SOL + FREE)
+// 💉 STIMPAK (ETH + SOL + XRP SUPPORTED)
 document.getElementById("buyCommonStimpak").onclick = async () => {
-  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:'))) {
+  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:') || wallet.startsWith('XRP:'))) {
     alert("💎 REAL PAYMENTS COMING SOON!\n🎮 FREE stimpaks for LAUNCH WEEK!");
+    // TODO: 0.001 ETH / 0.01 SOL / 5 XRP
   }
-  
+ 
   if (playerState.caps >= 100) {
     playerState.caps -= 100;
     playerState.stimpaks.push({name:"Stimpak"});
     updateUI();
+    // 🔥 FIX INVENTORY DISPLAY
+    document.getElementById("stimpakInventory").innerHTML = 
+      `💉 ${playerState.stimpaks.length} Stimpak${playerState.stimpaks.length > 1 ? 's' : ''}`;
     alert("💉 Stimpak purchased!\n⚡ Ready for revival!");
   } else {
     alert("❌ Need 100 CAPS\n🎯 LOOT MORE LOCATIONS!");
   }
 };
 
-// 💉 SUPER STIMPAK
+// 💉 SUPER STIMPAK (ETH + SOL + XRP SUPPORTED)
 document.getElementById("buyRareStimpak").onclick = async () => {
-  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:'))) {
+  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:') || wallet.startsWith('XRP:'))) {
     alert("💎 SUPER STIMPAK = $10 COMING SOON!\n🎮 FREE for LAUNCH!");
   }
-  
+ 
   if (playerState.caps >= 500) {
     playerState.caps -= 500;
     playerState.stimpaks.push({name:"Super Stimpak"});
     updateUI();
+    // 🔥 FIX INVENTORY DISPLAY
+    document.getElementById("stimpakInventory").innerHTML = 
+      `💉 ${playerState.stimpaks.length} Stimpak${playerState.stimpaks.length > 1 ? 's' : ''}`;
     alert("💉 SUPER Stimpak purchased!\n⚡ FULL HP + Gear Repair!");
   } else {
     alert("❌ Need 500 CAPS\n💰 LOOT BIGGER SPOTS!");
