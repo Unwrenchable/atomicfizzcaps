@@ -127,9 +127,8 @@ const locations = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
 const gearTable = ["10mm Pistol","Hunting Rifle","Combat Armor","Power Fist","Plasma Grenade","T-51b Power Armor","Fat Man","Alien Blaster","Super Stimpak"];
 const enemies = [{name:"Raiders",hp:80,dmg:25},{name:"Super Mutants",hp:140,dmg:40},{name:"Deathclaw",hp:250,dmg:80},{name:"Feral Ghoul Pack",hp:60,dmg:30}];
 
-// WALLET CONNECT (the bug is gone
 document.getElementById("connectBtn").onclick = async () => {
-  // Phantom first
+  // 1. Phantom (Solana)
   if (window.solana && window.solana.isPhantom) {
     try {
       await window.solana.connect({ onlyIfTrusted: false });
@@ -137,10 +136,12 @@ document.getElementById("connectBtn").onclick = async () => {
       provider = "Phantom";
       success();
       return;
-    } catch(e) { console.log("Phantom rejected"); }
+    } catch (e) {
+      console.log("Phantom skipped");
+    }
   }
 
-  // MetaMask / any EIP-1193
+  // 2. MetaMask / any Ethereum wallet
   if (window.ethereum) {
     try {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -151,18 +152,19 @@ document.getElementById("connectBtn").onclick = async () => {
         return;
       }
     } catch (e) {
-      if (e.code === 4001) alert("You rejected the connection — try again!");
-      else alert("Wallet error: " + (e.message || e));
+      if (e.code === 4001) alert("You rejected the connection — no worries!");
+      else alert("Wallet error: " + (e.message || "Try again"));
     }
   }
 
-  // Demo mode fallback
-  alert("No wallet detected → Running in DEMO mode (everything works)");
-  userAddress = "demo_player_1337";
+  // 3. Demo mode (full game unlocked)
+  alert("No wallet detected → Running in DEMO mode (everything works!)");
+  userAddress = "demo_wastelander_777";
   provider = "Demo";
   success();
 };
 
+  
 function success() {
   document.getElementById("status").innerHTML = `<span style="color:#0f0;">${provider} CONNECTED</span><br><small>${userAddress.slice(0,8)}...${userAddress.slice(-6)}</small>`;
   document.getElementById("connectBtn").textContent = "CONNECTED";
