@@ -14,7 +14,7 @@
 * {margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html, body {height:100vh;overflow:hidden;background:#000;color:#0f0;font-family:'Share Tech Mono',monospace;-webkit-user-select:none;user-select:none;}
 .term {flex:1;display:flex;flex-direction:column;background:#001a00;border:3px solid #0f0;box-shadow:0 0 40px #0f0;padding:15px;border-radius:12px;position:relative;text-align:center;min-height:0;overflow-y:auto;}
-.term::before {content:"VAULT 77 · ATOMIC FIZZ · 50 LOCATIONS v3.2";position:absolute;top:-15px;left:10px;background:#000;padding:0 15px;font-size:12px;letter-spacing:3px;}
+.term::before {content:"VAULT 77 · ATOMIC FIZZ · 50 LOCATIONS v3.2 ✅";position:absolute;top:-15px;left:10px;background:#000;padding:0 15px;font-size:12px;letter-spacing:3px;}
 h1 {font-size:clamp(2.5rem,6vw,4rem);margin:15px 0;text-shadow:0 0 25px #0f0;animation:f 2s infinite;}
 button {background:transparent;border:2px solid #0f0;color:#0f0;padding:12px 25px;font-size:clamp(1.2rem,4vw,1.6rem);margin:10px 5px;cursor:pointer;box-shadow:0 0 25px #0f0;transition:.2s;letter-spacing:2px;border-radius:8px;min-height:50px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
 button:active {background:#0f0;color:#000;box-shadow:0 0 50px #0f0;transform:scale(0.95);}
@@ -83,7 +83,7 @@ CAPS: <span id="caps">0</span>
 <div id="mapContainer"><div id="map"></div><div id="nearby"></div></div>
 </div>
 
-<!-- OVERLAYS (same as before) -->
+<!-- OVERLAYS -->
 <div class="overlay" id="lootOverlay">
 <div class="cratebox">💰 LOOT!</div>
 <h2 id="lootResult" style="margin:20px;font-size:clamp(1.2rem,5vw,2rem);">?</h2>
@@ -123,7 +123,6 @@ CAPS: <span id="caps">0</span>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/@solana/web3.js@1.95/lib/index.iife.min.js"></script>
 <script>
 const BACKEND_URL = "https://atomic-fizz-backend-vszj.vercel.app";
 let wallet, map, userMarker, spotMarkers = [], claimed = new Set(), playerState = {
@@ -183,7 +182,7 @@ const falloutSpots = [
   {n:"🔧 HELIOS Entrance",lat:35.7600,lng:-114.9500,raidChance:0.6}
 ];
 
-// 🔥 ENEMY TYPES (same)
+// 🔥 ENEMY TYPES
 const enemyTypes = [
   {name:"💀 Fiends", atk:15, hp:40, def:10, caps:25, xp:30, emoji:"💀"},
   {name:"⚔️ Raiders", atk:20, hp:50, def:12, caps:35, xp:40, emoji:"⚔️"},
@@ -192,12 +191,62 @@ const enemyTypes = [
   {name:"💀 Super Mutant", atk:35, hp:80, def:25, caps:75, xp:80, emoji:"💀"}
 ];
 
-// 🔥 ALL OTHER FUNCTIONS (same as mobile version above)
+// 🔥 LEVELING SYSTEM
 const levelRequirements = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200, 4000];
 function getLevelForXp(xp) {for(let i=levelRequirements.length-1;i>=0;i--)if(xp>=levelRequirements[i])return i;return 1;}
 function getXpForLevel(level) {return levelRequirements[level]||4000;}
 
-// 🔥 CONNECT (same)
+// 🔥 UI UPDATE
+function updateUI() {
+  document.getElementById("lvl").textContent = playerState.level;
+  document.getElementById("xpText").textContent = playerState.xp;
+  document.getElementById("xpMax").textContent = playerState.xpToNext;
+  document.getElementById("xpBar").style.width = `${Math.min(100, (playerState.xp/getXpForLevel(playerState.level+1))*100)}%`;
+  document.getElementById("hpText").textContent = `${playerState.hp}/${playerState.maxHp}`;
+  document.getElementById("hpBar").style.width = `${(playerState.hp/playerState.maxHp)*100}%`;
+  document.getElementById("caps").textContent = playerState.caps||0;
+  
+  document.getElementById("gearList").innerHTML = playerState.gear?.map(g=>`
+    <div class="gear-item">
+      <span>${g.name} ${g.atk?`+${g.atk}ATK`:''} ${g.def?`+${g.def}DEF`:''}</span>
+      <div class="durability-bar"><div class="durability-fill" style="width:${g.durability}%"></div></div>
+      <span>${g.durability}%</span>
+    </div>
+  `).join('') || '<p style="color:#f66;">NO GEAR – LOOT NOW!</p>';
+  
+  document.getElementById("stimpakInventory").innerHTML = playerState.stimpaks?.map(s=>
+    `<div style="color:#0f0;">💉 ${s.name}</div>`
+  ).join('') || '<p style="color:#f66;">NO STIMPAKS</p>';
+}
+
+// 🔥 LOAD STATE
+function loadPlayerState() {
+  playerState = {level:1,xp:0,xpToNext:100,maxHp:100,hp:100,gear:[],stimpaks:[],caps:0};
+  updateUI();
+}
+
+// 🔥 LEVEL UP
+function awardXp(amount, source) {
+  playerState.xp += amount;
+  const oldLevel = playerState.level;
+  playerState.level = getLevelForXp(playerState.xp);
+  playerState.xpToNext = getXpForLevel(playerState.level+1) - playerState.xp;
+  
+  if(playerState.level > oldLevel) {
+    playerState.maxHp += 20 * (playerState.level - oldLevel);
+    playerState.hp = playerState.maxHp;
+    playerState.gear?.forEach(g => {
+      if(g.atk) g.atk += 2 * (playerState.level - oldLevel);
+      if(g.def) g.def += 1 * (playerState.level - oldLevel);
+    });
+    document.getElementById("newLevel").textContent = playerState.level;
+    document.getElementById("levelUpOverlay").style.display = "flex";
+    setTimeout(()=>document.getElementById("levelUpOverlay").style.display="none", 3500);
+  }
+  updateUI();
+}
+
+// 🔥 CONNECT
 document.getElementById("connectBtn").onclick = () => {
   wallet = "MOBILE_" + Date.now();
   document.getElementById("status").innerHTML = `Status: <span style="color:#0f0;">TEST MODE ACTIVE</span>`;
@@ -212,13 +261,147 @@ document.getElementById("connectBtn").onclick = () => {
   alert(`✅ TEST MODE ACTIVE!\n🎯 ${falloutSpots.length} FALLOUT LOCATIONS LOADED!`);
 };
 
-// 🔥 ALL OTHER FUNCTIONS (updateUI, awardXp, loadPlayerState, buyStimpak, startCombat, endCombat, buttons, claimLoot, close functions) - SAME AS MOBILE VERSION ABOVE
+// 🔥 STIMPAK SHOP
+document.getElementById("buyCommonStimpak").onclick = () => {
+  if(playerState.caps >= 100) {
+    playerState.caps -= 100;
+    playerState.stimpaks.push({name:"Stimpak"});
+    updateUI();
+    alert("💉 Stimpak purchased!");
+  } else alert("❌ Need 100 CAPS");
+};
+document.getElementById("buyRareStimpak").onclick = () => {
+  if(playerState.caps >= 500) {
+    playerState.caps -= 500;
+    playerState.stimpaks.push({name:"Super Stimpak"});
+    updateUI();
+    alert("💉 Super Stimpak purchased!");
+  } else alert("❌ Need 500 CAPS");
+};
 
-// 🔥 SCANNER WITH 50 MARKERS
+// 🔥 COMBAT
+function startCombat(spotName) {
+  currentRaid = {spot:spotName,enemy:{...enemyTypes[Math.floor(Math.random()*enemyTypes.length)]},turn:0};
+  document.getElementById("enemyName").textContent = `${currentRaid.enemy.emoji} ${currentRaid.enemy.name}`;
+  document.getElementById("enemyStats").textContent = `${currentRaid.enemy.atk} ATK • ${currentRaid.enemy.hp} HP • ${currentRaid.enemy.def} DEF`;
+  document.getElementById("combatLog").innerHTML = `<div style="color:#0f0;">⚔️ Combat at ${spotName}!</div>`;
+  document.getElementById("raidOverlay").style.display = "flex";
+  
+  const combatInterval = setInterval(() => {
+    if(!currentRaid || currentRaid.won!==undefined) {clearInterval(combatInterval);return;}
+    
+    currentRaid.turn++;
+    const log = document.getElementById("combatLog");
+    const levelMult = 1 + (playerState.level-1)*0.15;
+    const playerAtk = (10 + levelMult*5) + (playerState.gear?.reduce((s,g)=>s+(g.atk||0),0)||0);
+    const playerDef = (5 + levelMult*2) + (playerState.gear?.reduce((s,g)=>s+(g.def||0),0)||0);
+    
+    // Player attack
+    const pDamage = Math.max(1, playerAtk - currentRaid.enemy.def + Math.random()*15);
+    currentRaid.enemy.hp -= pDamage;
+    log.innerHTML += `<div style="color:#0f0;">[LVL${playerState.level}] ${pDamage} damage!</div>`;
+    
+    if(currentRaid.enemy.hp <= 0) {
+      currentRaid.won = true;
+      awardXp(currentRaid.enemy.xp, "Combat");
+      log.innerHTML += `<div style="color:#0f0;font-size:1.1rem;">✅ VICTORY! +${currentRaid.enemy.xp} XP</div>`;
+      setTimeout(()=>endCombat(true), 1500);
+      return;
+    }
+    
+    // Enemy attack
+    const eDamage = Math.max(1, currentRaid.enemy.atk - playerDef + Math.random()*10);
+    playerState.hp -= eDamage;
+    log.innerHTML += `<div style="color:#f66;">Enemy hits ${eDamage}!</div>`;
+    
+    playerState.gear?.forEach(g => {if(Math.random()<0.25) g.durability = Math.max(0,g.durability-8);});
+    
+    if(playerState.hp <= 0) {
+      currentRaid.won = false;
+      log.innerHTML += `<div style="color:#f66;font-size:1.1rem;">☠️ DEFEAT!</div>`;
+      setTimeout(()=>endCombat(false), 1000);
+      return;
+    }
+    
+    updateUI();
+    log.scrollTop = log.scrollHeight;
+  }, 1600);
+}
+
+function endCombat(won) {
+  setTimeout(() => {
+    document.getElementById("raidOverlay").style.display = "none";
+    if(won) {
+      claimed.add(currentRaid.spot);
+      const idx = spotMarkers.findIndex(m=>m.spotName===currentRaid.spot);
+      if(idx>-1) {map.removeLayer(spotMarkers[idx]);spotMarkers.splice(idx,1);}
+      playerState.caps += currentRaid.enemy.caps;
+      updateUI();
+    } else {
+      document.getElementById("deathOverlay").style.display = "flex";
+      document.getElementById("deathMessage").textContent = `${currentRaid.enemy.name} destroyed you...`;
+    }
+    currentRaid = null;
+  }, 500);
+}
+
+// 🔥 BUTTONS
+document.getElementById("fightBtn").onclick = () => {
+  document.getElementById("fightBtn").disabled = true;
+  document.getElementById("fightBtn").textContent = "⚔️ FIGHTING...";
+};
+document.getElementById("fleeBtn").onclick = () => {
+  document.getElementById("raidOverlay").style.display = "none";
+  currentRaid = null;
+  alert("🏃 Fled from combat!");
+};
+document.getElementById("reviveBtn").onclick = () => {
+  if(playerState.stimpaks?.length > 0) {
+    const stimpak = playerState.stimpaks.shift();
+    playerState.hp = stimpak.name.includes('Super') ? playerState.maxHp : Math.min(playerState.maxHp, playerState.hp + 60);
+    playerState.gear?.forEach(g => g.durability = Math.min(100, g.durability + 20));
+    document.getElementById("deathOverlay").style.display = "none";
+    updateUI();
+    alert(`💉 REVIVED with ${stimpak.name}!`);
+  } else alert("❌ NO STIMPAKS!");
+};
+
+function closeLevelUp() {document.getElementById("levelUpOverlay").style.display="none";}
+function closeLoot() {document.getElementById("lootOverlay").style.display="none";}
+
+// 🔥 LOOT
+function claimLoot(spotName) {
+  if(claimed.has(spotName)) return;
+  if(Math.random() < 0.35) {startCombat(spotName);return;}
+  
+  const xpGain = 15 + playerState.level*5 + Math.random()*10;
+  awardXp(xpGain, "Loot");
+  playerState.caps += 10 + Math.random()*20;
+  if(Math.random() < 0.4) {
+    const gearTypes = [
+      {name:"10mm Pistol", atk:8, def:0},
+      {name:"Leather Armor", atk:0, def:6},
+      {name:"Hunting Rifle", atk:12, def:0},
+      {name:"Metal Armor", atk:0, def:10}
+    ];
+    const gear = gearTypes[Math.floor(Math.random()*gearTypes.length)];
+    playerState.gear.push({...gear, durability: 75 + Math.random()*25});
+  }
+  
+  claimed.add(spotName);
+  document.getElementById("lootResult").innerHTML = `+${Math.round(xpGain)} XP<br>+${Math.round(10+Math.random()*20)} CAPS`;
+  document.getElementById("lootOverlay").style.display = "flex";
+  updateUI();
+  
+  const idx = spotMarkers.findIndex(m=>m.spotName===spotName);
+  if(idx>-1 && map) {map.removeLayer(spotMarkers[idx]);spotMarkers.splice(idx,1);}
+}
+
+// 🔥 SCANNER
 document.getElementById("gpsBtn").onclick = () => {
   document.getElementById("mapContainer").style.display = "flex";
   document.getElementById("mainContainer").style.display = "none";
-  map = L.map('map', {zoomControl:false,attributionControl:false}).setView([36.1146,-115.1728],9); // Zoom out for 50 markers
+  map = L.map('map', {zoomControl:false,attributionControl:false}).setView([36.1146,-115.1728],9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);
   L.control.zoom({position:'topright'}).addTo(map);
   
@@ -226,10 +409,9 @@ document.getElementById("gpsBtn").onclick = () => {
     radius:10,color:'#0f0',fillColor:'#0f0',fillOpacity:0.8
   }).addTo(map).bindPopup("🟢 YOU");
   
-  // 🔥 ADD ALL 50 MARKERS
-  falloutSpots.forEach((spot, index) => {
+  falloutSpots.forEach(spot => {
     const marker = L.circleMarker([spot.lat,spot.lng],{
-      radius:6, // Smaller for 50 markers
+      radius:6,
       color:claimed.has(spot.n)?'#666':'#ff6200',
       fillColor:claimed.has(spot.n)?'#666':'#ff6200',
       fillOpacity:0.8,
@@ -237,7 +419,10 @@ document.getElementById("gpsBtn").onclick = () => {
     })
     .bindPopup(`<b>${spot.n}</b><br>Tap to LOOT!`)
     .addTo(map)
-    .on('click', ()=>{map.setView([spot.lat,spot.lng],16);});
+    .on('click', ()=>{ 
+      map.setView([spot.lat,spot.lng],16); 
+      claimLoot(spot.n);
+    });
     marker.spotName = spot.n;
     spotMarkers.push(marker);
   });
@@ -261,20 +446,7 @@ document.getElementById("gpsBtn").onclick = () => {
   alert(`🎯 SCANNER ACTIVE!\n✅ ${falloutSpots.length} FALLOUT LOCATIONS!\n🟢=You | 🟠=Loot | ⚫=Claimed`);
 };
 
-// 🔥 INSERT ALL OTHER FUNCTIONS HERE (same as mobile version)
-// ... (updateUI, awardXp, combat, etc. - copy from previous mobile version)
-
-console.log(`🎯 LOADED ${falloutSpots.length} FALLOUT LOCATIONS!`);
+console.log(`🎯 LOADED ${falloutSpots.length} FALLOUT LOCATIONS! ✅ ALL FUNCTIONS ACTIVE`);
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
