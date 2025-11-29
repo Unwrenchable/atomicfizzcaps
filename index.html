@@ -20,4 +20,32 @@ button {background:transparent;border:2px solid #0f0;color:#0f0;padding:12px 25p
 button:active {background:#0f0;color:#000;box-shadow:0 0 50px #0f0;transform:scale(0.95);}
 button:disabled {opacity:0.4;}
 .status {font-size:clamp(1.2rem,3.5vw,1.6rem);margin:15px 0;}
-.char {background:rgba(0,30,0,0.
+.char {background:rgba(0,30,0,0.8);padding:12px;margin:15px 0;border-left:4px solid #0f0;border-radius:8px;font-size:clamp(0.9rem,2.5vw,1.1rem);}
+.level-bar, .health-bar {background:#111;border:1px solid #ff9500;padding:8px;margin:8px 0;border-radius:6px;}
+.level-fill, .health-fill {height:20px;background:linear-gradient(90deg,#ff9500,#ffff00,#0f0);transition:width .3s;border-radius:3px;}
+.health-fill {background:linear-gradient(90deg,#f66,#ff9500,#0f0);}
+.gear-item {display:flex;justify-content:space-between;align-items:center;background:#111;padding:8px;margin:5px 0;border:1px solid #ff6200;border-radius:6px;font-size:0.85rem;}
+.durability-bar {flex:1;margin:0 8px;max-width:120px;}
+.durability-fill {height:12px;background:linear-gradient(90deg,#f66,#ff6200,#0f0);border-radius:2px;transition:width .3s;}
+#mapContainer {flex:1;display:none;min-height:400px;position:relative;margin:10px 0;}
+#map {height:100%;border:3px solid #0f0;box-shadow:0 0 30px #0f0;border-radius:12px;}
+#nearby {position:absolute;top:10px;left:10px;right:10px;background:rgba(0,0,0,0.9);padding:12px;border:2px solid #ff9500;border-radius:8px;color:#ff9500;font-size:clamp(0.8rem,2vw,1rem);max-height:120px;overflow-y:auto;z-index:1000;}
+.overlay {display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;justify-content:center;align-items:center;flex-direction:column;color:#ff9500;padding:20px;}
+.cratebox {width:280px;height:280px;max-width:90vw;max-height:90vh;background:#111;border:5px solid #ff6200;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:clamp(3rem,12vw,5rem);animation:s 0.8s infinite;}
+.raid-alert {background:#330000;border:4px solid #f66;padding:25px;border-radius:12px;text-align:center;max-width:90vw;max-height:80vh;overflow-y:auto;}
+.combat-log {background:#111;padding:12px;margin:12px 0;border:1px solid #f66;border-radius:6px;max-height:150px;overflow-y:auto;font-size:0.85rem;line-height:1.3;}
+.level-up {background:#001a00 !important;border:3px solid #0f0 !important;color:#0f0 !important;animation:levelGlow 1.5s infinite;}
+.death-screen {background:#000;border:5px solid #f66;padding:30px;border-radius:15px;text-align:center;max-width:90vw;}
+.stimpak-btn {background:#0f0 !important;color:#000 !important;border-color:#0f0 !important;}
+@keyframes f {0%,100%{opacity:1}50%{opacity:0.6}}
+@keyframes s {0%,100%{transform:translate(0)}25%{transform:translate(-8px,8px)rotate(-3deg)}75%{transform:translate(8px,-8px)rotate(3deg)}}
+@keyframes levelGlow {0%,100%{box-shadow:0 0 30px #0f0}50%{box-shadow:0 0 60px #0f0,0 0 100px #ffff00}}
+.leaflet-touch .leaflet-bar a {width:36px !important;height:36px !important;line-height:36px !important;}
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out {font-size:18px !important;}
+@media (max-width: 768px) {.term {padding:10px;margin:5px;border-radius:8px;border-width:2px;}}
+</style>
+</head>
+<body>
+<div class="term" id="mainContainer">
+<h1>ATOMIC FIZZ</h1>
+<p style="font-size:clamp(1.2rem,4vw,2rem);margin:15px 0;">
