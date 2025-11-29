@@ -245,84 +245,59 @@ function closeLoot() { document.getElementById("lootOverlay").style.display = "n
 
 // Radiation Scanner
 document.getElementById("gpsBtn").onclick = () => {
-  navigator.geolocation.getCurrentPosition(pos => {
-    document.getElementById("mapContainer").style.display = "block";
-    map = L.map('map').setView([pos.coords.latitude, pos.coords.longitude], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    userMarker = L.circleMarker([pos.coords.latitude, pos.coords.longitude], {radius:12,color:'#0f0'}).addTo(map).bindPopup("You are here");
-
-    const spots = [
-      {n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
-      {n:"Primm (Buffalo Bill's)",lat:35.6145,lng:-115.3845},
-      {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222},
-      {n:"Boulder City Hotel",lat:35.97750,lng:-114.83639},
-      {n:"Hoover Dam",lat:36.016045,lng:-114.737839},
-      {n:"Lucky 38 (The Strat)",lat:36.147247,lng:-115.156029},
-      {n:"New Vegas Strip (Bellagio)",lat:36.112740,lng:-115.174301},
-      {n:"Freeside (Fremont St)",lat:36.170719,lng:-115.143929},
-      {n:"Red Rock Canyon",lat:36.13514,lng:-115.4283},
-      {n:"Bonnie Springs Ranch",lat:36.06007,lng:-115.45027},
-      {n:"Callville Bay Marina",lat:36.14400,lng:-114.72200},
-      {n:"Black Mountain",lat:35.9310,lng:-115.0440},
-      {n:"Sloan Station",lat:35.94361,lng:-115.21722},
-      {n:"Jean Airport",lat:35.7677,lng:-115.3245},
-      {n:"Searchlight",lat:35.46434,lng:-114.91844},
-      {n:"McCarran Airport",lat:36.0801,lng:-115.1522},
-      {n:"Nellis AFB",lat:36.2361,lng:-115.0342},
-      {n:"Helios One (Nevada Solar One)",lat:35.7580,lng:-114.9530},
-      {n:"Old Mormon Fort",lat:36.1694,lng:-115.1305},
-      {n:"Ultra-Luxe (Caesars Palace)",lat:36.0972,lng:-115.1787},
-      {n:"Gomorrah (Dunes site)",lat:36.1100,lng:-115.1720},
-      {n:"Silver Rush (Golden Nugget)",lat:36.1498,lng:-115.1390},
-      {n:"Atomic Wrangler (Vegas Vic)",lat:36.1499,lng:-115.1383},
-      {n:"Repconn Test Site (Pepcon)",lat:36.0360,lng:-115.0880},
-      {n:"Novac (Little A'Le'Inn)",lat:37.6447,lng:-115.7461},
-      {n:"Nelson Ghost Town",lat:35.4189,lng:-114.7133},
-      {n:"Rhyolite Ghost Town",lat:36.9033,lng:-116.8283},
-      {n:"Mt. Charleston",lat:36.2650,lng:-115.6500},
-      {n:"Luxor Pyramid",lat:36.0965,lng:-115.1769},
-      {n:"Whiskey Pete's",lat:35.6167,lng:-115.3900},
-      {n:"Primm Valley Resort",lat:35.6160,lng:-115.3900},
-      {n:"Westgate (Vault 21)",lat:36.1311,lng:-115.1564},
-      {n:"Coca Cola Store",lat:36.1025,lng:-115.1738},
-      {n:"Nellis Solar Array",lat:36.2460,lng:-115.0320},
-      {n:"Ivanpah Solar",lat:35.2000,lng:-115.4667},
-      {n:"Cottonwood Cove",lat:35.9990,lng:-114.5000},
-      {n:"Vault 34 (Lake Mead)",lat:36.1750,lng:-114.7500},
-      {n:"Jacobstown",lat:36.3000,lng:-115.6500},
-      {n:"Dead Wind Cavern",lat:35.8000,lng:-115.4000},
-      {n:"REPCONN Headquarters",lat:36.0500,lng:-115.1000},
-      {n:"188 Trading Post",lat:35.9500,lng:-115.2000},
-      {n:"Griffin Wares Caravan",lat:35.9000,lng:-115.2500},
-      {n:"Nevada Highway Patrol",lat:35.9500,lng:-115.1500},
-      {n:"Sunset Sarsaparilla HQ",lat:36.0000,lng:-115.2000},
-      {n:"HELIOS One Entrance",lat:35.7600,lng:-114.9500},
-      {n:"Camp Searchlight Church",lat:35.4600,lng:-114.9200},
-      {n:"Quarry Junction",lat:35.9200,lng:-115.1800},
-      {n:"Vikki & Vance Museum",lat:35.6150,lng:-115.3850},
-      {n:"Mesquite Mountains",lat:35.8500,lng:-115.9500},
-      {n:"Devil's Gullet",lat:35.7000,lng:-115.3000}
-    ];
-    
-
-    navigator.geolocation.watchPosition(async p => {
-      userMarker.setLatLng([p.coords.latitude, p.coords.longitude]);
-      let near = "";
-      for (const s of spots) {
-        const d = map.distance([p.coords.latitude, p.coords.longitude], [s.lat, s.lng]);
-        if (d < 60 && !claimed.has(s.n)) {
-          await claimLoot(s.n);
-        } else if (d < 200) {
-          near += `${s.n} – ${Math.round(d)}m<br>`;
+  // FORCE GPS PERMISSION
+  if (!navigator.geolocation) {
+    alert("GPS not supported - use mobile browser");
+    return;
+  }
+  
+  // MAP LOADS FIRST - THEN GPS
+  document.getElementById("mapContainer").style.display = "block";
+  map = L.map('map').setView([36.1146, -115.1728], 10); // Vegas default
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  userMarker = L.circleMarker([36.1146, -115.1728], {radius:12,color:'#0f0'}).addTo(map).bindPopup("Loading GPS...");
+  
+  // NOW GET GPS
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      console.log(`GPS: ${lat}, ${lng}`); // DEBUG
+      map.setView([lat, lng], 15);
+      userMarker.setLatLng([lat, lng]).bindPopup("You are here");
+      
+      // 50 LOCATIONS ARRAY...
+      const spots = [ /* YOUR 50 SPOTS */ ];
+      
+      navigator.geolocation.watchPosition(async p => {
+        userMarker.setLatLng([p.coords.latitude, p.coords.longitude]);
+        let near = "";
+        for (const s of spots) {
+          const d = map.distance([p.coords.latitude, p.coords.longitude], [s.lat, s.lng]);
+          if (d < 60 && !claimed.has(s.n)) {
+            await claimLoot(s.n);
+          } else if (d < 200) {
+            near += `${s.n} – ${Math.round(d)}m<br>`;
+          }
         }
-      }
-      document.getElementById("nearby").innerHTML = near ? "NEARBY: " + near : "";
-    });
-  }, () => alert("GPS required"));
+        document.getElementById("nearby").innerHTML = near ? "NEARBY: " + near : "Walk to loot!";
+      }, err => {
+        console.error("GPS ERROR:", err);
+        document.getElementById("nearby").innerHTML = `<span style="color:#f66;">GPS Denied - Enable in Settings</span>`;
+      });
+    },
+    err => {
+      console.error("GPS ERROR:", err);
+      alert("GPS blocked! Settings → Site Settings → Location → Allow");
+      document.getElementById("nearby").innerHTML = `<span style="color:#f66;">GPS BLOCKED - Enable Location</span>`;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 };
 </script>
 </body>
 </html>
+
 
 
 
