@@ -116,17 +116,17 @@ let wallet, map, userMarker, claimed = new Set(), playerState = {hp:100, gear:[]
 document.getElementById("connectBtn").onclick = async () => {
   let p = window.solana || window.solflare || window.backpack;
 if (!p) {
-  // MOBILE TEST MODE - WORKS ON MAINNET TOO
+  // MOBILE BYPASS - FORCE TEST MODE
   if (/Mobi|Android/i.test(navigator.userAgent)) {
     wallet = "MOBILE_TEST_" + Date.now();
-    document.getElementById("status").innerHTML = `Status: <span style="color:#0f0;">TEST MODE</span>`;
+    document.getElementById("status").innerHTML = `Status: <span style="color:#0f0;">TEST MODE ACTIVE</span>`;
     document.getElementById("connectBtn").textContent = "TEST MODE";
     document.getElementById("connectBtn").disabled = true;
     document.getElementById("gpsBtn").disabled = false;
     document.getElementById("character").style.display = "block";
     document.getElementById("name").textContent = "WASTELANDER";
     loadPlayerState();
-    alert("✅ TEST MODE ACTIVE - MAP LOADS NOW!");
+    alert("✅ TEST MODE - MAP LOADS ON SCANNER!");
     return;
   }
   return alert("Install Phantom extension!");
@@ -252,22 +252,39 @@ document.getElementById("gpsBtn").onclick = () => {
   }
   
   // MAP LOADS FIRST - THEN GPS
+  document.getElementById("gpsBtn").onclick = () => {
+  // FORCE MAP LOAD (even if GPS fails)
   document.getElementById("mapContainer").style.display = "block";
-  map = L.map('map').setView([36.1146, -115.1728], 10); // Vegas default
+  map = L.map('map').setView([36.1146, -115.1728], 10); // Default Vegas
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
   userMarker = L.circleMarker([36.1146, -115.1728], {radius:12,color:'#0f0'}).addTo(map).bindPopup("Loading GPS...");
   
-  // NOW GET GPS
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      console.log(`GPS: ${lat}, ${lng}`); // DEBUG
-      map.setView([lat, lng], 15);
-      userMarker.setLatLng([lat, lng]).bindPopup("You are here");
-      
-      // 50 LOCATIONS ARRAY...
-      const spots = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
+  // GPS ATTEMPT
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        console.log(`GPS: ${lat}, ${lng}`);
+        map.setView([lat, lng], 15);
+        userMarker.setLatLng([lat, lng]).bindPopup("You are here");
+        startLocationWatch();
+      },
+      err => {
+        console.error("GPS ERROR:", err);
+        alert("GPS optional - map works anyway! Walk to loot.");
+        startLocationWatch(); // Use default Vegas for demo
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+  } else {
+    alert("GPS not supported - use default map");
+    startLocationWatch();
+  }
+};
+
+function startLocationWatch() {
+  const spots = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
       {n:"Primm (Buffalo Bill's)",lat:35.6145,lng:-115.3845},
       {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222},
       {n:"Boulder City Hotel",lat:35.97750,lng:-114.83639},
@@ -317,35 +334,26 @@ document.getElementById("gpsBtn").onclick = () => {
       {n:"Vikki & Vance Museum",lat:35.6150,lng:-115.3850},
       {n:"Mesquite Mountains",lat:35.8500,lng:-115.9500},
       {n:"Devil's Gullet",lat:35.7000,lng:-115.3000}];
-      
-      navigator.geolocation.watchPosition(async p => {
-        userMarker.setLatLng([p.coords.latitude, p.coords.longitude]);
-        let near = "";
-        for (const s of spots) {
-          const d = map.distance([p.coords.latitude, p.coords.longitude], [s.lat, s.lng]);
-          if (d < 60 && !claimed.has(s.n)) {
-            await claimLoot(s.n);
-          } else if (d < 200) {
-            near += `${s.n} – ${Math.round(d)}m<br>`;
-          }
-        }
-        document.getElementById("nearby").innerHTML = near ? "NEARBY: " + near : "Walk to loot!";
-      }, err => {
-        console.error("GPS ERROR:", err);
-        document.getElementById("nearby").innerHTML = `<span style="color:#f66;">GPS Denied - Enable in Settings</span>`;
-      });
-    },
-    err => {
-      console.error("GPS ERROR:", err);
-      alert("GPS blocked! Settings → Site Settings → Location → Allow");
-      document.getElementById("nearby").innerHTML = `<span style="color:#f66;">GPS BLOCKED - Enable Location</span>`;
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
+  navigator.geolocation.watchPosition(async p => {
+    const lat = p.coords.latitude || 36.1146; // Fallback
+    const lng = p.coords.longitude || -115.1728;
+    userMarker.setLatLng([lat, lng]);
+    let near = "";
+    for (const s of spots) {
+      const d = map.distance([lat, lng], [s.lat, s.lng]);
+      if (d < 60 && !claimed.has(s.n)) {
+        await claimLoot(s.n);
+      } else if (d < 200) {
+        near += `${s.n} – ${Math.round(d)}m<br>`;
+      }
+    }
+    document.getElementById("nearby").innerHTML = near ? "NEARBY: " + near : "Walk to loot!";
+  }, err => console.error("Watch error:", err));
 };
 </script>
 </body>
 </html>
+
 
 
 
