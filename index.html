@@ -283,6 +283,7 @@ document.getElementById("connectBtn").onclick = async () => {
   
   alert(`✅ ${walletType} ACTIVE!\n🎯 ${falloutSpots.length} LOCATIONS READY!`);
 };
+
 // 🔥 BACK BUTTON
 function backToMain() {
   document.getElementById("mapContainer").style.display = "none";
@@ -290,6 +291,62 @@ function backToMain() {
   document.getElementById("mainContainer").style.display = "flex";
   if(map) { map.remove(); map = null; }
 }
+
+// 💉 STIMPAK PAYMENTS (ETH + SOL + FREE)
+document.getElementById("buyCommonStimpak").onclick = async () => {
+  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:'))) {
+    alert("💎 REAL PAYMENTS COMING SOON!\n🎮 FREE stimpaks for LAUNCH WEEK!");
+  }
+  
+  if (playerState.caps >= 100) {
+    playerState.caps -= 100;
+    playerState.stimpaks.push({name:"Stimpak"});
+    updateUI();
+    alert("💉 Stimpak purchased!\n⚡ Ready for revival!");
+  } else {
+    alert("❌ Need 100 CAPS\n🎯 LOOT MORE LOCATIONS!");
+  }
+};
+
+// 💉 SUPER STIMPAK
+document.getElementById("buyRareStimpak").onclick = async () => {
+  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:'))) {
+    alert("💎 SUPER STIMPAK = $10 COMING SOON!\n🎮 FREE for LAUNCH!");
+  }
+  
+  if (playerState.caps >= 500) {
+    playerState.caps -= 500;
+    playerState.stimpaks.push({name:"Super Stimpak"});
+    updateUI();
+    alert("💉 SUPER Stimpak purchased!\n⚡ FULL HP + Gear Repair!");
+  } else {
+    alert("❌ Need 500 CAPS\n💰 LOOT BIGGER SPOTS!");
+  }
+};
+
+// 💉 REVIVE BUTTON
+document.getElementById("reviveBtn").onclick = () => {
+  if (playerState.stimpaks.length > 0) {
+    const stimpak = playerState.stimpaks.shift();
+    playerState.hp = stimpak.name.includes('Super') ? playerState.maxHp : Math.min(playerState.maxHp, playerState.hp + 60);
+    document.getElementById("deathOverlay").style.display = "none";
+    updateUI();
+    alert(`💉 REVIVED with ${stimpak.name}!`);
+  } else {
+    alert("❌ NO STIMPAKS!\n💀 PERMANENT DEATH");
+    location.reload(); // Restart game
+  }
+};
+
+// 🔥 FIGHT & FLEE BUTTONS
+document.getElementById("fightBtn").onclick = () => {
+  alert("⚔️ COMBAT COMING SOON!\n🎮 LOOT MORE FOR NOW!");
+};
+
+document.getElementById("fleeBtn").onclick = () => {
+  document.getElementById("raidOverlay").style.display = "none";
+  alert("🏃 Fled from combat!");
+};
 </script>
 </body>
 </html>
