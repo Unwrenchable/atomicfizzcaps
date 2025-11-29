@@ -228,29 +228,25 @@ document.getElementById("gpsBtn").onclick = () => {
 };
 
 // 🔥 CONNECT BUTTON
-// ✅ DUAL WALLET: ETH + SOL + TEST MODE
+// 🔥 TRIPLE WALLET: ETH + SOL + XRP + TEST
 document.getElementById("connectBtn").onclick = async () => {
   let connected = false;
   let walletType = "TEST MODE";
   
-  // 🔥 TRY ETHEREUM FIRST (80% of players)
+  // 🔥 1. ETHEREUM (80%)
   if (window.ethereum) {
     try {
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
-      });
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       wallet = `ETH:${accounts[0]}`;
       walletType = "ETHEREUM";
       document.getElementById("status").innerHTML = `
         <span style="color:#0f0;">✅ ETH ${accounts[0].slice(0,6)}...${accounts[0].slice(-4)}</span>
       `;
       connected = true;
-    } catch (e) {
-      console.log("ETH failed, trying Solana...");
-    }
+    } catch (e) { console.log("ETH failed..."); }
   }
   
-  // 🔥 TRY SOLANA SECOND (15% of players)  
+  // 🔥 2. SOLANA (15%)
   if (!connected && window.solana) {
     try {
       const resp = await window.solana.connect();
@@ -260,19 +256,36 @@ document.getElementById("connectBtn").onclick = async () => {
         <span style="color:#0f0;">✅ SOL ${resp.publicKey.toString().slice(0,6)}...${resp.publicKey.toString().slice(-4)}</span>
       `;
       connected = true;
-    } catch (e) {
-      console.log("SOL failed, using test mode...");
-    }
+    } catch (e) { console.log("SOL failed..."); }
   }
   
-  // 🔥 TEST MODE (5% no wallets)
+  // 🔥 3. XRP/XUMM (3% - HIGH VALUE!)
+  if (!connected && window.Xumm) {
+    try {
+      const result = await window.Xumm.xummPost({
+        TransactionType: 'Sign',
+        UserToken: false
+      });
+      
+      if (result.response && result.response.signed) {
+        wallet = `XRP:${result.response.account}`;
+        walletType = "RIPPLE/XRP";
+        document.getElementById("status").innerHTML = `
+          <span style="color:#0f0;">✅ XRP ${result.response.account.slice(0,6)}...${result.response.account.slice(-4)}</span>
+        `;
+        connected = true;
+      }
+    } catch (e) { console.log("XRP failed..."); }
+  }
+  
+  // 🔥 4. TEST MODE (2%)
   if (!connected) {
     wallet = "MOBILE_" + Date.now();
     walletType = "TEST MODE";
     document.getElementById("status").innerHTML = `<span style="color:#0f0;">✅ TEST MODE</span>`;
   }
   
-  // 🔥 UNLOCK GAME FOR EVERYONE
+  // 🔥 UNLOCK GAME
   document.getElementById("connectBtn").textContent = "✅ CONNECTED";
   document.getElementById("connectBtn").disabled = true;
   document.getElementById("gpsBtn").disabled = false;
