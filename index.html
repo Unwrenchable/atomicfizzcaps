@@ -122,8 +122,6 @@ CAPS: <span id="caps">0</span>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
 // 🔥 VARIABLES + 50 LOCATIONS
 let map, userMarker, claimed = new Set(), playerState = {level:1,xp:0,maxHp:100,hp:100,gear:[],caps:0};
 const falloutSpots = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
@@ -230,8 +228,51 @@ document.getElementById("gpsBtn").onclick = () => {
 };
 
 // 🔥 CONNECT BUTTON
-document.getElementById("connectBtn").onclick = () => {
-  document.getElementById("status").innerHTML = `<span style="color:#0f0;">✅ TEST MODE ACTIVE</span>`;
+// ✅ DUAL WALLET: ETH + SOL + TEST MODE
+document.getElementById("connectBtn").onclick = async () => {
+  let connected = false;
+  let walletType = "TEST MODE";
+  
+  // 🔥 TRY ETHEREUM FIRST (80% of players)
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      });
+      wallet = `ETH:${accounts[0]}`;
+      walletType = "ETHEREUM";
+      document.getElementById("status").innerHTML = `
+        <span style="color:#0f0;">✅ ETH ${accounts[0].slice(0,6)}...${accounts[0].slice(-4)}</span>
+      `;
+      connected = true;
+    } catch (e) {
+      console.log("ETH failed, trying Solana...");
+    }
+  }
+  
+  // 🔥 TRY SOLANA SECOND (15% of players)  
+  if (!connected && window.solana) {
+    try {
+      const resp = await window.solana.connect();
+      wallet = `SOL:${resp.publicKey.toString()}`;
+      walletType = "SOLANA";
+      document.getElementById("status").innerHTML = `
+        <span style="color:#0f0;">✅ SOL ${resp.publicKey.toString().slice(0,6)}...${resp.publicKey.toString().slice(-4)}</span>
+      `;
+      connected = true;
+    } catch (e) {
+      console.log("SOL failed, using test mode...");
+    }
+  }
+  
+  // 🔥 TEST MODE (5% no wallets)
+  if (!connected) {
+    wallet = "MOBILE_" + Date.now();
+    walletType = "TEST MODE";
+    document.getElementById("status").innerHTML = `<span style="color:#0f0;">✅ TEST MODE</span>`;
+  }
+  
+  // 🔥 UNLOCK GAME FOR EVERYONE
   document.getElementById("connectBtn").textContent = "✅ CONNECTED";
   document.getElementById("connectBtn").disabled = true;
   document.getElementById("gpsBtn").disabled = false;
@@ -239,9 +280,9 @@ document.getElementById("connectBtn").onclick = () => {
   document.getElementById("gearInventory").style.display = "block";
   document.getElementById("stimpakShop").style.display = "block";
   loadPlayerState();
-  alert("✅ TEST MODE ACTIVE!\n🎯 Click SCANNER for MAP!");
+  
+  alert(`✅ ${walletType} ACTIVE!\n🎯 ${falloutSpots.length} LOCATIONS READY!`);
 };
-
 // 🔥 BACK BUTTON
 function backToMain() {
   document.getElementById("mapContainer").style.display = "none";
