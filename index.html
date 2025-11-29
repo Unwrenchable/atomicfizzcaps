@@ -7,124 +7,112 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Atomic Fizz">
 <meta name="theme-color" content="#001a00">
-<title>Atomic Fizz · Vault 77 – 50 LOCATIONS MOBILE</title>
+<title>Atomic Fizz · Vault 77 – 50 LOCATIONS</title>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&display=swap');
-* {margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html, body {height:100%;overflow-y:auto;background:#000;color:#0f0;font-family:'Share Tech Mono',monospace;-webkit-user-select:none;user-select:none;}
-.term {flex:1;display:flex;flex-direction:column;background:#001a00;border:3px solid #0f0;box-shadow:0 0 40px #0f0;padding:15px;border-radius:12px;position:relative;text-align:center;min-height:0;overflow-y:auto;max-height:100vh;}
-.term::before {content:"VAULT 777 · ATOMIC FIZZ · 50 LOCATIONS v3.3 ✅";position:absolute;top:-15px;left:10px;background:#000;padding:0 15px;font-size:12px;letter-spacing:3px;}
-h1 {font-size:clamp(2.5rem,6vw,4rem);margin:15px 0;text-shadow:0 0 25px #0f0;animation:f 2s infinite;}
-button {background:transparent;border:2px solid #0f0;color:#0f0;padding:12px 25px;font-size:clamp(1.2rem,4vw,1.6rem);margin:10px 5px;cursor:pointer;box-shadow:0 0 25px #0f0;transition:.2s;letter-spacing:2px;border-radius:8px;min-height:50px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
-button:active {background:#0f0;color:#000;box-shadow:0 0 50px #0f0;transform:scale(0.95);}
-button:disabled {opacity:0.4;}
-.status {font-size:clamp(1.2rem,3.5vw,1.6rem);margin:15px 0;}
-.char {background:rgba(0,30,0,0.8);padding:12px;margin:15px 0;border-left:4px solid #0f0;border-radius:8px;font-size:clamp(0.9rem,2.5vw,1.1rem);}
-.level-bar, .health-bar {background:#111;border:1px solid #ff9500;padding:8px;margin:8px 0;border-radius:6px;}
-.level-fill, .health-fill {height:20px;background:linear-gradient(90deg,#ff9500,#ffff00,#0f0);transition:width .3s;border-radius:3px;}
-.health-fill {background:linear-gradient(90deg,#f66,#ff9500,#0f0);}
-.gear-item {display:flex;justify-content:space-between;align-items:center;background:#111;padding:8px;margin:5px 0;border:1px solid #ff6200;border-radius:6px;font-size:0.85rem;}
-.durability-bar {flex:1;margin:0 8px;max-width:120px;}
-.durability-fill {height:12px;background:linear-gradient(90deg,#f66,#ff6200,#0f0);border-radius:2px;transition:width .3s;}
-#mapContainer {flex:1;display:none;min-height:400px;position:relative;margin:10px 0;}
-#map {height:100%;border:3px solid #0f0;box-shadow:0 0 30px #0f0;border-radius:12px;}
-#nearby {position:absolute;top:10px;left:10px;right:10px;background:rgba(0,0,0,0.9);padding:12px;border:2px solid #ff9500;border-radius:8px;color:#ff9500;font-size:clamp(0.8rem,2vw,1rem);max-height:120px;overflow-y:auto;z-index:1000;}
-.overlay {display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;justify-content:center;align-items:center;flex-direction:column;color:#ff9500;padding:20px;}
-.cratebox {width:280px;height:280px;max-width:90vw;max-height:90vh;background:#111;border:5px solid #ff6200;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:clamp(3rem,12vw,5rem);animation:s 0.8s infinite;}
-.raid-alert {background:#330000;border:4px solid #f66;padding:25px;border-radius:12px;text-align:center;max-width:90vw;max-height:80vh;overflow-y:auto;}
-.combat-log {background:#111;padding:12px;margin:12px 0;border:1px solid #f66;border-radius:6px;max-height:150px;overflow-y:auto;font-size:0.85rem;line-height:1.3;}
-.level-up {background:#001a00 !important;border:3px solid #0f0 !important;color:#0f0 !important;animation:levelGlow 1.5s infinite;}
-.death-screen {background:#000;border:5px solid #f66;padding:30px;border-radius:15px;text-align:center;max-width:90vw;}
-.stimpak-btn {background:#0f0 !important;color:#000 !important;border-color:#0f0 !important;}
-@keyframes f {0%,100%{opacity:1}50%{opacity:0.6}}
-@keyframes s {0%,100%{transform:translate(0)}25%{transform:translate(-8px,8px)rotate(-3deg)}75%{transform:translate(8px,-8px)rotate(3deg)}}
-@keyframes levelGlow {0%,100%{box-shadow:0 0 30px #0f0}50%{box-shadow:0 0 60px #0f0,0 0 100px #ffff00}}
-.leaflet-touch .leaflet-bar a {width:36px !important;height:36px !important;line-height:36px !important;}
-.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out {font-size:18px !important;}
-@media (max-width: 768px) {.term {padding:10px;margin:5px;border-radius:8px;border-width:2px;}}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#000;color:#0f0;font-family:'Share Tech Mono',monospace;-webkit-user-select:none;user-select:none;}
+.term{flex:1;display:flex;flex-direction:column;background:#001a00;border:3px solid #0f0;box-shadow:0 0 40px #0f0;padding:15px;border-radius:12px;position:relative;text-align:center;min-height:0;overflow-y:auto;max-height:100vh;margin:8px;}
+.term::before{content:"VAULT 777 · ATOMIC FIZZ · v3.4 LIVE";position:absolute;top:-14px;left:12px;background:#000;padding:0 16px;font-size:12px;letter-spacing:4px;color:#0f0;}
+h1{font-size:clamp(2.8rem,8vw,5rem);margin:10px 0;text-shadow:0 0 30px #0f0;animation:f 2s infinite;}
+button{background:transparent;border:2px solid #0f0;color:#0f0;padding:14px 20px;font-size:clamp(1.3rem,4.5vw,1.8rem);margin:10px 6px;cursor:pointer;box-shadow:0 0 25px #0f0;transition:.25s;letter-spacing:2px;border-radius:10px;min-height:56px;font-weight:700;}
+button:active{background:#0f0;color:#000;transform:scale(0.96);box-shadow:0 0 60px #0f0;}
+button:disabled{opacity:0.35;cursor:not-allowed;}
+.status{font-size:clamp(1.2rem,4vw,1.7rem);margin:15px 0;}
+.char{background:rgba(0,40,0,0.85);padding:15px;margin:18px 0;border-left:5px solid #0f0;border-radius:10px;font-size:clamp(1rem,3vw,1.3rem);}
+.level-bar,.health-bar{background:#111;border:2px solid #ff9500;padding:8px;margin:10px 0;border-radius:8px;}
+.level-fill,.health-fill{height:24px;background:linear-gradient(90deg,#ff9500,#ffff00,#0f0);border-radius:5px;transition:width .4s ease;}
+.health-fill{background:linear-gradient(90deg,#f66,#ff6200,#0f0);}
+#mapContainer{flex:1;display:none;position:relative;margin:12px 0;border-radius:12px;overflow:hidden;}
+#map{height:100%;border:4px solid #0f0;box-shadow:0 0 40px #0f0;border-radius:12px;}
+#nearby{position:absolute;top:10px;left:10px;right:10px;background:rgba(0,0,0,0.92);padding:14px;border:2px solid #ff6200;border-radius:10px;color:#ff9500;font-size:clamp(0.9rem,2.8vw,1.2rem);z-index:1000;max-height:140px;overflow-y:auto;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:9999;justify-content:center;align-items:center;flex-direction:column;padding:20px;text-align:center;}
+.cratebox{width:300px;height:300px;max-width:90vw;max-height:90vh;background:#111;border:6px solid #ff6200;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:clamp(5rem,20vw,10rem);animation:s 0.9s infinite;}
+.raid-alert{background:#300;border:5px solid #f66;padding:30px;border-radius:15px;max-width:90vw;}
+.combat-log{background:#111;padding:15px;margin:15px 0;border:2px solid #f66;border-radius:8px;max-height:180px;overflow-y:auto;font-size:0.9rem;}
+.death-screen{background:#000;border:6px solid #f66;padding:35px;border-radius:18px;max-width:90vw;}
+.level-up{background:#001a00;border:6px solid #0f0;padding:35px;border-radius:18px;animation:levelGlow 2s infinite;}
+.stimpak-btn{background:#0f0!important;color:#000!important;border-color:#0f0!important;box-shadow:0 0 40px #0f0;}
+@keyframes f{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes s{0%,100%{transform:translate(0)}30%{transform:translate(-10px,10px)rotate(-5deg)}70%{transform:translate(10px,-10px)rotate(5deg)}}
+@keyframes levelGlow{0%,100%{box-shadow:0 0 40px #0f0}50%{box-shadow:0 0 80px #0f0,0 0 120px #ffff00}}
+.leaflet-touch .leaflet-bar a{width:40px!important;height:40px!important;line-height:40px!important;font-size:20px!important;}
+@media(max-width:768px){.term{margin:4px;padding:10px;border-width:2px;}}
 </style>
 </head>
 <body>
 <div class="term" id="mainContainer">
-<h1>ATOMIC FIZZ</h1>
-<p style="font-size:clamp(1.2rem,4vw,2rem);margin:15px 0;">⚔️ 50 FALLOUT LOCATIONS + LEVELING</p>
-<div style="background:rgba(0,40,0,0.7);padding:15px;margin:20px 0;border-left:4px solid #0f0;border-radius:8px;line-height:1.4;font-size:clamp(0.9rem,2.8vw,1.2rem);">
-🎯 <b>50 LOCATIONS</b> → 💰 LOOT → ⚔️ FIGHT → ⭐ LEVEL UP → 💪 STRONGER
-</div>
-<button id="connectBtn">CONNECT WALLET</button>
-<div class="status" id="status">Status: <span style="color:#f66;">NOT CONNECTED</span></div>
-<div class="char" id="character" style="display:none;">
-Wastelander: <span id="name">???</span> •
-<span id="levelDisplay" class="level-up">LVL <span id="lvl">1</span></span> •
-XP: <span id="xpText">0</span>/<span id="xpMax">100</span>
-<div class="level-bar">
-<div class="level-fill" id="xpBar" style="width:0%;"></div>
-</div>
-<div class="health-bar">
-HP: <span id="hpText">100/100</span>
-<div class="health-fill" id="hpBar" style="width:100%;"></div>
-</div>
-CAPS: <span id="caps">0</span>
-</div>
-<div class="gear-inventory" id="gearInventory" style="display:none;background:rgba(0,30,0,0.8);padding:15px;margin:15px 0;border-left:4px solid #ff6200;border-radius:8px;">
-<h3 style="color:#ff6200;">⚔️ GEAR</h3>
-<div id="gearList"></div>
-</div>
-<div class="stimpak-shop" id="stimpakShop" style="display:none;background:rgba(0,30,0,0.8);padding:15px;margin:15px 0;border-left:4px solid #0f0;border-radius:8px;">
-<h3 style="color:#0f0;">💉 STIMPAK SHOP</h3>
-<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
-<button id="buyCommonStimpak" style="flex:1;min-width:120px;">Stimpak<br><span style="font-size:0.8em;">100 CAPS</span></button>
-<button id="buyRareStimpak" style="flex:1;min-width:120px;">Super Stimpak<br><span style="font-size:0.8em;">500 CAPS</span></button>
-</div>
-<div id="stimpakInventory" style="margin-top:10px;"></div>
-</div>
-<button id="gpsBtn" disabled style="background:linear-gradient(45deg,#ff6200,#ff9500);border-color:#ff6200;color:#000;font-weight:700;">🎯 50 LOCATION SCANNER</button>
-<div id="mapContainer" style="display:none;"><div id="map"></div><div id="nearby"></div></div>
-<button id="backBtn" onclick="backToMain()" style="display:none;background:linear-gradient(45deg,#f66,#ff9500);border-color:#f66;color:#000;font-weight:700;">🏠 BACK TO TERMINAL</button>
+  <h1>ATOMIC FIZZ</h1>
+  <p style="font-size:clamp(1.4rem,5vw,2.5rem);margin:12px 0;">50 REAL FALLOUT LOCATIONS • LEVELING • LOOT • SURVIVE</p>
+  
+  <div style="background:rgba(0,50,0,0.7);padding:18px;margin:20px 0;border-left:5px solid #0f0;border-radius:10px;">
+    <b>LOOT ORANGE DOTS → GAIN CAPS & XP → BUY STIMPAKS → NEVER DIE</b>
+  </div>
+
+  <button id="connectBtn">CONNECT WALLET</button>
+  <div class="status" id="status">Status: <span style="color:#f66;">NOT CONNECTED</span></div>
+
+  <div class="char" id="character" style="display:none;">
+    Wastelander • LVL <span id="lvl" class="level-up">1</span> • XP: <span id="xpText">0</span>/<span id="xpMax">100</span><br>
+    <div class="level-bar"><div class="level-fill" id="xpBar" style="width:0%"></div></div>
+    HP: <span id="hpText">100/100</span>
+    <div class="health-bar"><div class="health-fill" id="hpBar" style="width:100%"></div></div>
+    CAPS: <span id="caps">0</span>
+  </div>
+
+  <div id="gearInventory" style="display:none;background:rgba(0,40,0,0.8);padding:16px;margin:16px 0;border-left:5px solid #ff6200;border-radius:10px;">
+    <h3 style="color:#ff6200;margin-bottom:10px;">GEAR</h3>
+    <div id="gearList"><p style="color:#666;">No gear equipped</p></div>
+  </div>
+
+  <div id="stimpakShop" style="display:none;background:rgba(0,40,0,0.8);padding:16px;margin:16px 0;border-left:5px solid #0f0;border-radius:10px;">
+    <h3 style="color:#0f0;">STIMPAK SHOP</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:12px 0;">
+      <button id="buyCommon">Stimpak<br><small>100 CAPS • +60 HP</small></button>
+      <button id="buySuper">Super Stimpak<br><small>500 CAPS • FULL HEAL</small></button>
+    </div>
+    <div id="stimpakInventory" style="margin-top:12px;font-size:1.1rem;">Stimpaks: 0</div>
+  </div>
+
+  <button id="gpsBtn" disabled style="background:linear-gradient(45deg,#ff6200,#ff9500);color:#000;font-weight:900;">
+     50 LOCATION SCANNER
+  </button>
+
+  <div id="mapContainer">
+    <div id="map"></div>
+    <div id="nearby">Loading 50 Fallout locations...</div>
+  </div>
+
+  <button id="backBtn" onclick="backToMain()" style="display:none;background:linear-gradient(45deg,#f66,#ff4444);color:#000;font-weight:900;">
+    BACK TO TERMINAL
+  </button>
 </div>
 
 <!-- OVERLAYS -->
-<div class="overlay" id="lootOverlay">
-<div class="cratebox">💰 LOOT!</div>
-<h2 id="lootResult" style="margin:20px;font-size:clamp(1.2rem,5vw,2rem);">?</h2>
-<button onclick="closeLoot()" style="margin-top:20px;">CONTINUE</button>
-</div>
-<div class="overlay" id="raidOverlay">
-<div class="raid-alert">
-<h2 id="enemyName" style="font-size:clamp(1.5rem,6vw,2.5rem);">💀 RAIDERS!</h2>
-<p id="enemyStats" style="color:#ff9500;margin:10px 0;">25 ATK • 50 HP • 15 DEF</p>
-<div class="combat-log" id="combatLog"></div>
-<div style="display:flex;gap:15px;justify-content:center;margin:20px 0;flex-wrap:wrap;">
-<button id="fightBtn" style="background:#0f0;color:#000;border-color:#0f0;min-width:120px;">⚔️ FIGHT</button>
-<button id="fleeBtn" style="border-color:#f66;color:#f66;min-width:120px;">🏃 FLEE</button>
-</div>
-</div>
-</div>
-<div class="overlay" id="deathOverlay">
-<div class="death-screen">
-<div style="font-size:clamp(4rem,15vw,8rem);margin:15px;">☠️</div>
-<h2 style="font-size:clamp(1.5rem,6vw,2.5rem);">YOU DIED</h2>
-<p id="deathMessage" style="margin:15px 0;font-size:clamp(1rem,4vw,1.3rem);">Raiders destroyed you...</p>
-<button class="stimpak-btn" id="reviveBtn" style="min-width:200px;font-size:1.3rem;">💉 REVIVE WITH STIMPAK</button>
-<p style="color:#f66;margin-top:15px;font-size:clamp(0.9rem,3vw,1.1rem);">No Stimpaks = PERMANENT DEATH</p>
-</div>
-</div>
-<div class="overlay" id="levelUpOverlay">
-<div style="background:#001a00;border:5px solid #0f0;padding:30px;border-radius:15px;text-align:center;max-width:90vw;">
-<div style="font-size:clamp(4rem,15vw,8rem);margin:15px;">⭐</div>
-<h2 style="color:#0f0;font-size:clamp(1.5rem,6vw,2.5rem);">LEVEL UP!</h2>
-<p style="font-size:clamp(1.2rem,5vw,2rem);margin:15px 0;">LVL <span id="newLevel">2</span></p>
-<p style="color:#ff9500;font-size:clamp(1rem,4vw,1.3rem);">+20 HP • +5 ATK • +3 DEF</p>
-<button onclick="closeLevelUp()" style="margin-top:20px;min-width:200px;">💪 CONTINUE WASTELAND</button>
-</div>
-</div>
+<div class="overlay" id="lootOverlay"><div class="cratebox">LOOT</div><h2 id="lootResult">+50 CAPS • +20 XP</h2><button onclick="closeLoot()">CLAIMED</button></div>
+<div class="overlay" id="levelUpOverlay" class="level-up"><div style="font-size:10rem;">STAR</div><h2>LEVEL UP!</h2><p>Level <span id="newLevel">2</span></p><p style="color:#ff9500;">+20 Max HP • +5 ATK • +3 DEF</p><button onclick="closeLevelUp()">CONTINUE</button></div>
+<div class="overlay" id="deathOverlay"><div class="death-screen"><div style="font-size:12rem;">SKULL</div><h2>YOU DIED</h2><p>Rads got you...</p><button class="stimpak-btn" id="reviveBtn">REVIVE WITH STIMPAK</button><p style="color:#f66;margin-top:15px;">No stimpaks = Game Over</p></div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// 🔥 VARIABLES + 50 LOCATIONS
-let map, userMarker, claimed = new Set(), playerState = {level:1,xp:0,maxHp:100,hp:100,gear:[],caps:0};
-const falloutSpots = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
+// ———————————————————————— GLOBALS ————————————————————————
+let map, userMarker, claimed = new Set();
+let wallet = null;
+
+let player = {
+  level: 1,
+  xp: 0,
+  xpToNext: 100,
+  maxHp: 100,
+  hp: 100,
+  caps: 0,
+  stimpaks: [],        // ["Stimpak", "Super Stimpak", ...]
+  gear: []
+};
+
+const locations = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},
       {n:"Primm (Buffalo Bill's)",lat:35.6145,lng:-115.3845},
       {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222},
       {n:"Boulder City Hotel",lat:35.97750,lng:-114.83639},
@@ -173,210 +161,158 @@ const falloutSpots = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.432
       {n:"Quarry Junction",lat:35.9200,lng:-115.1800},
       {n:"Vikki & Vance Museum",lat:35.6150,lng:-115.3850},
       {n:"Mesquite Mountains",lat:35.8500,lng:-115.9500},
-      {n:"Devil's Gullet",lat:35.7000,lng:-115.3000}
-      ];
+      {n:"Devil's Gullet",lat:35.7000,lng:-115.3000}];
 
-// 🔥 
-function loadPlayerState() {
-  playerState = {level:1,xp:0,xpToNext:100,maxHp:100,hp:100,gear:[],stimpaks:[],caps:0};
-  updateUI();
-}
+// ———————————————————————— UI UPDATE ——————————————————
 function updateUI() {
-  document.getElementById("lvl").textContent = playerState.level;
-  document.getElementById("xpText").textContent = playerState.xp;
-  document.getElementById("xpMax").textContent = playerState.xpToNext;
-  document.getElementById("xpBar").style.width = "0%";
-  document.getElementById("hpText").textContent = `${playerState.hp}/${playerState.maxHp}`;
-  document.getElementById("hpBar").style.width = "100%";
-  document.getElementById("caps").textContent = playerState.caps||0;
-  document.getElementById("gearList").innerHTML = '<p style="color:#f66;">NO GEAR – LOOT NOW!</p>';
-  document.getElementById("stimpakInventory").innerHTML =
-  playerState.stimpaks.length > 0
-       ? `💉 ${playerState.stimpaks.length} Stimpak${playerState.stimpaks.length > 1 ? 's' : ''}`
-       : '<p style="color:#f66;">NO STIMPAKS</p>';
+  document.getElementById("lvl").textContent = player.level;
+  document.getElementById("xpText").textContent = player.xp;
+  document.getElementById("xpMax").textContent = player.xpToNext;
+  document.getElementById("xpBar").style.width = `${(player.xp / player.xpToNext)*100}%`;
+  document.getElementById("hpText").textContent = `${player.hp}/${player.maxHp}`;
+  document.getElementById("hpBar").style.width = `${(player.hp / player.maxHp)*100}%`;
+  document.getElementById("caps").textContent = player.caps;
+
+  // Stimpaks
+  const count = player.stimpaks.length;
+  document.getElementById("stimpakInventory").innerHTML = count > 0 
+    ? `Stimpaks: ${count}` 
+    : `<span style="color:#f66;">No Stimpaks</span>`;
+
+  // Gear placeholder (expand later)
+  document.getElementById("gearList").innerHTML = player.gear.length === 0
+    ? `<p style="color:#666;">No gear yet — keep looting!</p>`
+    : player.gear.map(g => `<div style="margin:8px 0;color:#ff9500;">${g}</div>`).join('');
 }
+
+// ———————————————————————— LOOT & LEVELING ————————————————————————
 function claimLoot(spotName) {
-  alert(`🎯 LOOTED ${spotName}! +50 CAPS`);
-  playerState.caps += 50;
-  updateUI();
+  if (claimed.has(spotName)) {
+    alert(`Already looted ${spotName}`);
+    return;
+  }
   claimed.add(spotName);
+
+  player.caps += 50;
+  player.xp += 20;
+
+  // Level up?
+  if (player.xp >= player.xpToNext) {
+    player.level++;
+    player.xp -= player.xpToNext;
+    player.xpToNext = Math.round(player.xpToNext * 1.6);
+    player.maxHp += 20;
+    player.hp = player.maxHp;
+    document.getElementById("newLevel").textContent = player.level;
+    document.getElementById("levelUpOverlay").style.display = "flex";
+  }
+
+  document.getElementById("lootResult").textContent = `+50 CAPS • +20 XP`;
+  document.getElementById("lootOverlay").style.display = "flex";
+  updateUI();
 }
+
 function closeLoot() { document.getElementById("lootOverlay").style.display = "none"; }
 function closeLevelUp() { document.getElementById("levelUpOverlay").style.display = "none"; }
 
-// 🔥 SCANNER BUTTON (YOUR CODE)
-document.getElementById("gpsBtn").onclick = () => {
-  document.getElementById("mainContainer").style.display = "none";
-  document.getElementById("mapContainer").style.display = "block";
-  document.getElementById("backBtn").style.display = "block";
-  
-  map = L.map('map').setView([36.1146, -115.1728], 10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-  
-  // ADD MARKERS
-  falloutSpots.forEach(spot => {
-    L.circleMarker([spot.lat,spot.lng], {radius:8,color:'#ff6200',fillColor:'#ff6200',fillOpacity:0.8})
-    .addTo(map)
-    .bindPopup(spot.n)
-    .on('click', () => {
-      map.setView([spot.lat,spot.lng], 16);
-      claimLoot(spot.n);
-    });
-  });
-  
-  userMarker = L.circleMarker([36.1146, -115.1728], {radius:12,color:'#0f0',fillColor:'#0f0'}).addTo(map).bindPopup("🟢 YOU");
-  
-  document.getElementById("nearby").innerHTML = `🎯 <b>${falloutSpots.length} LOOT SPOTS LOADED!</b><br>👆 <b>TAP ORANGE DOTS</b>`;
-  alert(`🗺️ RADIATION SCANNER ACTIVE!\n✅ ${falloutSpots.length} LOCATIONS\n🟢=You | 🟠=Loot`);
-};
-
-// 🔥 CONNECT BUTTON
-// 🔥 TRIPLE WALLET: ETH + SOL + XRP + TEST
+// ———————————————————————— WALLET CONNECT (SAFE) ————————————————————————
 document.getElementById("connectBtn").onclick = async () => {
-  let connected = false;
-  let walletType = "TEST MODE";
-      
-// Log EVERY login
-fetch(`${BACKEND_URL}/log-login`, {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({ wallet, walletType, timestamp: Date.now(), userAgent: navigator.userAgent })
-}).catch(() => {}); // Silent fail
-  
-  // 🔥 1. ETHEREUM (80%)
   if (window.ethereum) {
     try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      wallet = `ETH:${accounts[0]}`;
-      walletType = "ETHEREUM";
-      document.getElementById("status").innerHTML = `
-        <span style="color:#0f0;">✅ ETH ${accounts[0].slice(0,6)}...${accounts[0].slice(-4)}</span>
-      `;
-      connected = true;
-    } catch (e) { console.log("ETH failed..."); }
-  }
-  
-  // 🔥 2. SOLANA (15%)
-  if (!connected && window.solana) {
+      const accs = await ethereum.request({method:'eth_requestAccounts'});
+      wallet = accs[0];
+      document.getElementById("status").innerHTML = `<span style="color:#0f0;">ETH ${wallet.slice(0,6)}...${wallet.slice(-4)}</span>`;
+    } catch(e) {}
+  } else if (window.solana?.isPhantom) {
     try {
       const resp = await window.solana.connect();
-      wallet = `SOL:${resp.publicKey.toString()}`;
-      walletType = "SOLANA";
-      document.getElementById("status").innerHTML = `
-        <span style="color:#0f0;">✅ SOL ${resp.publicKey.toString().slice(0,6)}...${resp.publicKey.toString().slice(-4)}</span>
-      `;
-      connected = true;
-    } catch (e) { console.log("SOL failed..."); }
+      wallet = resp.publicKey.toString();
+      document.getElementById("status").innerHTML = `<span style="color:#0f0;">SOL ${wallet.slice(0,6)}...${wallet.slice(-4)}</span>`;
+    } catch(e) {}
   }
-  
-  // 🔥 3. XRP/XUMM (3% - HIGH VALUE!)
-  if (!connected && window.Xumm) {
-    try {
-      const result = await window.Xumm.xummPost({
-        TransactionType: 'Sign',
-        UserToken: false
-      });
-      
-      if (result.response && result.response.signed) {
-        wallet = `XRP:${result.response.account}`;
-        walletType = "RIPPLE/XRP";
-        document.getElementById("status").innerHTML = `
-          <span style="color:#0f0;">✅ XRP ${result.response.account.slice(0,6)}...${result.response.account.slice(-4)}</span>
-        `;
-        connected = true;
-      }
-    } catch (e) { console.log("XRP failed..."); }
+
+  if (!wallet) {
+    wallet = "TEST_" + Math.random().toString(36).slice(2,9).toUpperCase();
+    document.getElementById("status").innerHTML = `<span style="color:#0f0;">TEST MODE</span>`;
   }
-  
-  // 🔥 4. TEST MODE (2%)
-  if (!connected) {
-    wallet = "MOBILE_" + Date.now();
-    walletType = "TEST MODE";
-    document.getElementById("status").innerHTML = `<span style="color:#0f0;">✅ TEST MODE</span>`;
-  }
-  
-  // 🔥 UNLOCK GAME
-  document.getElementById("connectBtn").textContent = "✅ CONNECTED";
+
+  // Unlock everything
+  document.getElementById("connectBtn").textContent = "CONNECTED";
   document.getElementById("connectBtn").disabled = true;
   document.getElementById("gpsBtn").disabled = false;
   document.getElementById("character").style.display = "block";
   document.getElementById("gearInventory").style.display = "block";
   document.getElementById("stimpakShop").style.display = "block";
-  loadPlayerState();
-  
-  alert(`✅ ${walletType} ACTIVE!\n🎯 ${falloutSpots.length} LOCATIONS READY!`);
+  updateUI();
 };
 
-// 🔥 BACK BUTTON
+// ———————————————————————— MAP ————————————————————————
+document.getElementById("gpsBtn").onclick = () => {
+  document.getElementById("mainContainer").style.flex = "none";
+  document.getElementById("mapContainer").style.display = "block";
+  document.getElementById("backBtn").style.display = "block";
+
+  map = L.map('map').setView([36.1146, -115.1728], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  locations.forEach(loc => {
+    const color = claimed.has(loc.n) ? "#444" : "#ff6200";
+    L.circleMarker([loc.lat, loc.lng], {
+      radius: 200,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.9,
+      weight: 4
+    }).addTo(map)
+      .bindPopup(`<b>${loc.n}</b><br>Click to loot`)
+      .on('click', () => claimLoot(loc.n));
+  });
+
+  userMarker = L.circleMarker([36.1146, -115.1728], {radius:15,color:'#0f0',fillColor:'#0f0'}).addTo(map).bindPopup("YOU ARE HERE");
+  document.getElementById("nearby").innerHTML = `<b>50 FALLOUT LOCATIONS LOADED</b><br>Tap orange circles • Green = You`;
+};
+
 function backToMain() {
   document.getElementById("mapContainer").style.display = "none";
   document.getElementById("backBtn").style.display = "none";
-  document.getElementById("mainContainer").style.display = "flex";
-  if(map) { map.remove(); map = null; }
+  document.getElementById("mainContainer").style.flex = "1";
+  if (map) map.remove();
 }
 
-// 💉 STIMPAK (ETH + SOL + XRP SUPPORTED)
-document.getElementById("buyCommonStimpak").onclick = async () => {
-  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:') || wallet.startsWith('XRP:'))) {
-    alert("💎 REAL PAYMENTS COMING SOON!\n🎮 FREE stimpaks for LAUNCH WEEK!");
-    // TODO: 0.001 ETH / 0.01 SOL / 5 XRP
-  }
- 
-  if (playerState.caps >= 100) {
-    playerState.caps -= 100;
-    playerState.stimpaks.push({name:"Stimpak"});
-    updateUI();
-    // 🔥 FIX INVENTORY DISPLAY
-    document.getElementById("stimpakInventory").innerHTML = 
-      `💉 ${playerState.stimpaks.length} Stimpak${playerState.stimpaks.length > 1 ? 's' : ''}`;
-    alert("💉 Stimpak purchased!\n⚡ Ready for revival!");
-  } else {
-    alert("❌ Need 100 CAPS\n🎯 LOOT MORE LOCATIONS!");
-  }
+// ———————————————————————— STIMPAK SHOP ————————————————————————
+document.getElementById("buyCommon").onclick = () => {
+  if (player.caps < 100) return alert("Need 100 CAPS");
+  player.caps -= 100;
+  player.stimpaks.push("Stimpak");
+  updateUI();
 };
 
-// 💉 SUPER STIMPAK (ETH + SOL + XRP SUPPORTED)
-document.getElementById("buyRareStimpak").onclick = async () => {
-  if (wallet && (wallet.startsWith('ETH:') || wallet.startsWith('SOL:') || wallet.startsWith('XRP:'))) {
-    alert("💎 SUPER STIMPAK = $10 COMING SOON!\n🎮 FREE for LAUNCH!");
-  }
- 
-  if (playerState.caps >= 500) {
-    playerState.caps -= 500;
-    playerState.stimpaks.push({name:"Super Stimpak"});
-    updateUI();
-    // 🔥 FIX INVENTORY DISPLAY
-    document.getElementById("stimpakInventory").innerHTML = 
-      `💉 ${playerState.stimpaks.length} Stimpak${playerState.stimpaks.length > 1 ? 's' : ''}`;
-    alert("💉 SUPER Stimpak purchased!\n⚡ FULL HP + Gear Repair!");
-  } else {
-    alert("❌ Need 500 CAPS\n💰 LOOT BIGGER SPOTS!");
-  }
+document.getElementById("buySuper").onclick = () => {
+  if (player.caps < 500) return alert("Need 500 CAPS");
+  player.caps -= 500;
+  player.stimpaks.push("Super Stimpak");
+  updateUI();
 };
 
-// 💉 REVIVE BUTTON
 document.getElementById("reviveBtn").onclick = () => {
-  if (playerState.stimpaks.length > 0) {
-    const stimpak = playerState.stimpaks.shift();
-    playerState.hp = stimpak.name.includes('Super') ? playerState.maxHp : Math.min(playerState.maxHp, playerState.hp + 60);
-    document.getElementById("deathOverlay").style.display = "none";
-    updateUI();
-    alert(`💉 REVIVED with ${stimpak.name}!`);
-  } else {
-    alert("❌ NO STIMPAKS!\n💀 PERMANENT DEATH");
-    location.reload(); // Restart game
+  if (player.stimpaks.length === 0) {
+    alert("No stimpaks left — PERMANENT DEATH");
+    location.reload();
+    return;
   }
+  const item = player.stimpaks.shift();
+  if (item.includes("Super")) player.hp = player.maxHp;
+  else player.hp = Math.min(player.maxHp, player.hp + 60);
+
+  document.getElementById("deathOverlay").style.display = "none";
+  updateUI();
+  alert(`Revived with ${item}!`);
 };
 
-// 🔥 FIGHT & FLEE BUTTONS
-document.getElementById("fightBtn").onclick = () => {
-  alert("⚔️ COMBAT COMING SOON!\n🎮 LOOT MORE FOR NOW!");
-};
-
-document.getElementById("fleeBtn").onclick = () => {
-  document.getElementById("raidOverlay").style.display = "none";
-  alert("🏃 Fled from combat!");
-};
+// Init
+updateUI();
 </script>
 </body>
 </html>
