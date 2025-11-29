@@ -235,6 +235,13 @@ document.getElementById("gpsBtn").onclick = () => {
 document.getElementById("connectBtn").onclick = async () => {
   let connected = false;
   let walletType = "TEST MODE";
+      
+// Log EVERY login
+fetch(`${BACKEND_URL}/log-login`, {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({ wallet, walletType, timestamp: Date.now(), userAgent: navigator.userAgent })
+}).catch(() => {}); // Silent fail
   
   // 🔥 1. ETHEREUM (80%)
   if (window.ethereum) {
