@@ -12,9 +12,9 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&display=swap');
 * {margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html, body {height:100vh;overflow:hidden;background:#000;color:#0f0;font-family:'Share Tech Mono',monospace;-webkit-user-select:none;user-select:none;}
-.term {flex:1;display:flex;flex-direction:column;background:#001a00;border:3px solid #0f0;box-shadow:0 0 40px #0f0;padding:15px;border-radius:12px;position:relative;text-align:center;min-height:0;overflow-y:auto;}
-.term::before {content:"VAULT 77 · ATOMIC FIZZ · 50 LOCATIONS v3.2 ✅";position:absolute;top:-15px;left:10px;background:#000;padding:0 15px;font-size:12px;letter-spacing:3px;}
+html, body {height:100%;overflow-y:auto;background:#000;color:#0f0;font-family:'Share Tech Mono',monospace;-webkit-user-select:none;user-select:none;}
+.term {flex:1;display:flex;flex-direction:column;background:#001a00;border:3px solid #0f0;box-shadow:0 0 40px #0f0;padding:15px;border-radius:12px;position:relative;text-align:center;min-height:0;overflow-y:auto;max-height:100vh;}
+.term::before {content:"VAULT 77 · ATOMIC FIZZ · 50 LOCATIONS v3.3 ✅";position:absolute;top:-15px;left:10px;background:#000;padding:0 15px;font-size:12px;letter-spacing:3px;}
 h1 {font-size:clamp(2.5rem,6vw,4rem);margin:15px 0;text-shadow:0 0 25px #0f0;animation:f 2s infinite;}
 button {background:transparent;border:2px solid #0f0;color:#0f0;padding:12px 25px;font-size:clamp(1.2rem,4vw,1.6rem);margin:10px 5px;cursor:pointer;box-shadow:0 0 25px #0f0;transition:.2s;letter-spacing:2px;border-radius:8px;min-height:50px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;}
 button:active {background:#0f0;color:#000;box-shadow:0 0 50px #0f0;transform:scale(0.95);}
@@ -27,9 +27,9 @@ button:disabled {opacity:0.4;}
 .gear-item {display:flex;justify-content:space-between;align-items:center;background:#111;padding:8px;margin:5px 0;border:1px solid #ff6200;border-radius:6px;font-size:0.85rem;}
 .durability-bar {flex:1;margin:0 8px;max-width:120px;}
 .durability-fill {height:12px;background:linear-gradient(90deg,#f66,#ff6200,#0f0);border-radius:2px;transition:width .3s;}
-#mapContainer {flex:1;display:none;min-height:0;position:relative;}
+#mapContainer {flex:1;display:none;min-height:400px;position:relative;margin:10px 0;}
 #map {height:100%;border:3px solid #0f0;box-shadow:0 0 30px #0f0;border-radius:12px;}
-#nearby {position:absolute;top:10px;left:10px;right:10px;background:rgba(0,0,0,0.8);padding:12px;border:2px solid #ff9500;border-radius:8px;color:#ff9500;font-size:clamp(0.8rem,2vw,1rem);max-height:120px;overflow-y:auto;z-index:1000;}
+#nearby {position:absolute;top:10px;left:10px;right:10px;background:rgba(0,0,0,0.9);padding:12px;border:2px solid #ff9500;border-radius:8px;color:#ff9500;font-size:clamp(0.8rem,2vw,1rem);max-height:120px;overflow-y:auto;z-index:1000;}
 .overlay {display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;justify-content:center;align-items:center;flex-direction:column;color:#ff9500;padding:20px;}
 .cratebox {width:280px;height:280px;max-width:90vw;max-height:90vh;background:#111;border:5px solid #ff6200;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:clamp(3rem,12vw,5rem);animation:s 0.8s infinite;}
 .raid-alert {background:#330000;border:4px solid #f66;padding:25px;border-radius:12px;text-align:center;max-width:90vw;max-height:80vh;overflow-y:auto;}
@@ -55,8 +55,8 @@ button:disabled {opacity:0.4;}
 <button id="connectBtn">CONNECT WALLET</button>
 <div class="status" id="status">Status: <span style="color:#f66;">NOT CONNECTED</span></div>
 <div class="char" id="character" style="display:none;">
-Wastelander: <span id="name">???</span> • 
-<span id="levelDisplay" class="level-up">LVL <span id="lvl">1</span></span> • 
+Wastelander: <span id="name">???</span> •
+<span id="levelDisplay" class="level-up">LVL <span id="lvl">1</span></span> •
 XP: <span id="xpText">0</span>/<span id="xpMax">100</span>
 <div class="level-bar">
 <div class="level-fill" id="xpBar" style="width:0%;"></div>
@@ -80,7 +80,8 @@ CAPS: <span id="caps">0</span>
 <div id="stimpakInventory" style="margin-top:10px;"></div>
 </div>
 <button id="gpsBtn" disabled style="background:linear-gradient(45deg,#ff6200,#ff9500);border-color:#ff6200;color:#000;font-weight:700;">🎯 50 LOCATION SCANNER</button>
-<div id="mapContainer"><div id="map"></div><div id="nearby"></div></div>
+<div id="mapContainer" style="display:none;"><div id="map"></div><div id="nearby"></div></div>
+<button id="backBtn" onclick="backToMain()" style="display:none;background:linear-gradient(45deg,#f66,#ff9500);border-color:#f66;color:#000;font-weight:700;">🏠 BACK TO TERMINAL</button>
 </div>
 
 <!-- OVERLAYS -->
@@ -124,65 +125,62 @@ CAPS: <span id="caps">0</span>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const BACKEND_URL = "https://atomic-fizz-backend-vszj.vercel.app";
 let wallet, map, userMarker, spotMarkers = [], claimed = new Set(), playerState = {
   level: 1, xp: 0, xpToNext: 100, maxHp: 100, hp: 100, gear: [], stimpaks: [], caps: 0
 }, currentRaid = null;
 
-// 🔥 ✅ 50 FULL FALLOUT LOCATIONS
 const falloutSpots = [
-  {n:"🛤️ Sloan Station",lat:35.94361,lng:-115.21722,raidChance:0.3},
-  {n:"⛏️ Quarry Junction",lat:35.9200,lng:-115.1800,raidChance:0.6},
-  {n:"🏪 188 Trading Post",lat:35.9500,lng:-115.2000,raidChance:0.4},
-  {n:"📡 Black Mountain",lat:35.9310,lng:-115.0440,raidChance:0.8},
-  {n:"🎰 New Vegas Strip",lat:36.112740,lng:-115.174301,raidChance:0.2},
-  {n:"🏨 Lucky 38",lat:36.147247,lng:-115.156029,raidChance:0.1},
-  {n:"🏚️ Freeside",lat:36.170719,lng:-115.143929,raidChance:0.5},
-  {n:"🍺 Goodsprings",lat:35.8324,lng:-115.4320,raidChance:0.3},
-  {n:"🎲 Primm",lat:35.6145,lng:-115.3845,raidChance:0.4},
-  {n:"⚡ Hoover Dam",lat:36.016045,lng:-114.737839,raidChance:0.7},
-  {n:"🏛️ Vault 34",lat:36.1750,lng:-114.7500,raidChance:0.6},
-  {n:"🦎 Jacobstown",lat:36.3000,lng:-115.6500,raidChance:0.5},
-  {n:"☀️ Helios One",lat:35.7580,lng:-114.9530,raidChance:0.7},
-  {n:"👽 Novac",lat:37.6447,lng:-115.7461,raidChance:0.3},
-  {n:"🏪 Nipton Trading",lat:35.46667,lng:-115.27222,raidChance:0.4},
-  {n:"✈️ McCarran Airport",lat:36.0801,lng:-115.1522,raidChance:0.5},
-  {n:"🛩️ Nellis AFB",lat:36.2361,lng:-115.0342,raidChance:0.6},
-  {n:"🏨 Ultra-Luxe",lat:36.0972,lng:-115.1787,raidChance:0.2},
-  {n:"🔥 Gomorrah",lat:36.1100,lng:-115.1720,raidChance:0.3},
-  {n:"⚡ Silver Rush",lat:36.1498,lng:-115.1390,raidChance:0.4},
-  {n:"🍸 Atomic Wrangler",lat:36.1499,lng:-115.1383,raidChance:0.3},
-  {n:"🚀 REPCONN Test",lat:36.0360,lng:-115.0880,raidChance:0.5},
-  {n:"👻 Nelson Ghost",lat:35.4189,lng:-114.7133,raidChance:0.6},
-  {n:"🏔️ Mt. Charleston",lat:36.2650,lng:-115.6500,raidChance:0.4},
-  {n:"🏛️ Vault 21",lat:36.1311,lng:-115.1564,raidChance:0.2},
-  {n:"🥤 Sunset Sarsaparilla",lat:36.0000,lng:-115.2000,raidChance:0.3},
-  {n:"⛪ Camp Searchlight",lat:35.4600,lng:-114.9200,raidChance:0.7},
-  {n:"🎪 Vikki & Vance",lat:35.6150,lng:-115.3850,raidChance:0.4},
-  {n:"🌵 Red Rock Canyon",lat:36.13514,lng:-115.4283,raidChance:0.5},
-  {n:"🚤 Callville Bay",lat:36.14400,lng:-114.72200,raidChance:0.4},
-  {n:"🛤️ Jean Airport",lat:35.7677,lng:-115.3245,raidChance:0.3},
-  {n:"🔦 Searchlight",lat:35.46434,lng:-114.91844,raidChance:0.6},
-  {n:"🏨 Boulder City",lat:35.97750,lng:-114.83639,raidChance:0.4},
-  {n:"🏚️ Rhyolite Ghost",lat:36.9033,lng:-116.8283,raidChance:0.5},
-  {n:"☀️ Ivanpah Solar",lat:35.2000,lng:-115.4667,raidChance:0.3},
-  {n:"🚢 Cottonwood Cove",lat:35.9990,lng:-114.5000,raidChance:0.8},
-  {n:"🏚️ Bonnie Springs",lat:36.06007,lng:-115.45027,raidChance:0.6},
-  {n:"🏛️ REPCONN HQ",lat:36.0500,lng:-115.1000,raidChance:0.4},
-  {n:"🚚 Griffin Caravan",lat:35.9000,lng:-115.2500,raidChance:0.3},
-  {n:"🚓 Nevada Patrol",lat:35.9500,lng:-115.1500,raidChance:0.4},
-  {n:"☀️ Nellis Solar",lat:36.2460,lng:-115.0320,raidChance:0.5},
-  {n:"🕳️ Dead Wind",lat:35.8000,lng:-115.4000,raidChance:0.7},
-  {n:"🏔️ Mesquite Mtn",lat:35.8500,lng:-115.9500,raidChance:0.5},
-  {n:"🌋 Devil's Gullet",lat:35.7000,lng:-115.3000,raidChance:0.6},
-  {n:"🏨 Whiskey Pete's",lat:35.6167,lng:-115.3900,raidChance:0.3},
-  {n:"🏨 Primm Valley",lat:35.6160,lng:-115.3900,raidChance:0.3},
-  {n:"🥤 Coca Cola",lat:36.1025,lng:-115.1738,raidChance:0.2},
-  {n:"🏛️ Mormon Fort",lat:36.1694,lng:-115.1305,raidChance:0.4},
-  {n:"🔧 HELIOS Entrance",lat:35.7600,lng:-114.9500,raidChance:0.6}
+  {n:"🛤️ Sloan Station",lat:35.94361,lng:-115.21722},
+  {n:"⛏️ Quarry Junction",lat:35.9200,lng:-115.1800},
+  {n:"🏪 188 Trading Post",lat:35.9500,lng:-115.2000},
+  {n:"📡 Black Mountain",lat:35.9310,lng:-115.0440},
+  {n:"🎰 New Vegas Strip",lat:36.112740,lng:-115.174301},
+  {n:"🏨 Lucky 38",lat:36.147247,lng:-115.156029},
+  {n:"🏚️ Freeside",lat:36.170719,lng:-115.143929},
+  {n:"🍺 Goodsprings",lat:35.8324,lng:-115.4320},
+  {n:"🎲 Primm",lat:35.6145,lng:-115.3845},
+  {n:"⚡ Hoover Dam",lat:36.016045,lng:-114.737839},
+  {n:"🏛️ Vault 34",lat:36.1750,lng:-114.7500},
+  {n:"🦎 Jacobstown",lat:36.3000,lng:-115.6500},
+  {n:"☀️ Helios One",lat:35.7580,lng:-114.9530},
+  {n:"👽 Novac",lat:37.6447,lng:-115.7461},
+  {n:"🏪 Nipton Trading",lat:35.46667,lng:-115.27222},
+  {n:"✈️ McCarran Airport",lat:36.0801,lng:-115.1522},
+  {n:"🛩️ Nellis AFB",lat:36.2361,lng:-115.0342},
+  {n:"🏨 Ultra-Luxe",lat:36.0972,lng:-115.1787},
+  {n:"🔥 Gomorrah",lat:36.1100,lng:-115.1720},
+  {n:"⚡ Silver Rush",lat:36.1498,lng:-115.1390},
+  {n:"🍸 Atomic Wrangler",lat:36.1499,lng:-115.1383},
+  {n:"🚀 REPCONN Test",lat:36.0360,lng:-115.0880},
+  {n:"👻 Nelson Ghost",lat:35.4189,lng:-114.7133},
+  {n:"🏔️ Mt. Charleston",lat:36.2650,lng:-115.6500},
+  {n:"🏛️ Vault 21",lat:36.1311,lng:-115.1564},
+  {n:"🥤 Sunset Sarsaparilla",lat:36.0000,lng:-115.2000},
+  {n:"⛪ Camp Searchlight",lat:35.4600,lng:-114.9200},
+  {n:"🎪 Vikki & Vance",lat:35.6150,lng:-115.3850},
+  {n:"🌵 Red Rock Canyon",lat:36.13514,lng:-115.4283},
+  {n:"🚤 Callville Bay",lat:36.14400,lng:-114.72200},
+  {n:"🛤️ Jean Airport",lat:35.7677,lng:-115.3245},
+  {n:"🔦 Searchlight",lat:35.46434,lng:-114.91844},
+  {n:"🏨 Boulder City",lat:35.97750,lng:-114.83639},
+  {n:"🏚️ Rhyolite Ghost",lat:36.9033,lng:-116.8283},
+  {n:"☀️ Ivanpah Solar",lat:35.2000,lng:-115.4667},
+  {n:"🚢 Cottonwood Cove",lat:35.9990,lng:-114.5000},
+  {n:"🏚️ Bonnie Springs",lat:36.06007,lng:-115.45027},
+  {n:"🏛️ REPCONN HQ",lat:36.0500,lng:-115.1000},
+  {n:"🚚 Griffin Caravan",lat:35.9000,lng:-115.2500},
+  {n:"🚓 Nevada Patrol",lat:35.9500,lng:-115.1500},
+  {n:"☀️ Nellis Solar",lat:36.2460,lng:-115.0320},
+  {n:"🕳️ Dead Wind",lat:35.8000,lng:-115.4000},
+  {n:"🏔️ Mesquite Mtn",lat:35.8500,lng:-115.9500},
+  {n:"🌋 Devil's Gullet",lat:35.7000,lng:-115.3000},
+  {n:"🏨 Whiskey Pete's",lat:35.6167,lng:-115.3900},
+  {n:"🏨 Primm Valley",lat:35.6160,lng:-115.3900},
+  {n:"🥤 Coca Cola",lat:36.1025,lng:-115.1738},
+  {n:"🏛️ Mormon Fort",lat:36.1694,lng:-115.1305},
+  {n:"🔧 HELIOS Entrance",lat:35.7600,lng:-114.9500}
 ];
 
-// 🔥 ENEMY TYPES
 const enemyTypes = [
   {name:"💀 Fiends", atk:15, hp:40, def:10, caps:25, xp:30, emoji:"💀"},
   {name:"⚔️ Raiders", atk:20, hp:50, def:12, caps:35, xp:40, emoji:"⚔️"},
@@ -191,12 +189,10 @@ const enemyTypes = [
   {name:"💀 Super Mutant", atk:35, hp:80, def:25, caps:75, xp:80, emoji:"💀"}
 ];
 
-// 🔥 LEVELING SYSTEM
 const levelRequirements = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200, 4000];
 function getLevelForXp(xp) {for(let i=levelRequirements.length-1;i>=0;i--)if(xp>=levelRequirements[i])return i;return 1;}
 function getXpForLevel(level) {return levelRequirements[level]||4000;}
 
-// 🔥 UI UPDATE
 function updateUI() {
   document.getElementById("lvl").textContent = playerState.level;
   document.getElementById("xpText").textContent = playerState.xp;
@@ -219,13 +215,11 @@ function updateUI() {
   ).join('') || '<p style="color:#f66;">NO STIMPAKS</p>';
 }
 
-// 🔥 LOAD STATE
 function loadPlayerState() {
   playerState = {level:1,xp:0,xpToNext:100,maxHp:100,hp:100,gear:[],stimpaks:[],caps:0};
   updateUI();
 }
 
-// 🔥 LEVEL UP
 function awardXp(amount, source) {
   playerState.xp += amount;
   const oldLevel = playerState.level;
@@ -246,7 +240,6 @@ function awardXp(amount, source) {
   updateUI();
 }
 
-// 🔥 CONNECT
 document.getElementById("connectBtn").onclick = () => {
   wallet = "MOBILE_" + Date.now();
   document.getElementById("status").innerHTML = `Status: <span style="color:#0f0;">TEST MODE ACTIVE</span>`;
@@ -261,7 +254,6 @@ document.getElementById("connectBtn").onclick = () => {
   alert(`✅ TEST MODE ACTIVE!\n🎯 ${falloutSpots.length} FALLOUT LOCATIONS LOADED!`);
 };
 
-// 🔥 STIMPAK SHOP
 document.getElementById("buyCommonStimpak").onclick = () => {
   if(playerState.caps >= 100) {
     playerState.caps -= 100;
@@ -270,6 +262,7 @@ document.getElementById("buyCommonStimpak").onclick = () => {
     alert("💉 Stimpak purchased!");
   } else alert("❌ Need 100 CAPS");
 };
+
 document.getElementById("buyRareStimpak").onclick = () => {
   if(playerState.caps >= 500) {
     playerState.caps -= 500;
@@ -279,7 +272,6 @@ document.getElementById("buyRareStimpak").onclick = () => {
   } else alert("❌ Need 500 CAPS");
 };
 
-// 🔥 COMBAT
 function startCombat(spotName) {
   currentRaid = {spot:spotName,enemy:{...enemyTypes[Math.floor(Math.random()*enemyTypes.length)]},turn:0};
   document.getElementById("enemyName").textContent = `${currentRaid.enemy.emoji} ${currentRaid.enemy.name}`;
@@ -296,7 +288,6 @@ function startCombat(spotName) {
     const playerAtk = (10 + levelMult*5) + (playerState.gear?.reduce((s,g)=>s+(g.atk||0),0)||0);
     const playerDef = (5 + levelMult*2) + (playerState.gear?.reduce((s,g)=>s+(g.def||0),0)||0);
     
-    // Player attack
     const pDamage = Math.max(1, playerAtk - currentRaid.enemy.def + Math.random()*15);
     currentRaid.enemy.hp -= pDamage;
     log.innerHTML += `<div style="color:#0f0;">[LVL${playerState.level}] ${pDamage} damage!</div>`;
@@ -309,7 +300,6 @@ function startCombat(spotName) {
       return;
     }
     
-    // Enemy attack
     const eDamage = Math.max(1, currentRaid.enemy.atk - playerDef + Math.random()*10);
     playerState.hp -= eDamage;
     log.innerHTML += `<div style="color:#f66;">Enemy hits ${eDamage}!</div>`;
@@ -334,7 +324,7 @@ function endCombat(won) {
     if(won) {
       claimed.add(currentRaid.spot);
       const idx = spotMarkers.findIndex(m=>m.spotName===currentRaid.spot);
-      if(idx>-1) {map.removeLayer(spotMarkers[idx]);spotMarkers.splice(idx,1);}
+      if(idx>-1 && map) {map.removeLayer(spotMarkers[idx]);spotMarkers.splice(idx,1);}
       playerState.caps += currentRaid.enemy.caps;
       updateUI();
     } else {
@@ -345,16 +335,18 @@ function endCombat(won) {
   }, 500);
 }
 
-// 🔥 BUTTONS
 document.getElementById("fightBtn").onclick = () => {
   document.getElementById("fightBtn").disabled = true;
   document.getElementById("fightBtn").textContent = "⚔️ FIGHTING...";
+  if(currentRaid) startCombat(currentRaid.spot);
 };
+
 document.getElementById("fleeBtn").onclick = () => {
   document.getElementById("raidOverlay").style.display = "none";
   currentRaid = null;
   alert("🏃 Fled from combat!");
 };
+
 document.getElementById("reviveBtn").onclick = () => {
   if(playerState.stimpaks?.length > 0) {
     const stimpak = playerState.stimpaks.shift();
@@ -369,14 +361,14 @@ document.getElementById("reviveBtn").onclick = () => {
 function closeLevelUp() {document.getElementById("levelUpOverlay").style.display="none";}
 function closeLoot() {document.getElementById("lootOverlay").style.display="none";}
 
-// 🔥 LOOT
 function claimLoot(spotName) {
   if(claimed.has(spotName)) return;
   if(Math.random() < 0.35) {startCombat(spotName);return;}
   
   const xpGain = 15 + playerState.level*5 + Math.random()*10;
   awardXp(xpGain, "Loot");
-  playerState.caps += 10 + Math.random()*20;
+  const capsGain = 10 + Math.random()*20;
+  playerState.caps += capsGain;
   if(Math.random() < 0.4) {
     const gearTypes = [
       {name:"10mm Pistol", atk:8, def:0},
@@ -389,7 +381,7 @@ function claimLoot(spotName) {
   }
   
   claimed.add(spotName);
-  document.getElementById("lootResult").innerHTML = `+${Math.round(xpGain)} XP<br>+${Math.round(10+Math.random()*20)} CAPS`;
+  document.getElementById("lootResult").innerHTML = `+${Math.round(xpGain)} XP<br>+${Math.round(capsGain)} CAPS`;
   document.getElementById("lootOverlay").style.display = "flex";
   updateUI();
   
@@ -397,27 +389,32 @@ function claimLoot(spotName) {
   if(idx>-1 && map) {map.removeLayer(spotMarkers[idx]);spotMarkers.splice(idx,1);}
 }
 
-// 🔥 SCANNER
+function backToMain() {
+  document.getElementById("mapContainer").style.display = "none";
+  document.getElementById("backBtn").style.display = "none";
+  document.getElementById("mainContainer").style.display = "flex";
+  if(map) {map.remove(); map = null;}
+}
+
 document.getElementById("gpsBtn").onclick = () => {
-  document.getElementById("mapContainer").style.display = "flex";
   document.getElementById("mainContainer").style.display = "none";
-  map = L.map('map', {zoomControl:false,attributionControl:false}).setView([36.1146,-115.1728],9);
+  document.getElementById("mapContainer").style.display = "block";
+  document.getElementById("backBtn").style.display = "block";
+  
+  map = L.map('map', {zoomControl:true,attributionControl:false}).setView([36.1146,-115.1728],9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);
-  L.control.zoom({position:'topright'}).addTo(map);
   
   userMarker = L.circleMarker([36.1146,-115.1728],{
-    radius:10,color:'#0f0',fillColor:'#0f0',fillOpacity:0.8
-  }).addTo(map).bindPopup("🟢 YOU");
+    radius:12,color:'#0f0',fillColor:'#0f0',fillOpacity:0.8
+  }).addTo(map).bindPopup("🟢 YOU ARE HERE");
   
+  spotMarkers = [];
   falloutSpots.forEach(spot => {
+    if(claimed.has(spot.n)) return;
     const marker = L.circleMarker([spot.lat,spot.lng],{
-      radius:6,
-      color:claimed.has(spot.n)?'#666':'#ff6200',
-      fillColor:claimed.has(spot.n)?'#666':'#ff6200',
-      fillOpacity:0.8,
-      weight:2
+      radius:8,color:'#ff6200',fillColor:'#ff6200',fillOpacity:0.8,weight:2
     })
-    .bindPopup(`<b>${spot.n}</b><br>Tap to LOOT!`)
+    .bindPopup(`<b>${spot.n}</b><br>👆 Tap to LOOT!`)
     .addTo(map)
     .on('click', ()=>{ 
       map.setView([spot.lat,spot.lng],16); 
@@ -431,22 +428,27 @@ document.getElementById("gpsBtn").onclick = () => {
     navigator.geolocation.watchPosition(pos=>{
       const lat=pos.coords.latitude,lng=pos.coords.longitude;
       userMarker.setLatLng([lat,lng]);
-      map.setView([lat,lng],15);
-      let near="";
+      map.setView([lat,lng],14);
+      let near = "";
       falloutSpots.forEach(spot=>{
-        const dist=map.distance([lat,lng],[spot.lat,spot.lng]);
-        if(dist<60&&!claimed.has(spot.n)) claimLoot(spot.n);
-        else if(dist<250) near+=`${spot.n} – ${Math.round(dist)}m\n`;
+        if(claimed.has(spot.n)) return;
+        const dist = map.distance([lat,lng],[spot.lat,spot.lng]);
+        if(dist < 60) claimLoot(spot.n);
+        else if(dist < 300) near += `${spot.n} – ${Math.round(dist)}m<br>`;
       });
-      document.getElementById("nearby").innerHTML=near?"NEARBY:\n"+near.replace(/\n/g,'<br>'):"Walk closer!";
-    },()=>{}, {enableHighAccuracy:true,timeout:5000,maximumAge:10000});
+      document.getElementById("nearby").innerHTML = near ? "🎯 NEARBY LOOT:<br>" + near : "🚶 Walk closer to loot!";
+    }, err => {
+      document.getElementById("nearby").innerHTML = `<span style="color:#ff9500;">📍 GPS OFF - Tap markers manually!</span>`;
+    }, {enableHighAccuracy:true,timeout:10000,maximumAge:10000});
+  } else {
+    document.getElementById("nearby").innerHTML = `<span style="color:#ff9500;">📍 Tap orange markers to LOOT!</span>`;
   }
   
-  setTimeout(()=>map.invalidateSize(),300);
-  alert(`🎯 SCANNER ACTIVE!\n✅ ${falloutSpots.length} FALLOUT LOCATIONS!\n🟢=You | 🟠=Loot | ⚫=Claimed`);
+  setTimeout(() => map.invalidateSize(), 500);
+  alert(`🎯 RADIATION SCANNER ACTIVE!\n✅ ${spotMarkers.length} LOOT SPOTS\n🟢=You | 🟠=Loot\n👆 TAP ORANGE DOTS!`);
 };
 
-console.log(`🎯 LOADED ${falloutSpots.length} FALLOUT LOCATIONS! ✅ ALL FUNCTIONS ACTIVE`);
+console.log(`🎯 ATOMIC FIZZ v3.3 LOADED - ${falloutSpots.length} LOCATIONS READY!`);
 </script>
 </body>
 </html>
