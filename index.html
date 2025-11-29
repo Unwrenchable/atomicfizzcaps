@@ -15,7 +15,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;background:#000;color:#0f0;font-family:'Share Tech Mono',monospace;}
 .term{display:flex;flex-direction:column;height:100%;background:#001a00;border:4px solid #0f0;box-shadow:0 0 50px #0f0;padding:12px;position:relative;}
-.term::before{content:"VAULT 777 · ATOMIC FIZZ v5.3 · 50 LOCATIONS LIVE";position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:#000;padding:0 20px;font-size:13px;letter-spacing:5px;}
+.term::before{content:"ATOMIC FIZZ";position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:#000;padding:0 20px;font-size:13px;letter-spacing:5px;}
 h1{font-size:clamp(3rem,9vw,6rem);text-shadow:0 0 40px #0f0;animation:f 2s infinite;}
 button{background:transparent;border:3px solid #0f0;color:#0f0;padding:16px;font-size:1.6rem;margin:10px;border-radius:12px;box-shadow:0 0 30px #0f0;transition:.3s;letter-spacing:3px;cursor:pointer;}
 button:hover{box-shadow:0 0 50px #0f0;}
@@ -33,14 +33,14 @@ button:disabled{opacity:0.3;cursor:not-allowed;box-shadow:none;}
 
 <div class="term" id="main">
   <h1>ATOMIC FIZZ</h1>
-  <p style="font-size:1.8rem;margin:10px;">50 REAL LOCATIONS • REAL GPS • ON-CHAIN CAPS</p>
+  <p style="font-size:1.8rem;margin:10px;">50 LOCATIONS ROAM THE WASTELAND COLLECT CAPS</p>
   <button id="connectBtn">CONNECT WALLET</button>
   <div id="status" style="margin:20px;font-size:1.5rem;">Status: <span style="color:#f66;">NOT CONNECTED</span></div>
   <div style="background:#003300;padding:15px;margin:15px 0;border-left:5px solid #0f0;border-radius:10px;">
     LVL <span id="lvl">1</span> • HP <span id="hp">100/100</span> • CAPS <span id="caps">0</span>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-    <button id="scannerBtn" disabled>REAL GPS SCANNER</button>
+    <button id="scannerBtn" disabled>GPS SCANNER</button>
     <button id="inventoryBtn" disabled>INVENTORY</button>
   </div>
 </div>
@@ -66,7 +66,7 @@ let provider = null;
 let userAddress = "";
 const PROXIMITY = 120;
 
-// 50 REAL LOCATIONS
+// 50 LOCATIONS
 const locations = [{n:"Goodsprings (Pioneer Saloon)",lat:35.8324,lng:-115.4320},{n:"Primm (Buffalo Bill's)",lat:35.6145,lng:-115.3845},{n:"Nipton Trading Post",lat:35.46667,lng:-115.27222},{n:"Boulder City Hotel",lat:35.97750,lng:-114.83639},{n:"Hoover Dam",lat:36.016045,lng:-114.737839},{n:"Lucky 38 (The Strat)",lat:36.147247,lng:-115.156029},{n:"New Vegas Strip (Bellagio)",lat:36.112740,lng:-115.174301},{n:"Freeside (Fremont St)",lat:36.170719,lng:-115.143929},{n:"Red Rock Canyon",lat:36.13514,lng:-115.4283},{n:"Bonnie Springs Ranch",lat:36.06007,lng:-115.45027},{n:"Callville Bay Marina",lat:36.14400,lng:-114.72200},{n:"Black Mountain",lat:35.9310,lng:-115.0440},{n:"Sloan Station",lat:35.94361,lng:-115.21722},{n:"Jean Airport",lat:35.7677,lng:-115.3245},{n:"Searchlight",lat:35.46434,lng:-114.91844},{n:"McCarran Airport",lat:36.0801,lng:-115.1522},{n:"Nellis AFB",lat:36.2361,lng:-115.0342},{n:"Helios One (Nevada Solar One)",lat:35.7580,lng:-114.9530},{n:"Old Mormon Fort",lat:36.1694,lng:-115.1305},{n:"Ultra-Luxe (Caesars Palace)",lat:36.0972,lng:-115.1787},{n:"Gomorrah (Dunes site)",lat:36.1100,lng:-115.1720},{n:"Silver Rush (Golden Nugget)",lat:36.1498,lng:-115.1390},{n:"Atomic Wrangler (Vegas Vic)",lat:36.1499,lng:-115.1383},{n:"Repconn Test Site (Pepcon)",lat:36.0360,lng:-115.0880},{n:"Novac (Little A'Le'Inn)",lat:37.6447,lng:-115.7461},{n:"Nelson Ghost Town",lat:35.4189,lng:-114.7133},{n:"Rhyolite Ghost Town",lat:36.9033,lng:-116.8283},{n:"Mt. Charleston",lat:36.2650,lng:-115.6500},{n:"Luxor Pyramid",lat:36.0965,lng:-115.1769},{n:"Whiskey Pete's",lat:35.6167,lng:-115.3900},{n:"Primm Valley Resort",lat:35.6160,lng:-115.3900},{n:"Westgate (Vault 21)",lat:36.1311,lng:-115.1564},{n:"Coca Cola Store",lat:36.1025,lng:-115.1738},{n:"Nellis Solar Array",lat:36.2460,lng:-115.0320},{n:"Ivanpah Solar",lat:35.2000,lng:-115.4667},{n:"Cottonwood Cove",lat:35.9990,lng:-114.5000},{n:"Vault 34 (Lake Mead)",lat:36.1750,lng:-114.7500},{n:"Jacobstown",lat:36.3000,lng:-115.6500},{n:"Dead Wind Cavern",lat:35.8000,lng:-115.4000},{n:"REPCONN Headquarters",lat:36.0500,lng:-115.1000},{n:"188 Trading Post",lat:35.9500,lng:-115.2000},{n:"Griffin Wares Caravan",lat:35.9000,lng:-115.2500},{n:"Nevada Highway Patrol",lat:35.9500,lng:-115.1500},{n:"Sunset Sarsaparilla HQ",lat:36.0000,lng:-115.2000},{n:"HELIOS One Entrance",lat:35.7600,lng:-114.9500},{n:"Camp Searchlight Church",lat:35.4600,lng:-114.9200},{n:"Quarry Junction",lat:35.9200,lng:-115.1800},{n:"Vikki & Vance Museum",lat:35.6150,lng:-115.3850},{n:"Mesquite Mountains",lat:35.8500,lng:-115.9500},{n:"Devil's Gullet",lat:35.7000,lng:-115.3000}];
 
 const gearTable = ["10mm Pistol","Hunting Rifle","Combat Armor","Power Fist","Plasma Grenade","T-51b Power Armor","Fat Man","Alien Blaster","Super Stimpak"];
