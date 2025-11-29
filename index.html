@@ -344,11 +344,6 @@ document.getElementById("fleeBtn").onclick = () => {
   alert("🏃 Fled from combat!");
 };
 
-document.getElementById("raidOverlay").style.display = "none";
-  currentRaid = null;
-  alert("🏃 Fled from combat!");
-};
-
 document.getElementById("reviveBtn").onclick = () => {
   if(playerState.stimpaks?.length > 0) {
     const stimpak = playerState.stimpaks.shift();
@@ -398,7 +393,7 @@ function backToMain() {
   if(map) {map.remove(); map = null;}
 }
 
-document.getElementById("gpsBtn").onclick = () => {
+  document.getElementById("gpsBtn").onclick = () => {
   document.getElementById("mainContainer").style.display = "none";
   document.getElementById("mapContainer").style.display = "block";
   document.getElementById("backBtn").style.display = "block";
