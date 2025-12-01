@@ -5,18 +5,16 @@
 <title>PIP-BOY 3000 Mk IV • ATOMIC FIZZ CAPS • VAULT 77</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <style>
-/* (your amazing Pip-Boy CSS stays 100% unchanged – only removed one tiny duplicate) */
 * {margin:0;padding:0;box-sizing:border-box}
 html,body {height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;font-weight:bold;text-shadow:0 0 5px #00ff00}
 body {background:radial-gradient(circle at center,#001100,#000);position:relative}
-.crt::before {content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.03) 0px,transparent 1px,transparent 2px);pointer-events:none;animation:scanline 8s linear infinite}
-.crt::after {content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg,transparent 0%,rgba(0,0,0,0.3) 50%,transparent 100%);pointer-events:none}
-@keyframes scanline {0%{transform:translateY(0)}100%{transform:translateY(2px)}}
-.pipboy {position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(145deg,#111,#000);box-shadow:0 0 100px #00ff00,0 0 200px #00aa00,inset 0 0 150px rgba(0,0,0,0.9);padding:10px;z-index:10}
+.crt::before {content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.03) 0px,transparent 1px,transparent 2px);pointer-events:none;animation:scan 8s linear infinite}
+.crt::after {content:"";position:fixed;inset:0;background:linear-gradient(0deg,transparent 0%,rgba(0,0,0,0.3) 50%,transparent 100%);pointer-events:none}
+@keyframes scan {0%{transform:translateY(0)}100%{transform:translateY(2px)}}
+.pipboy {position:fixed;inset:0;background:linear-gradient(145deg,#111,#000);box-shadow:0 0 100px #00ff00,0 0 200px #00aa00,inset 0 0 150px rgba(0,0,0,0.9);padding:10px}
 .pip-screen {position:absolute;inset:10px;background:#000;overflow-y:auto;box-shadow:inset 0 0 60px #002200,0 0 60px rgba(0,255,0,0.6);padding:15px}
-.pip-screen{overflow-y:scroll;-ms-overflow-style:none;scrollbar-width:none}
-.pip-screen::-webkit-scrollbar{display:none}
-h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background:linear-gradient(90deg,#00ff00,#44ff44,#00ff00);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 20px #00ff00,0 0 40px #00ff00;animation:glow 2s ease-in-out infinite}
+.pip-screen{overflow-y:scroll;-ms-overflow-style:none;scrollbar-width:none} .pip-screen::-webkit-scrollbar{display:none}
+h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background:linear-gradient(90deg,#00ff00,#44ff44,#00ff00);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 20px #00ff00;animation:glow 2s ease-in-out infinite}
 @keyframes glow{0%,100%{text-shadow:0 0 20px #00ff00}50%{text-shadow:0 0 40px #00ff00,0 0 80px #00ff00}}
 .statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin:10px 0}
 .stat{background:#000;border:2px double #00aa00;padding:6px;text-align:center;border-radius:6px;box-shadow:0 0 10px rgba(0,255,0,0.4),inset 0 0 8px #000}
@@ -24,7 +22,7 @@ h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background
 .quest,.settlelog{background:rgba(0,20,0,0.8);border:2px double #00aa00;padding:10px;margin:10px 0;border-radius:8px;box-shadow:0 0 15px rgba(0,255,0,0.3),inset 0 0 15px #000}
 .mint-grid{text-align:center;margin:20px 0}
 .btn{background:#000;color:#00ff00;border:3px double #00aa00;padding:10px 20px;margin:6px;border-radius:20px;cursor:pointer;font-weight:bold;text-shadow:0 0 4px #00ff00;transition:.2s}
-.btn:hover{background:rgba(0,255,0,0.2);box-shadow:0 0 25px #00ff00;transform:translateY(-2px)}
+.btn-F:hover,.btn:active{background:rgba(0,255,0,0.2);box-shadow:0 0 25px #00ff00;transform:translateY(-2px)}
 #map{height:300px;border:4px double #00aa00;border-radius:10px;margin:15px 0;box-shadow:0 0 25px #00ff00;background:#000}
 .tabs{display:flex;justify-content:center;gap:8px;margin:15px 0;flex-wrap:wrap}
 .tab{background:rgba(0,0,0,0.7);border:2px double #00aa00;padding:8px 16px;border-radius:18px;cursor:pointer;text-shadow:0 0 2px #00ff00;transition:.2s}
@@ -33,11 +31,8 @@ h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background
 .item{background:rgba(0,0,0,0.8);border:2px solid #00aa00;padding:12px;border-radius:6px;cursor:pointer;transition:.3s;box-shadow:0 0 8px rgba(0,255,0,0.3)}
 .item:hover{transform:translateY(-4px);box-shadow:0 0 30px #00ff00;border-color:#ffff00;background:rgba(0,255,0,0.08)}
 .rar{padding:4px 10px;border-radius:12px;font-size:0.8rem;margin-top:6px;display:inline-block}
-.legendary{background:#ffff00;color:#000;animation:pulse 1.5s infinite}
-.epic{background:#ff6600;color:#000}
-.rare{background:#00ffff;color:#000}
-.common{background:#006600}
-@keyframes pulse{0%,100%{box-shadow:0 0 10px #ffff00}50%{box-shadow:0 0 25px #ffff00}}
+.legendary{background:#ffff00;color:#000;animation:pulse 1.5s infinite}@keyframes pulse{0%,100%{box-shadow:0 0 10px #ffff00}50%{box-shadow:0 0 25px #ffff00}}
+.epic{background:#ff6600;color:#000}.rare{background:#00ffff;color:#000}.common{background:#006600}
 @media(max-width:768px){#map{height:240px}.btn{padding:8px 14px;font-size:0.9rem}}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -45,7 +40,7 @@ h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background
 </head>
 <body class="crt">
 <div class="pipboy">
-  <div class="pip-screen" id="pip-content">
+  <div class="pip-screen">
     <h1>PIP-BOY 3000 Mk IV</h1>
     <p style="text-align:center;letter-spacing:3px;margin-bottom:15px">ATOMIC FIZZ CAPS • VAULT 77 • FULL MOJAVE</p>
     
@@ -59,15 +54,15 @@ h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background
     </div>
 
     <div class="quest"><strong>>> MAIN QUEST</strong><br><span id="maintitle">Awaken in Goodsprings</span></div>
-    <div class="settlelog"><strong>>> SIDE QUESTS & SETTLEMENTS</strong><br><span id="sidelog">No active side quests yet.</span></div>
+    <div class="settlelog"><strong>>> SIDE QUESTS & SETTLEMENTS</strong><br><span id="sidelog">Walk the wasteland. Collect caps.</span></div>
 
     <div class="mint-grid">
       <button class="btn" onclick="connectWallet()">CONNECT WALLET</button>
       <button class="btn" onclick="mint(1)">MINT 1 CAP</button>
       <button class="btn" onclick="mint(5)">MINT 5 CAPS</button>
       <button class="btn" onclick="mint(10)">MINT 10 CAPS</button>
-      <button class="btn" onclick="alert('Coming soon – Weapon NFTs')">MINT WEAPON (SOON)</button>
-      <button class="btn" onclick="alert('Coming soon – Armor NFTs')">MINT ARMOR (SOON)</button>
+      <button class="btn" onclick="alert('Weapon NFTs coming soon')">MINT WEAPON</button>
+      <button class="btn" onclick="alert('Armor NFTs coming soon')">MINT ARMOR</button>
     </div>
 
     <div id="map"></div>
@@ -93,58 +88,72 @@ h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
-// ====================== GAME DATA ======================
-const MAIN_QUEST = ["Awaken in Goodsprings","Talk to Trudy","Find the Holotape","Rescue Deputy Beagle","Clear Bison Steve Hotel","Retrieve Fizz Formula (Vault 22)","Meet Benny at The Tops","Infiltrate Lucky 38","Steal the Platinum Chip","Upgrade Securitrons with Fizz Tech","Defend Hoover Dam","Discover Hidden Valley","Locate Vault 77 Entrance","Descend into Vault 77","DRINK THE ORIGINAL ATOMIC FIZZ → ASCEND"];
-const SIDE_QUESTS = ["Clear Quarry Junction (+800 XP)","Help Boone avenge his wife","Collect 50 Star Caps","Build Sanctuary","Build Red Rocket","Build Starlight Drive-In","Build Tenpenny Tower","Recruit 20 settlers","Defend settlement from raid","Establish trade route","Become the Fizz God"];
+// ====================== GAME STATE ======================
+const MAIN_QUEST = ["Awaken in Goodsprings","Talk to Trudy","Find the Holotape","Rescue Deputy Beagle","Clear Bison Steve Hotel","Retrieve Fizz Formula (Vault 22)","Meet Benny at The Tops","Infiltrate Lucky 38","Steal the Platinum Chip","Upgrade Securitrons","Defend Hoover Dam","Discover Hidden Valley","Locate Vault 77","Descend into Vault 77","DRINK THE ORIGINAL ATOMIC FIZZ → ASCEND"];
+const SIDE_QUESTS = ["Clear Quarry Junction (+800 XP)","Help Boone avenge his wife","Collect 50 Star Caps","Build Sanctuary","Build Red Rocket","Build Starlight Drive-In","Build Tenpenny Tower","Recruit 20 settlers","Defend settlement","Establish trade route","Become the Fizz God"];
 
-let main = 0, side = [], settle = 0, lvl = 1, xp = 0, minted = 0, user = null, sound = true;
+let main=0, side=[], settle=0, lvl=1, xp=0, minted=0, user=null, sound=true, walletAddress=null;
 
-// Fixed spots with proper rarity
+// ====================== SPOTS (with rarity) ======================
 const spots = [
   {n:"Goodsprings Saloon",lat:35.8324,lng:-115.4320,lvl:1,rads:5,rarity:"common"},
   {n:"Primm Bison Steve",lat:35.6145,lng:-115.3845,lvl:2,rads:10,rarity:"common"},
-  {n:"Hoover Dam",lat:36.016045,lng:-114.737839,lvl:12,rads:25,rarity:"rare"},
-  {n:"Lucky 38 Casino",lat:36.147247,lng:-115.156029,lvl:10,rads:12,rarity:"epic"},
-  {n:"Black Mountain",lat:35.9310,lng:-115.0440,lvl:15,rads:80,rarity:"rare"},
-  {n:"Area 51",lat:37.2431,lng:-115.7930,lvl:45,rads:600,rarity:"legendary"},
-  {n:"Chernobyl Pripyat",lat:51.389,lng:30.099,lvl:60,rads:3000,rarity:"legendary"},
-  {n:"Fukushima Daiichi",lat:37.421,lng:141.032,lvl:65,rads:5000,rarity:"legendary"},
-  // ... (keep all your other spots – just add rarity:"common" to most)
-].concat([
-  // Add the rest of your 350+ spots here with rarity:"common"/"rare"/"epic"/"legendary"
-  // For brevity I only fixed a few – you can copy-paste the rest and add rarity
-]);
-
-// Simple settlements (you can expand)
+  {n:"Hoover Dam",lat:36.016,lng:-114.738,lvl:12,rads:25,rarity:"rare"},
+  {n:"Lucky 38",lat:36.147,lng:-115.156,lvl:10,rads:12,rarity:"epic"},
+  {n:"Area 51",lat:37.243,lng:-115.793,lvl:45,rads:600,rarity:"legendary"},
+  {n:"Chernobyl",lat:51.389,lng:30.099,lvl:60,rads:3000,rarity:"legendary"},
+  {n:"Fukushima",lat:37.421,lng:141.032,lvl:65,rads:5000,rarity:"legendary"},
+  {n:"Vault 77 (Secret)",lat:36.17,lng:-115.14,lvl:99,rads:999,rarity:"legendary"}
+  // Add the rest of your 350+ spots here later – they’ll work automatically
+];
 const settlements = [
-  {name:"Goodsprings Outpost", lat:35.8324, lng:-115.4320, built:false},
-  {name:"Primm Rollercoaster Base", lat:35.6145, lng:-115.3845, built:false},
-  {name:"Novac Motel Fortress", lat:37.6447, lng:-115.7461, built:false},
-  {name:"Strip Penthouse", lat:36.112740, lng:-115.174301, built:false}
+  {name:"Goodsprings Outpost",lat:35.8324,lng:-115.4320,built:false},
+  {name:"Primm Base",lat:35.6145,lng:-115.3845,built:false},
+  {name:"Novac Fortress",lat:37.6447,lng:-115.7461,built:false}
 ];
 
 // ====================== MAP ======================
 const map = L.map('map').setView([36.1699, -115.1398], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap'
-}).addTo(map);
-
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
 const cluster = L.markerClusterGroup();
-spots.forEach(s => {
-  const color = s.rarity === "legendary" ? "#ffff00" : s.rarity === "epic" ? "#ff6600" : s.rarity === "rare" ? "#00ffff" : "#00ff00";
-  const marker = L.circleMarker([s.lat, s.lng], {
-    radius: s.rarity === "legendary" ? 16 : 10,
-    color: "#000",
-    weight: 2,
-    fillColor: color,
-    fillOpacity: 0.9
-  }).bindPopup(`<b style="color:#00ff00">${s.n}</b><br>Level ${s.lvl} • ${s.rads} rads<br><span style="color:${color}">${(s.rarity||"common").toUpperCase()}</span>`);
-  cluster.addLayer(marker);
+spots.forEach(s=>{
+  const col = s.rarity==="legendary"?"#ffff00":s.rarity==="epic"?"#ff6600":s.rarity==="rare"?"#00ffff":"#00ff00";
+  L.circleMarker([s.lat,s.lng],{radius:s.rarity==="legendary"?16:10,color:"#000",weight:2,fillColor:col,fillOpacity:0.9})
+   .bindPopup(`<b style="color:#0f0">${s.n}</b><br>Lvl ${s.lvl} • ${s.rads} rads<br><span style="color:${col}">${s.rarity.toUpperCase()}</span>`)
+   .addTo(cluster);
 });
 map.addLayer(cluster);
 
-// ====================== CORE FUNCTIONS ======================
+// ====================== WALLET (OFFLINE + REAL READY) ======================
+async function connectWallet() {
+  playSound('vats');
+  // DEV / OFFLINE MODE
+  if (!window.solana && !window.ethereum) {
+    walletAddress = "F1ZZdev"+Math.random().toString(36).slice(2,8).toUpperCase();
+    alert(`DEV WALLET CONNECTED ✓\n${walletAddress}\nYou can now mint!`);
+    document.querySelector('button[onclick="connectWallet()"]').textContent = "DEV WALLET ✓";
+    update(); render();
+    return;
+  }
+  // Real Phantom
+  if (window.solana?.isPhantom) {
+    try { const resp = await window.solana.connect(); walletAddress = resp.publicKey.toString();
+      alert(`Phantom connected!\n${walletAddress.slice(0,10)}...`); 
+      document.querySelector('button[onclick="connectWallet()"]').textContent = "PHANTOM ✓";
+    } catch(e) { alert("Cancelled"); }
+  }
+  // Real MetaMask / EVM
+  else if (window.ethereum) {
+    try { const accs = await window.ethereum.request({method:'eth_requestAccounts'});
+      walletAddress = accs[0];
+      alert(`MetaMask connected!\n${walletAddress.slice(0,10)}...`);
+      document.querySelector('button[onclick="connectWallet()"]').textContent = "METAMASK ✓";
+    } catch(e) { alert("Cancelled"); }
+  }
+  update();
+}
+
+// ====================== CORE ======================
 function playSound(id){ if(sound) document.getElementById(id).play().catch(()=>{}); }
 function update(){
   document.getElementById('lvl').textContent = lvl;
@@ -153,87 +162,62 @@ function update(){
   document.getElementById('side').textContent = side.length+"/12";
   document.getElementById('settle').textContent = settle;
   document.getElementById('minted').textContent = minted;
-  document.getElementById('maintitle').textContent = MAIN_QUEST[main] || "ASCENDED – FIZZ GOD";
+  document.getElementById('maintitle').textContent = MAIN_QUEST[main] || "FIZZ GOD ASCENDED";
 }
-function haversine(lat1,lon1,lat2,lon2){
-  const R=6371;
-  const dLat=(lat2-lat1)*Math.PI/180;
-  const dLon=(lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+function haversine(a1,b1,a2,b2){
+  const R=6371, x=Math.PI/180, d=a2-a1,x1=d*x, d=b2-b1,x2=d*x;
+  const a=Math.sin(x1/2)**2 + Math.cos(a1*x)*Math.cos(a2*x)*Math.sin(x2/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
-
 function render(){
   const tab = document.querySelector('.tab.active').dataset.tab;
   let list = [];
-
-  if(tab==="quest"){
-    list = MAIN_QUEST.map((q,i)=>({title:q, done:i<main}));
-    list = list.concat(SIDE_QUESTS.map((q,i)=>({title:q, done:side.includes(i)})));
-  }
+  if(tab==="quest") list = MAIN_QUEST.map((q,i)=>({title:q,done:i<main})).concat(SIDE_QUESTS.map((q,i)=>({title:q,done:side.includes(i)})));
   else if(tab==="settle") list = settlements;
-  else if(tab==="near" && user){
-    list = spots.map(s=>({...s, dist:haversine(user.lat,user.lng,s.lat,s.lng)}))
-               .sort((a,b)=>a.dist-b.dist).slice(0,30);
-  }
+  else if(tab==="near" && user) list = spots.map(s=>({...s,dist:haversine(user.lat,user.lng,s.lat,s.lng)})).sort((a,b)=>a.dist-b.dist).slice(0,30);
   else if(tab==="leg") list = spots.filter(s=>s.rarity==="legendary");
   else list = spots;
-
   document.getElementById('grid').innerHTML = list.map(i=>`
-    <div class="item" onclick="${i.built!==undefined ? `build(${settlements.indexOf(i)})` : `map.setView([${i.lat||i.lat},${i.lng||i.lng}],16);playSound('vats')`}">
+    <div class="item" onclick="${i.built!==undefined?`build(${settlements.indexOf(i)})`:`map.setView([${i.lat},${i.lng}],16);playSound('vats')`}">
       <div style="font-size:1.4rem;color:#ff0">${i.n||i.name||i.title}</div>
-      <div>${i.dist? i.dist.toFixed(1)+"km • " : ""}Lvl ${i.lvl||""} • ${i.rads||""} rads</div>
+      <div>${i.dist? i.dist.toFixed(1)+"km • ":""}Lvl ${i.lvl||""} • ${i.rads||""} rads</div>
       ${i.rarity?`<span class="rar ${i.rarity}">${i.rarity.toUpperCase()}</span>`:""}
-      ${i.done?"<span style='color:#ff0'> [COMPLETE]</span>":""}
-      ${i.built?"<span style='color:#0f0'> [BUILT]</span>":""}
+      ${i.done?'<span style="color:#ff0"> [COMPLETE]</span>':""}
+      ${i.built?'<span style="color:#0f0"> [BUILT]</span>':""}
     </div>`).join('');
 }
-
-// ====================== GAME LOGIC ======================
 function build(idx){
   if(settlements[idx].built) return;
-  if(settle >= lvl+2) return alert("Level up to build more outposts!");
-  settlements[idx].built = true;
-  settle++; xp += 500; lvl = Math.floor(xp/100)+1;
-  playSound('build');
-  update(); render();
+  if(settle >= lvl+3) return alert("Level up first!");
+  settlements[idx].built=true; settle++; xp+=500; lvl=Math.floor(xp/100)+1;
+  playSound('build'); update(); render();
 }
-
 function mint(n){
-  if(!user) return alert("Connect wallet first, wanderer!");
-  minted += n; xp += n*150; lvl = Math.floor(xp/100)+1;
+  if(!walletAddress) return alert("Connect wallet first!");
+  minted+=n; xp+=n*200; lvl=Math.floor(xp/100)+1;
   playSound('vats');
-  alert(`MINTED ${n} ATOMIC FIZZ CAP${n>1?"S":""}! +${n*150} XP`);
+  alert(`MINTED ${n} ATOMIC FIZZ CAP${n>1?"S":""}!\n+${n*200} XP\nWallet: ${walletAddress.slice(0,12)}...`);
   update(); render();
 }
 
-function connectWallet(){
-  alert("Wallet connection coming soon!\nFor now you can mint & play offline.");
-  playSound('vats');
-}
-
-// GPS checking (every 10 sec)
+// GPS auto-progress
 setInterval(()=>{
   if(!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos=>{
-    user = {lat:pos.coords.latitude, lng:pos.coords.longitude};
-    const nearMain = spots.find(s=>haversine(user.lat,user.lng,s.lat,s.lng)<0.5);
-    if(nearMain && main < MAIN_QUEST.length && spots.indexOf(nearMain) === main){
-      main++; xp += 800; lvl = Math.floor(xp/100)+1;
+  navigator.geolocation.getCurrentPosition(p=>{
+    user = {lat:p.coords.latitude,lng:p.coords.longitude};
+    const near = spots[main];
+    if(near && haversine(user.lat,user.lng,near.lat,near.lng)<0.5){
+      main++; xp+=800; lvl=Math.floor(xp/100)+1;
       playSound('vats');
-      alert(`QUEST ADVANCED!\n${MAIN_QUEST[main-1]}\n+800 XP`);
+      alert(`QUEST COMPLETE!\n${MAIN_QUEST[main-1]}\n+800 XP`);
       update(); render();
     }
     if(document.querySelector('.tab.active').dataset.tab==="near") render();
   });
 },10000);
 
-// Tabs + Sound
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  render();
-});
+// Tabs & sound
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); render();});
 document.getElementById('soundbtn').onclick=()=>{sound=!sound; document.getElementById('soundbtn').textContent=sound?"SOUND ON":"SOUND OFF";};
 document.body.onclick=e=>playSound('click');
 
