@@ -22,7 +22,7 @@ h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background
 .quest,.settlelog{background:rgba(0,20,0,0.8);border:2px double #00aa00;padding:10px;margin:10px 0;border-radius:8px;box-shadow:0 0 15px rgba(0,255,0,0.3),inset 0 0 15px #000}
 .mint-grid{text-align:center;margin:20px 0}
 .btn{background:#000;color:#00ff00;border:3px double #00aa00;padding:10px 20px;margin:6px;border-radius:20px;cursor:pointer;font-weight:bold;text-shadow:0 0 4px #00ff00;transition:.2s}
-.btn-F:hover,.btn:active{background:rgba(0,255,0,0.2);box-shadow:0 0 25px #00ff00;transform:translateY(-2px)}
+.btn:hover,.btn:active{background:rgba(0,255,0,0.2);box-shadow:0 0 25px #00ff00;transform:translateY(-2px)}
 #map{height:300px;border:4px double #00aa00;border-radius:10px;margin:15px 0;box-shadow:0 0 25px #00ff00;background:#000}
 .tabs{display:flex;justify-content:center;gap:8px;margin:15px 0;flex-wrap:wrap}
 .tab{background:rgba(0,0,0,0.7);border:2px double #00aa00;padding:8px 16px;border-radius:18px;cursor:pointer;text-shadow:0 0 2px #00ff00;transition:.2s}
@@ -48,7 +48,7 @@ h1{font-size:2.2rem;text-align:center;margin:8px 0;letter-spacing:4px;background
       <div class="stat"><div class="val" id="lvl">1</div><div>LEVEL</div></div>
       <div class="stat"><div class="val" id="xp">0/100</div><div>XP</div></div>
       <div class="stat"><div class="val" id="main">0/15</div><div>MAIN</div></div>
-      <div class="stat"><div class="val" id="side">0/12</div><div>SIDE</div></div>
+      <div class="stat"><div class="val" id="side">0/11</div><div>SIDE</div></div>
       <div class="stat"><div class="val" id="settle">0</div><div>OUTPOSTS</div></div>
       <div class="stat"><div class="val" id="minted">0</div><div>MINTED</div></div>
     </div>
@@ -94,27 +94,33 @@ const SIDE_QUESTS = ["Clear Quarry Junction (+800 XP)","Help Boone avenge his wi
 
 let main=0, side=[], settle=0, lvl=1, xp=0, minted=0, user=null, sound=true, walletAddress=null;
 
-// ====================== SPOTS (with rarity) ======================
+// ====================== SPOTS ======================
 const spots = [
   {n:"Goodsprings Saloon",lat:35.8324,lng:-115.4320,lvl:1,rads:5,rarity:"common"},
   {n:"Primm Bison Steve",lat:35.6145,lng:-115.3845,lvl:2,rads:10,rarity:"common"},
+  {n:"Novac",lat:36.6447,lng:-115.7461,lvl:4,rads:8,rarity:"common"},
+  {n:"Boulder City",lat:35.9786,lng:-114.8325,lvl:6,rads:15,rarity:"rare"},
   {n:"Hoover Dam",lat:36.016,lng:-114.738,lvl:12,rads:25,rarity:"rare"},
   {n:"Lucky 38",lat:36.147,lng:-115.156,lvl:10,rads:12,rarity:"epic"},
+  {n:"The Strip",lat:36.1147,lng:-115.1728,lvl:15,rads:20,rarity:"epic"},
+  {n:"Vault 22",lat:36.42,lng:-114.30,lvl:18,rads:80,rarity:"epic"},
   {n:"Area 51",lat:37.243,lng:-115.793,lvl:45,rads:600,rarity:"legendary"},
   {n:"Chernobyl",lat:51.389,lng:30.099,lvl:60,rads:3000,rarity:"legendary"},
   {n:"Fukushima",lat:37.421,lng:141.032,lvl:65,rads:5000,rarity:"legendary"},
   {n:"Vault 77 (Secret)",lat:36.17,lng:-115.14,lvl:99,rads:999,rarity:"legendary"}
-  // Add the rest of your 350+ spots here later – they’ll work automatically
 ];
+
 const settlements = [
   {name:"Goodsprings Outpost",lat:35.8324,lng:-115.4320,built:false},
   {name:"Primm Base",lat:35.6145,lng:-115.3845,built:false},
-  {name:"Novac Fortress",lat:37.6447,lng:-115.7461,built:false}
+  {name:"Novac Fortress",lat:36.6447,lng:-115.7461,built:false},
+  {name:"Nipton Outpost",lat:35.4808,lng:-114.9822,built:false},
+  {name:"Red Rock Canyon",lat:36.297,lng:-115.643,built:false}
 ];
 
 // ====================== MAP ======================
 const map = L.map('map').setView([36.1699, -115.1398], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
 const cluster = L.markerClusterGroup();
 spots.forEach(s=>{
   const col = s.rarity==="legendary"?"#ffff00":s.rarity==="epic"?"#ff6600":s.rarity==="rare"?"#00ffff":"#00ff00";
@@ -124,30 +130,26 @@ spots.forEach(s=>{
 });
 map.addLayer(cluster);
 
-// ====================== WALLET (OFFLINE + REAL READY) ======================
+// ====================== WALLET ======================
 async function connectWallet() {
   playSound('vats');
-  // DEV / OFFLINE MODE
   if (!window.solana && !window.ethereum) {
     walletAddress = "F1ZZdev"+Math.random().toString(36).slice(2,8).toUpperCase();
-    alert(`DEV WALLET CONNECTED ✓\n${walletAddress}\nYou can now mint!`);
-    document.querySelector('button[onclick="connectWallet()"]').textContent = "DEV WALLET ✓";
+    alert(`DEV WALLET CONNECTED\n${walletAddress}\nYou can now mint!`);
+    document.querySelector('button[onclick="connectWallet()"]').textContent = "DEV WALLET";
     update(); render();
     return;
   }
-  // Real Phantom
   if (window.solana?.isPhantom) {
     try { const resp = await window.solana.connect(); walletAddress = resp.publicKey.toString();
-      alert(`Phantom connected!\n${walletAddress.slice(0,10)}...`); 
-      document.querySelector('button[onclick="connectWallet()"]').textContent = "PHANTOM ✓";
+      alert(`Phantom connected!\n${walletAddress.slice(0,10)}...`);
+      document.querySelector('button[onclick="connectWallet()"]').textContent = "PHANTOM";
     } catch(e) { alert("Cancelled"); }
-  }
-  // Real MetaMask / EVM
-  else if (window.ethereum) {
+  } else if (window.ethereum) {
     try { const accs = await window.ethereum.request({method:'eth_requestAccounts'});
       walletAddress = accs[0];
       alert(`MetaMask connected!\n${walletAddress.slice(0,10)}...`);
-      document.querySelector('button[onclick="connectWallet()"]').textContent = "METAMASK ✓";
+      document.querySelector('button[onclick="connectWallet()"]').textContent = "METAMASK";
     } catch(e) { alert("Cancelled"); }
   }
   update();
@@ -158,68 +160,82 @@ function playSound(id){ if(sound) document.getElementById(id).play().catch(()=>{
 function update(){
   document.getElementById('lvl').textContent = lvl;
   document.getElementById('xp').textContent = (xp%100)+"/100";
-  document.getElementById('main').textContent = main+"/15";
-  document.getElementById('side').textContent = side.length+"/12";
+  document.getElementById('main').textContent = main+"/"+MAIN_QUEST.length;
+  document.getElementById('side').textContent = side.length+"/"+SIDE_QUESTS.length;
   document.getElementById('settle').textContent = settle;
   document.getElementById('minted').textContent = minted;
   document.getElementById('maintitle').textContent = MAIN_QUEST[main] || "FIZZ GOD ASCENDED";
 }
 function haversine(a1,b1,a2,b2){
-  const R=6371, x=Math.PI/180, d=a2-a1,x1=d*x, d=b2-b1,x2=d*x;
-  const a=Math.sin(x1/2)**2 + Math.cos(a1*x)*Math.cos(a2*x)*Math.sin(x2/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  const R=6371, x=Math.PI/180;
+  const dLat = (a2-a1)*x, dLon = (b2-b1)*x;
+  const a = Math.sin(dLat/2)**2 + Math.cos(a1*x) * Math.cos(a2*x) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 function render(){
-  const tab = document.querySelector('.tab.active').dataset.tab;
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
   let list = [];
-  if(tab==="quest") list = MAIN_QUEST.map((q,i)=>({title:q,done:i<main})).concat(SIDE_QUESTS.map((q,i)=>({title:q,done:side.includes(i)})));
-  else if(tab==="settle") list = settlements;
-  else if(tab==="near" && user) list = spots.map(s=>({...s,dist:haversine(user.lat,user.lng,s.lat,s.lng)})).sort((a,b)=>a.dist-b.dist).slice(0,30);
-  else if(tab==="leg") list = spots.filter(s=>s.rarity==="legendary");
+
+  if(activeTab === "quest"){
+    MAIN_QUEST.forEach((q,i)=>list.push({title:q, done:i<main, isMain:true}));
+    SIDE_QUESTS.forEach((q,i)=>list.push({title:q, done:side.includes(i)}));
+  }
+  else if(activeTab === "settle") list = settlements;
+  else if(activeTab === "near" && user){
+    list = spots.map(s=>({...s, dist:haversine(user.lat,user.lng,s.lat,s.lng)})).sort((a,b)=>a.dist-b.dist).slice(0,30);
+  }
+  else if(activeTab === "leg") list = spots.filter(s=>s.rarity==="legendary");
   else list = spots;
+
   document.getElementById('grid').innerHTML = list.map(i=>`
-    <div class="item" onclick="${i.built!==undefined?`build(${settlements.indexOf(i)})`:`map.setView([${i.lat},${i.lng}],16);playSound('vats')`}">
-      <div style="font-size:1.4rem;color:#ff0">${i.n||i.name||i.title}</div>
-      <div>${i.dist? i.dist.toFixed(1)+"km • ":""}Lvl ${i.lvl||""} • ${i.rads||""} rads</div>
-      ${i.rarity?`<span class="rar ${i.rarity}">${i.rarity.toUpperCase()}</span>`:""}
-      ${i.done?'<span style="color:#ff0"> [COMPLETE]</span>':""}
-      ${i.built?'<span style="color:#0f0"> [BUILT]</span>':""}
+    <div class="item" ${i.lat!==undefined ? `onclick="map.setView([${i.lat},${i.lng}],16);playSound('vats')"` : (i.built===false ? `onclick="build(${settlements.indexOf(i)})"` : '')}>
+      <div style="font-size:1.4rem;color:#ff0">${i.n || i.name || i.title}</div>
+      ${i.dist!==undefined ? `<div>${i.dist.toFixed(1)} km away</div>` : ''}
+      ${i.lvl ? `<div>Lvl ${i.lvl} • ${i.rads||0} rads</div>` : ''}
+      ${i.rarity ? `<span class="rar ${i.rarity}">${i.rarity.toUpperCase()}</span>` : ''}
+      ${i.done ? '<span style="color:#ff0"> [COMPLETE]</span>' : ''}
+      ${i.built ? '<span style="color:#0f0"> [BUILT]</span>' : i.built===false ? '<span style="color:#aaa"> [READY TO BUILD]</span>' : ''}
     </div>`).join('');
 }
 function build(idx){
   if(settlements[idx].built) return;
-  if(settle >= lvl+3) return alert("Level up first!");
-  settlements[idx].built=true; settle++; xp+=500; lvl=Math.floor(xp/100)+1;
+  if(settle >= lvl + 3){ alert("Max settlements for your level! Level up first."); return; }
+  settlements[idx].built = true; settle++; xp += 500; lvl = Math.floor(xp/100) + 1;
   playSound('build'); update(); render();
 }
 function mint(n){
-  if(!walletAddress) return alert("Connect wallet first!");
-  minted+=n; xp+=n*200; lvl=Math.floor(xp/100)+1;
+  if(!walletAddress){ alert("Connect wallet first!"); return; }
+  minted += n; xp += n * 200; lvl = Math.floor(xp/100) + 1;
   playSound('vats');
   alert(`MINTED ${n} ATOMIC FIZZ CAP${n>1?"S":""}!\n+${n*200} XP\nWallet: ${walletAddress.slice(0,12)}...`);
   update(); render();
 }
 
-// GPS auto-progress
+// ====================== GPS AUTO-PROGRESS ======================
 setInterval(()=>{
   if(!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(p=>{
-    user = {lat:p.coords.latitude,lng:p.coords.longitude};
-    const near = spots[main];
-    if(near && haversine(user.lat,user.lng,near.lat,near.lng)<0.5){
-      main++; xp+=800; lvl=Math.floor(xp/100)+1;
-      playSound('vats');
-      alert(`QUEST COMPLETE!\n${MAIN_QUEST[main-1]}\n+800 XP`);
-      update(); render();
+  navigator.geolocation.getCurrentPosition(pos=>{
+    user = {lat:pos.coords.latitude, lng:pos.coords.longitude};
+    if(main < spots.length){
+      const target = spots[main];
+      const dist = haversine(user.lat,user.lng,target.lat,target.lng);
+      if(dist < 0.5){
+        main++; xp += 800; lvl = Math.floor(xp/100) + 1;
+        playSound('vats');
+        alert(`MAIN QUEST COMPLETE!\n${MAIN_QUEST[main-1]}\n+800 XP`);
+        update(); render();
+      }
     }
     if(document.querySelector('.tab.active').dataset.tab==="near") render();
   });
-},10000);
+}, 10000);
 
-// Tabs & sound
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); render();});
-document.getElementById('soundbtn').onclick=()=>{sound=!sound; document.getElementById('soundbtn').textContent=sound?"SOUND ON":"SOUND OFF";};
-document.body.onclick=e=>playSound('click');
+// ====================== UI ======================
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick = ()=>{ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); };
+});
+document.getElementById('soundbtn').onclick = ()=>{ sound = !sound; document.getElementById('soundbtn').textContent = sound ? "SOUND ON" : "SOUND OFF"; };
+document.body.onclick = e=> { if(e.target.tagName !== "BUTTON") playSound('click'); };
 
 update(); render();
 </script>
