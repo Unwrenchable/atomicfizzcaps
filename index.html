@@ -5,105 +5,75 @@
 <title>PIP-BOY 3000 Mk IV • ATOMIC FIZZ CAPS • VAULT 77</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <style>
-/* Authentic Pip-Boy 3000 Mk IV Style - Monochrome Green CRT, Courier-like font, scanlines, glow, retro-futuristic wasteland vibes */
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;font-weight:bold;text-shadow:0 0 5px #00ff00}
-body{background:radial-gradient(circle at center,#001100,#000);position:relative}
-
-/* Heavy CRT Scanlines & Phosphor Glow */
-.crt::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.03) 0px,transparent 1px,transparent 2px);pointer-events:none;animation:scanline 0.1s linear infinite}
-.crt::after{content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg,transparent 0%,rgba(0,0,0,0.3) 50%,transparent 100%);pointer-events:none;animation:phosphor 3s ease-in-out infinite}
-@keyframes scanline{0%{background-position:0 0}100%{background-position:0 2px}}
-@keyframes phosphor{0%,100%{opacity:1}50%{opacity:0.8}}
-
-/* Pip-Boy Casing - Die-cast metal look, screws, bezel, Fallout 3/NV authentic */
-.pipboy{position:fixed;top:10%;left:50%;transform:translateX(-50%);width:90vw;max-width:800px;height:70vh;border:50px solid #0a3008;border-image:linear-gradient(45deg,#0f0 0%,#004400 25%,#002200 50%,#004400 75%,#0f0 100%) 40;border-radius:80px/120px;overflow:hidden;background:linear-gradient(145deg,#111,#000);box-shadow:0 0 100px #00ff00,0 0 200px #00aa00,inset 0 0 150px rgba(0,0,0,0.9),inset 0 0 50px #001100;padding:20px;z-index:10}
-
-/* Screen Bezel & Reflection */
-.screen-bezel{position:relative;width:100%;height:100%;background:linear-gradient(145deg,#1a1a1a 0%,#000 50%,#111 100%);border:8px solid #003300;border-radius:60px/100px;box-shadow:inset 0 0 80px rgba(0,255,0,0.1),inset 0 0 40px #000;}
-
-/* Inner Screen - Pure Monochrome Green */
-.pip-screen{position:absolute;top:15%;left:15%;right:15%;bottom:15%;background:#000;border:4px inset #00aa00;border-radius:40px;overflow:hidden;box-shadow:inset 0 0 60px #002200,0 0 60px rgba(0,255,0,0.6);padding:20px;overflow-y:auto}
-
-/* Title - Glowing Header */
-h1{font-size:2.8rem;text-align:center;margin:10px 0;letter-spacing:6px;background:linear-gradient(90deg,#00ff00,#44ff44,#00ff00);background-clip:text;-webkit-background-clip:text;color:transparent;text-shadow:0 0 20px #00ff00,0 0 40px #00ff00,0 0 60px #00aa00;animation:glow 2s ease-in-out infinite}
-@keyframes glow{0%,100%{text-shadow:0 0 20px #00ff00,0 0 40px #00ff00}50%{text-shadow:0 0 40px #00ff00,0 0 80px #00ff00,0 0 120px #00aa00}}
-
-/* Stats Bar - Pip-Boy Grid */
-.statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:15px 0}
-.stat{background:#000;border:3px double #00aa00;padding:8px;text-align:center;border-radius:8px;box-shadow:0 0 15px rgba(0,255,0,0.4),inset 0 0 10px #000}
-.val{font-size:2rem;color:#ffff00;text-shadow:0 0 10px #ffff00;font-weight:900}
-
-/* Quest Boxes - Inset Panels */
-.quest,.settlelog{background:rgba(0,20,0,0.8);border:3px double #00aa00;padding:15px;margin:15px 0;border-radius:10px;box-shadow:0 0 20px rgba(0,255,0,0.3),inset 0 0 20px #000}
-
-/* Mint Buttons - Retro Buttons */
-.mint-grid{text-align:center;margin:15px 0}
-.btn{background:#000;color:#00ff00;border:4px double #00aa00;padding:12px 24px;margin:5px;border-radius:25px;cursor:pointer;font-size:1.1rem;font-weight:bold;text-shadow:0 0 5px #00ff00;transition:all 0.2s}
-.btn:hover,.btn:active{background:rgba(0,255,0,0.1);color:#000;box-shadow:0 0 30px #00ff00;text-shadow:none;transform:translateY(-2px)}
-
-/* Map - Embedded with green overlay */
-#map{height:400px;border:5px double #00aa00;border-radius:12px;margin:15px 0;box-shadow:0 0 30px #00ff00;background:#000;filter:sepia(0.2) hue-rotate(90deg) saturate(2)}
-
-/* Tabs - Horizontal Bottom Nav like Pip-Boy */
-.tabs{position:absolute;bottom:40px;left:20px;right:20px;display:flex;justify-content:center;gap:8px}
-.tab{background:rgba(0,0,0,0.7);border:3px double #00aa00;padding:10px 18px;border-radius:20px;cursor:pointer;font-weight:bold;text-shadow:0 0 3px #00ff00;transition:0.2s}
-.tab.active,.tab:hover{background:#00aa00;color:#000;box-shadow:0 0 20px #00ff00}
-
-/* Grid Items - List Entries */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;padding:10px}
-.item{background:rgba(0,0,0,0.8);border:2px solid #00aa00;padding:12px;border-radius:8px;cursor:pointer;transition:0.3s;box-shadow:0 0 10px rgba(0,255,0,0.2)}
-.item:hover{transform:translateY(-3px);box-shadow:0 0 30px #00ff00;border-color:#ffff00;background:rgba(0,255,0,0.05)}
-.rar{padding:4px 10px;border-radius:15px;font-size:0.9rem;margin-top:5px;display:inline-block}
-.legendary{background:#ffff00;color:#000;animation:pulse 1.5s infinite;box-shadow:0 0 15px #ffff00}
-.epic{background:#ff6600;color:#000;box-shadow:0 0 10px #ff6600}
-.rare{background:#00aa00;color:#000}
-.common{background:#006600}
-
-/* Sound Toggle */
-.sound{position:absolute;bottom:10px;right:20px;background:#000;border:3px double #00aa00;padding:8px 16px;cursor:pointer;border-radius:20px}
-
-/* Responsive & Mobile Wasteland Walk */
-@media (max-width:768px){.pipboy{top:5%;width:95vw;height:90vh;border-width:30px;padding:10px;font-size:0.9rem}}
+body{background:radial-gradient(circle at center,#001100,#000)}
+.crt::before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.03) 0px,transparent 1px,transparent 2px);pointer-events:none;animation:s 0.1s linear infinite}
+.crt::after{content:"";position:fixed;inset:0;background:linear-gradient(0deg,transparent 0%,rgba(0,0,0,0.3) 50%,transparent 100%);pointer-events:none;animation:p 3s ease-in-out infinite}
+@keyframes s{0%{background-position:0 0}100%{background-position:0 2px}}
+@keyframes p{0%,100%{opacity:1}50%{opacity:0.8}}
+.pipboy{position:fixed;top:5%;left:50%;transform:translateX(-50%);width:95vw;max-width:900px;height:90vh;border:40px solid #0a3008;border-image:linear-gradient(45deg,#0f0,#004400,#002200,#004400,#0f0) 40;border-radius:80px;overflow:hidden;background:#000;box-shadow:0 0 120px #00ff00,0 0 240px #00aa00,inset 0 0 100px #000}
+.pip-screen{position:absolute;inset:10%;background:#000;border:6px inset #00aa00;border-radius:40px;overflow:hidden;box-shadow:inset 0 0 80px #002200,0 0 80px rgba(0,255,0,0.6);padding:20px}
+h1{font-size:3rem;text-align:center;letter-spacing:8px;background:linear-gradient(90deg,#0f0,#44ff44,#0f0);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 30px #0f0;animation:g 2s infinite}
+@keyframes g{0%,100%{text-shadow:0 0 30px #0f0}50%{text-shadow:0 0 80px #0f0,0 0 120px #0f0}}
+.statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:20px 0}
+.stat{background:#000;border:3px double #00aa00;padding:10px;text-align:center;border-radius:8px;box-shadow:0 0 15px rgba(0,255,0,0.5)}
+.val{font-size:2.2rem;color:#ffff00;text-shadow:0 0 12px #ffff00}
+.quest,.settlelog{background:rgba(0,30,0,0.8);border:4px double #00aa00;padding:15px;margin:15px 0;border-radius:10px;box-shadow:0 0 20px rgba(0,255,0,0.4)}
+.btn{background:#000;color:#0f0;border:4px double #0f0;padding:12px 30px;margin:8px;border-radius:30px;cursor:pointer;font-size:1.3rem;transition:0.3s}
+.btn:hover{background:#0f0;color:#000;box-shadow:0 0 40px #0f0;transform:scale(1.05)}
+#map{height:380px;border:5px double #0f0;border-radius:12px;margin:20px 0;box-shadow:0 0 40px #0f0;filter:hue-rotate(90deg) saturate(2)}
+.tabs{position:absolute;bottom:15px;left:50%;transform:translateX(-50%);display:flex;gap:12px}
+.tab{background:rgba(0,0,0,0.8);border:3px double #0f0;padding:10px 20px;border-radius:25px;cursor:pointer}
+.tab.active,.tab:hover{background:#0f0;color:#000;box-shadow:0 0 25px #0f0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:20px}
+.item{background:rgba(0,0,0,0.9);border:2px solid #0f0;padding:12px;border-radius:8px;cursor:pointer;transition:0.3s}
+.item:hover{transform:translateY(-5px);border-color:#ff0;box-shadow:0 0 30px #0f0;background:rgba(0,255,0,0.1)}
+.rar{padding:5px 12px;border-radius:15px;font-weight:bold}
+.legendary{background:#ff0;color:#000;animation:pulse 1.5s infinite}
+.epic{background:#f60;color:#000}
+.rare{background:#0f0;color:#000}
+.common{background:#040}
+@keyframes pulse{0%,100%{box-shadow:0 0 10px #ff0}50%{box-shadow:0 0 30px #ff0}}
+.sound{position:absolute;bottom:15px;right:20px;background:#000;border:3px double #0f0;padding:8px 16px;border-radius:20px;cursor:pointer}
+@media (max-width:768px){.pipboy{border-width:25px;height:95vh}}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
 </head>
 <body class="crt">
 <div class="pipboy">
-  <div class="screen-bezel">
-    <div class="pip-screen" id="pip-content">
-      <h1>PIP-BOY 3000 Mk IV</h1>
-      <p style="text-align:center;letter-spacing:3px;font-size:1.1rem;margin-bottom:15px">ATOMIC FIZZ CAPS • VAULT 77 • FULL MOJAVE</p>
+  <div class="pip-screen">
+    <h1>ATOMIC FIZZ CAPS</h1>
+    <p style="text-align:center;letter-spacing:4px;margin-bottom:15px">VAULT 77 • FULL MOJAVE • GEO-NFT WASTELAND</p>
 
-      <div class="statbar">
-        <div class="stat"><div class="val" id="lvl">1</div><div>LEVEL</div></div>
-        <div class="stat"><div class="val" id="xp">0/100</div><div>XP</div></div>
-        <div class="stat"><div class="val" id="main">0/15</div><div>MAIN</div></div>
-        <div class="stat"><div class="val" id="side">0/12</div><div>SIDE</div></div>
-        <div class="stat"><div class="val" id="settle">0</div><div>OUTPOSTS</div></div>
-        <div class="stat"><div class="val" id="minted">0</div><div>MINTED</div></div>
-      </div>
-
-      <div class="quest"><strong>>> MAIN QUEST</strong><br><span id="maintitle">The Fizz Eternal</span><br><span id="maindesc">A signal from Vault 77 calls you to the Mojave...</span></div>
-      <div class="settlelog"><strong>>> SIDE QUESTS & SETTLEMENTS</strong><br><span id="sidelog">No active side quests. Walk the wasteland, collect caps!</span></div>
-
-      <div class="mint-grid">
-        <button class="btn" onclick="mint(1)">MINT 1</button>
-        <button class="btn" onclick="mint(5)">MINT 5</button>
-        <button class="btn" onclick="mint(10)">MINT 10</button>
-      </div>
-
-      <div id="map"></div>
-
-      <div class="tabs">
-        <button class="tab active" data-tab="quest">QUEST</button>
-        <button class="tab" data-tab="settle">SETTLE</button>
-        <button class="tab" data-tab="near">NEARBY</button>
-        <button class="tab" data-tab="leg">LEGENDARY</button>
-        <button class="tab" data-tab="all">ALL 350+</button>
-      </div>
+    <div class="statbar">
+      <div class="stat"><div class="val" id="lvl">1</div><div>LEVEL</div></div>
+      <div class="stat"><div class="val" id="xp">0/100</div><div>XP</div></div>
+      <div class="stat"><div class="val" id="main">0/15</div><div>MAIN</div></div>
+      <div class="stat"><div class="val" id="side">0/12</div><div>SIDE</div></div>
+      <div class="stat"><div class="val" id="settle">0</div><div>OUTPOSTS</div></div>
+      <div class="stat"><div class="val" id="minted">0</div><div>MINTED</div></div>
     </div>
+
+    <div class="quest"><strong>>> MAIN QUEST</strong><br><span id="maintitle">The Fizz Eternal</span></div>
+    <div class="settlelog"><strong>>> LOG</strong><br><span id="sidelog">Walk the wasteland — collect caps — mint NFTs</span></div>
+
+    <div style="text-align:center;margin:20px 0">
+      <button class="btn" onclick="mint(1)">MINT 1 CAP</button>
+      <button class="btn" onclick="mint(5)">MINT 5 CAPS</button>
+      <button class="btn" onclick="mint(10)">MINT 10 CAPS</button>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="quest">QUEST</button>
+      <button class="tab" data-tab="near">NEARBY</button>
+      <button class="tab" data-tab="leg">LEGENDARY</button>
+      <button class="tab" data-tab="all">ALL 350+</button>
+    </div>
+
     <div class="grid" id="grid"></div>
     <div class="sound" id="soundbtn">SOUND ON</div>
   </div>
@@ -116,15 +86,12 @@ h1{font-size:2.8rem;text-align:center;margin:10px 0;letter-spacing:6px;backgroun
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script>
-// Wasteland Geo NFT Game - Walk, Collect Caps, Trade, Multi-Chain Vibes - 100% Pip-Boy Authentic
-// Spots data unchanged - 350+ real Fallout locations
-const MAIN_QUEST=["Awaken in Goodsprings","Talk to Trudy","Find the Holotape","Rescue Deputy Beagle","Clear Bison Steve Hotel","Retrieve Fizz Formula (Vault 22)","Meet Benny at The Tops","Infiltrate Lucky 38","Steal the Platinum Chip","Upgrade Securitrons with Fizz Tech","Defend Hoover Dam","Discover Hidden Valley","Locate Vault 77 Entrance","Descend into Vault 77","DRINK THE ORIGINAL ATOMIC FIZZ → ASCEND"];
-const SIDE_QUESTS=["Clear Quarry Junction of Deathclaws (+800 XP)","Help Boone avenge his wife (Novac)","Find missing Crimson Caravan (+600 XP)","Collect 50 Sunset Sarsaparilla Star Caps","Build Sanctuary at Goodsprings","Build Red Rocket Station (Primm)","Build Starlight Drive-In (Novac)","Build Tenpenny Tower (The Strip)","Recruit 20 settlers","Defend your settlement from Super Mutant raid","Establish trade route (+1000 caps/day)","Become the Fizz God (Complete everything)"];
+// ==================== DATA ====================
+const MAIN_QUEST = ["Awaken in Goodsprings","Talk to Trudy","Find the Holotape","Rescue Deputy Beagle","Clear Bison Steve Hotel","Retrieve Fizz Formula (Vault 22)","Meet Benny at The Tops","Infiltrate Lucky 38","Steal the Platinum Chip","Upgrade Securitrons","Defend Hoover Dam","Discover Hidden Valley","Locate Vault 77 Entrance","Descend into Vault 77","DRINK THE ORIGINAL ATOMIC FIZZ → ASCEND"];
 
-let main=0,side=[],settle=0,lvl=1,xp=0,minted=0,user=null,sound=true;
+let main=0,lvl=1,xp=0,minted=0,user=null,sound=true;
 
-// Spots array unchanged (too long, assume same as original)
-const spots=[// LEGENDARY (25) - Vault 77 & Iconic
+const spots = [// LEGENDARY (25) - Vault 77 & Iconic
             { name: "Vault 77", location: "Atomic Fizz Origin - Under Vegas", lat: 36.1147, lng: -115.1728, rarity: "legendary" },
             { name: "Nuka-Cola Factory", location: "Fizz Source Plant", lat: 36.1699, lng: -115.1398, rarity: "legendary" },
             { name: "Lucky 38 Penthouse", location: "Mr. House Throne", lat: 36.1178, lng: -115.1750, rarity: "legendary" },
@@ -268,76 +235,93 @@ const spots=[// LEGENDARY (25) - Vault 77 & Iconic
             { name: "Cerulean Logistics", location: "Freeside", lat: 36.1667, lng: -115.1333, rarity: "common" },
             { name: "New Vegas Clinic", location: "Freeside", lat: 36.1667, lng: -115.1333, rarity: "common" },
             { name: "Mick & Ralph's", location: "Freeside", lat: 36.1667, lng: -115.1333, rarity: "common" },
-        ];
+            
+];
 
-const settlements=[ /* unchanged */ ];
+while(spots.length < 350){
+  spots.push({
+    name:`Fizz Cache #${spots.length}`,
+    location:"Mojave Wasteland",
+    lat:35.5 + Math.random()*3,
+    lng:-116.5 + Math.random()*5,
+    rarity: spots.length<30?"legendary":spots.length<100?"epic":spots.length<200?"rare":"common"
+  });
+}
 
-// Map with green tint
-let map=L.map('map').setView([36.1699,-115.1398],9);
-L.tileLayer('https://raw.githubusercontent.com/FalloutMaps/Project/master/tiles/{z}/{x}/{y}.png',{maxZoom:5,minZoom:3,tms:true,attribution:'&copy; Fallout Wasteland'}).addTo(map);
-let cluster=L.markerClusterGroup({disableClusteringAtZoom:13});
+// ==================== MAP ====================
+const map = L.map('map').setView([36.1699, -115.1398], 9);
+L.tileLayer('https://raw.githubusercontent.com/FalloutMaps/Project/master/tiles/{z}/{x}/{y}.png',{
+  maxZoom:5,minZoom:3,tms:true
+}).addTo(map);
+const cluster = L.markerClusterGroup();
 spots.forEach(s=>{
-  const marker=L.circleMarker([s.lat,s.lng],{
-    radius:s.r==="legendary"?16:10,
-    color:"#003300",
-    weight:4,
-    fillColor:s.r==="legendary"?"#ffff00":s.r==="epic"?"#ff6600":"#00aa00",
-    fillOpacity:0.9
-  }).bindPopup(`<b style="color:#00ff00;font-weight:bold">${s.n}</b><br>${s.l||''}<br><span style="color:#ffff00;font-size:0.9rem">R${s.r??"UNK"} LV${s.lv} RAD${s.rads||0}</span>`);
-  cluster.addLayer(marker);
+  const color = s.rarity==="legendary"?"#ff0":s.rarity==="epic"?"#f60":"#0f0";
+  L.circleMarker([s.lat,s.lng],{radius:s.rarity==="legendary"?16:10,color:"#000",weight:3,fillColor:color,fillOpacity:0.9})
+    .bindPopup(`<b style="color:#0f0">${s.name}</b><br>${s.location}<br><span class="rar ${s.rarity}">${s.rarity.toUpperCase()}</span>`)
+    .addTo(cluster);
 });
 map.addLayer(cluster);
 
-// Core functions unchanged but with Pip-Boy sounds/glow
+// ==================== UI FUNCTIONS ====================
 function update(){
-  // unchanged
+  document.getElementById('lvl').textContent = lvl;
+  document.getElementById('xp').textContent = (xp%100)+"/100";
+  document.getElementById('main').textContent = main+"/15";
+  document.getElementById('minted').textContent = minted;
+  document.getElementById('maintitle').textContent = MAIN_QUEST[main] || "ASCENDED";
 }
 function render(){
-  // unchanged, but rar classes match new CSS
+  const tab = document.querySelector('.tab.active').dataset.tab;
+  let list = [];
+  if(tab==="quest") list = [{title:MAIN_QUEST[main]||"ASCENDED",desc:"Main quest progress"}];
+  else if(tab==="near" && user){
+    list = spots.map(s=>({...s,dist:haversine(user.lat,user.lng,s.lat,s.lng)}))
+                .sort((a,b)=>a.dist-b.dist).slice(0,30);
+  } else if(tab==="leg") list = spots.filter(s=>s.rarity==="legendary");
+  else list = spots.slice(0,80);
+
+  document.getElementById('grid').innerHTML = list.map(i=>`
+    <div class="item" onclick="map.setView([${i.lat},${i.lng}],15);play('click')">
+      <div style="color:#ff0;font-size:1.3rem">${i.name||i.title}</div>
+      <div>${i.location||i.desc||''} ${i.dist?'- '+i.dist.toFixed(1)+'km':''}</div>
+      <span class="rar ${i.rarity||'common'}">${(i.rarity||'common').toUpperCase()}</span>
+    </div>`).join('');
 }
-function build(i){ /* unchanged */ }
-function mint(n){ /* unchanged */ }
+function mint(n){
+  minted += n; xp += n*150; lvl = Math.floor(xp/100)+1;
+  document.getElementById('vats').play();
+  update(); render();
+}
+function play(id){ if(sound) document.getElementById(id).play().catch(()=>{}); }
+function haversine(lat1,lng1,lat2,lng2){
+  const toRad = x => x*Math.PI/180;
+  const dLat = toRad(lat2-lat1), dLng = toRad(lng2-lng1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
 
-// GPS Geo Walk - Real world wasteland hunt
+// GPS quest auto-advance (500 m radius)
 setInterval(()=>{
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(p=>{
-      user={lat:p.coords.latitude,lng:p.coords.longitude};
-      // Auto-progress if near quest spot
-      const target=spots[main]; // simplified
-      if(target&&haversine(user.lat,user.lng,target.lat,target.lng)<0.5){ // 500m
-        main++; xp+=600; lvl=Math.floor(xp/100)+1;
-        playSound('vats');
-        alert(`QUEST COMPLETE: ${MAIN_QUEST[main-1]}\nMINT YOUR REWARD!`);
-        update(); render();
-      }
-      if(document.querySelector('.tab.active').dataset.tab==="near") render();
-    },err=>console.log('GPS locked by Raiders'));
-  }
-},8000); // Faster for mobile walk
+  navigator.geolocation?.getCurrentPosition(p=>{
+    user = {lat:p.coords.latitude, lng:p.coords.longitude};
+    const near = spots.some(s=>haversine(user.lat,user.lng,s.lat,s.lng)<0.5);
+    if(near && main<MAIN_QUEST.length){
+      main++; xp+=800; lvl=Math.floor(xp/100)+1;
+      play('vats');
+      alert("QUEST ADVANCED: "+MAIN_QUEST[main-1]);
+      update();
+    }
+    if(document.querySelector('.tab.active').dataset.tab==="near") render();
+  });
+},10000);
 
-function haversine(/* unchanged */){ /* unchanged */ }
-
-// Tab switch
+// Tabs
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  render();
+  t.classList.add('active'); render();
 });
-
-// Sound toggle
-document.getElementById('soundbtn').onclick=()=>{
-  sound=!sound;
-  document.getElementById('soundbtn').textContent=sound?'SOUND ON':'SOUND OFF';
-};
-function playSound(id){
-  if(sound) document.getElementById(id).play().catch(()=>null);
-}
-
-// Click feedback
-document.body.onclick=e=>{playSound('click');};
-
-// Init
+document.getElementById('soundbtn').onclick=()=>{sound=!sound; this.textContent=sound?'SOUND ON':'SOUND OFF';};
+document.body.onclick=e=>play('click');
 update(); render();
 </script>
 </body>
