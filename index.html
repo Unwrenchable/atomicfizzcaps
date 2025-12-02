@@ -32,7 +32,7 @@ h1{font-size:2.4rem;text-align:center;margin:8px 0;letter-spacing:6px;background
 .item:hover{transform:translateY(-6px);box-shadow:0 0 40px #00ff00;background:rgba(0,255,0,0.15)}
 .rar{padding:6px 14px;border-radius:20px;font-size:0.9rem;margin-top:8px;display:inline-block;font-weight:bold}
 .legendary{background:#ffff00;color:#000;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 15px #ffff00}50%{box-shadow:0 0 40px #ffff00}}
+@keyframes pulse{0%,100%{box-shadow:0 0 15px #ffff00}50%{box-shadow:0 0 40px #00ff00}}
 .epic{background:#ff6600;color:#000}.rare{background:#00ffff;color:#000}.common{background:#006600;color:#0f0}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.98);z-index:9999;justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:20px;color:#0f0}
 .crate{width:340px;height:340px;background:#111 url('https://i.ibb.co/4p7vK3B/nuka-crate.png') center/70% no-repeat;border:10px solid #ff6200;border-radius:25px;display:flex;align-items:flex-end;justify-content:center;font-size:5rem;color:#ff6200;text-shadow:0 0 30px #f90;animation:shake 0.7s infinite}
@@ -56,7 +56,7 @@ h1{font-size:2.4rem;text-align:center;margin:8px 0;letter-spacing:6px;background
       <div class="stat"><div class="val" id="claimed">0</div><div>CLAIMED</div></div>
     </div>
 
-    <button class="btn" id="connectBtn">CONNECT WALLET</button>
+    <button class="btn" id="connectBtn" onclick="connectWallet()">CONNECT WALLET</button>
     <div id="status" style="text-align:center;margin:10px;font-size:1.3rem;color:#f66">NOT CONNECTED</div>
 
     <div id="map"></div>
@@ -67,427 +67,228 @@ h1{font-size:2.4rem;text-align:center;margin:8px 0;letter-spacing:6px;background
       <button class="tab" data-tab="quest">QUEST LOG</button>
     </div>
 
-    <div class="grid" id="grid"></div>
+    <div class="grid" id="grid" style="display:none"></div>
   </div>
 </div>
 
-<div class="overlay" id="lootOverlay">
+<div class="overlay" id="lootOverlay" style="display:none">
   <div class="crate">LOOT</div>
   <h2 id="lootMsg" style="margin:30px;font-size:2.5rem;"></h2>
   <button class="btn" onclick="closeLoot()">CLAIM & CONTINUE</button>
 </div>
 
-<div class="overlay" id="combatOverlay" style="background:#300;border:8px double #f66;padding:40px">
+<div class="overlay" id="combatOverlay" style="display:none; background:#300;border:8px double #f66;padding:40px">
   <h2 style="color:#f66;font-size:3rem" id="enemyName">DEATHCLAW</h2>
   <p style="font-size:2rem" id="enemyHp">HP: 250</p>
   <button class="btn" style="background:#f66;color:#000" onclick="fight()">V.A.T.S. ATTACK</button>
   <button class="btn" onclick="flee()">FLEE</button>
 </div>
 
-<audio id="loot" src="https://freesound.org/data/previews/276/276496_5123850-lq.mp3"></audio>
-<audio id="hit" src="https://freesound.org/data/previews/342/342254_5674468-lq.mp3"></audio>
-<audio id="death" src="https://freesound.org/data/previews/531/531981_5123851-lq.mp3"></audio>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.95.3/dist/index.iife.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@metaplex-foundation/js@0.20.1/dist/browser/metaplex.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-base@0.9.23/dist/umd/index.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-phantom@0.9.24/dist/umd/index.min.js"></script>
-
 <script>
-// This line was the ONLY thing breaking the map:
-const { walletAdapterIdentity } = window.solanaWalletAdapterBase || {};
+// Globals
+let map, playerMarker, watchId;
+let player = { lvl: 1, hp: 100, maxHp: 100, caps: 0, stimpaks: [], gear: [], lat: 36.1146, lng: -115.1728 };
+let claimed = new Set();
+let markers = {};
+let wallet = null;
+let currentEnemy = null;
+const API_BASE = 'http://localhost:3000'; // Change to your Vercel URL
 
-const locations = [ {n:"Goodsprings Saloon",lat:35.8324,lng:-115.4320,lvl:1,rarity:"common"},
-  {n:"Primm Rollercoaster",lat:35.6145,lng:-115.3845,lvl:2,rarity:"common"},
-  {n:"Novac Motel",lat:35.0525,lng:-114.8247,lvl:5,rarity:"rare"},
-  {n:"Hoover Dam",lat:36.016,lng:-114.738,lvl:12,rarity:"epic"},
-  {n:"The Strip Gate",lat:36.1147,lng:-115.1728,lvl:15,rarity:"epic"},
-  {n:"Lucky 38",lat:36.147,lng:-115.156,lvl:18,rarity:"epic"},
-  {n:"Black Mountain",lat:35.9310,lng:-115.0440,lvl:20,rarity:"epic"},
-  {n:"Area 51 Gate",lat:37.2431,lng:-115.7930,lvl:45,rarity:"legendary"},
-  {n:"Vault 77 (Secret)",lat:36.170,lng:-115.140,lvl:77,rarity:"legendary"},
-  {n:"Chernobyl Pripyat",lat:51.389,lng:30.099,lvl:99,rarity:"legendary"},
-  {n:"Fukushima Daiichi",lat:37.421,lng:141.032,lvl:99,rarity:"legendary"},
-  {n:"Dead Wind Cavern",lat:35.8000,lng:-115.4000,lvl:40,rarity:"legendary"},
-  {n:"Vault 34",lat:36.1750,lng:-114.7500,lvl:20,rarity:"epic"},
-  {n:"Jacobstown",lat:36.3000,lng:-115.6500,lvl:22,rarity:"rare"},
-  {n:"Searchlight Church",lat:35.46434,lng:-114.91844,lvl:10,rarity:"rare"},
-  {n:"Cottonwood Cove",lat:35.9990,lng:-114.5000,lvl:14,rarity:"rare"},
-  {n:"Deathclaw Promontory",lat:36.1000,lng:-114.9000,lvl:45,rarity:"legendary"},
-  {n:"Los Alamos Lab",lat:35.875,lng:-106.300,lvl:50,rarity:"legendary"},
-  {n:"Yucca Mountain",lat:37.000,lng:-116.800,lvl:50,rarity:"legendary"},
-  {n:"Nevada Test Site",lat:37.100,lng:-116.000,lvl:48,rarity:"legendary"},
-  {n:"Diamond City",lat:42.360,lng:-71.058,lvl:15,rarity:"epic"},
-  {n:"Glowing Sea",lat:42.200,lng:-71.400,lvl:50,rarity:"legendary"},
-  {n:"Vault 111",lat:42.390,lng:-71.300,lvl:5,rarity:"common"},
-  {n:"Megaton",lat:38.863,lng:-77.085,lvl:8,rarity:"rare"},
-  {n:"Vault 101",lat:38.948,lng:-77.334,lvl:1,rarity:"common"},
-  {n:"Dunwich Building",lat:38.920,lng:-77.220,lvl:40,rarity:"legendary"},
-  {n:"The Pitt",lat:40.4406,lng:-79.9959,lvl:40,rarity:"legendary"},
-  {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222,lvl:4,rarity:"common"},
-  {n:"Boulder City Hotel",lat:35.97750,lng:-114.83639,lvl:6,rarity:"rare"},
-  {n:"New Vegas Strip",lat:36.112740,lng:-115.174301,lvl:10,rarity:"epic"},
-  {n:"Freeside Market",lat:36.170719,lng:-115.143929,lvl:5,rarity:"common"},
-  {n:"Red Rock Canyon",lat:36.13514,lng:-115.4283,lvl:8,rarity:"rare"},
-  {n:"Nellis Air Force Base",lat:36.2361,lng:-115.0342,lvl:25,rarity:"epic"},
-  {n:"Helios One",lat:35.7580,lng:-114.9530,lvl:13,rarity:"epic"},
-  {n:"REPCONN Test Site",lat:36.0360,lng:-115.0880,lvl:12,rarity:"rare"},
-  {n:"Quarry Junction",lat:35.9200,lng:-115.1800,lvl:35,rarity:"epic"},
-  {n:"Dead Wind Cavern",lat:35.8000,lng:-115.4000,lvl:40,rarity:"legendary"},
-  {n:"Bonnie Springs Ranch",lat:36.06007,lng:-115.45027,lvl:7,rarity:"common"},
-  {n:"Callville Bay Marina",lat:36.14400,lng:-114.72200,lvl:9,rarity:"common"},
-  {n:"Sloan Station",lat:35.94361,lng:-115.21722,lvl:5,rarity:"common"},
-  {n:"Jean Airport",lat:35.7677,lng:-115.3245,lvl:6,rarity:"common"},
-  {n:"McCarran Airport",lat:36.0801,lng:-115.1522,lvl:8,rarity:"rare"},
-  {n:"Old Mormon Fort",lat:36.1694,lng:-115.1305,lvl:6,rarity:"common"},
-  {n:"Ultra-Luxe Casino",lat:36.0972,lng:-115.1787,lvl:11,rarity:"epic"},
-  {n:"Gomorrah Casino",lat:36.1100,lng:-115.1720,lvl:10,rarity:"epic"},
-  {n:"Silver Rush",lat:36.1498,lng:-115.1390,lvl:9,rarity:"rare"},
-  {n:"Atomic Wrangler",lat:36.1499,lng:-115.1383,lvl:8,rarity:"rare"},
-  {n:"Nelson Ghost Town",lat:35.4189,lng:-114.7133,lvl:9,rarity:"rare"},
-  {n:"Rhyolite Ghost Town",lat:36.9033,lng:-116.8283,lvl:11,rarity:"rare"},
-  {n:"Mt Charleston",lat:36.2650,lng:-115.6500,lvl:16,rarity:"epic"},
-  {n:"Luxor Pyramid",lat:36.0965,lng:-115.1769,lvl:9,rarity:"rare"},
-  {n:"Whiskey Pete's",lat:35.6167,lng:-115.3900,lvl:3,rarity:"common"},
-  {n:"Primm Valley Resort",lat:35.6160,lng:-115.3900,lvl:3,rarity:"common"},
-  {n:"Westgate Hotel",lat:36.1311,lng:-115.1564,lvl:10,rarity:"epic"},
-  {n:"Coca Cola Factory",lat:36.1025,lng:-115.1738,lvl:8,rarity:"rare"},
-  {n:"Nellis Solar Array",lat:36.2460,lng:-115.0320,lvl:15,rarity:"epic"},
-  {n:"Ivanpah Solar",lat:35.2000,lng:-115.4667,lvl:18,rarity:"epic"},
-  {n:"Cottonwood Cove",lat:35.9990,lng:-114.5000,lvl:14,rarity:"rare"},
-  {n:"Vault 34",lat:36.1750,lng:-114.7500,lvl:20,rads:200},
-  {n:"Jacobstown",lat:36.3000,lng:-115.6500,lvl:22,rarity:"rare"},
-  {n:"Dead Wind Cavern",lat:35.8000,lng:-115.4000,lvl:25,rads:180},
-  {n:"REPCONN Headquarters",lat:36.0500,lng:-115.1000,lvl:13,rads:95},
-  {n:"188 Trading Post",lat:35.9500,lng:-115.2000,lvl:8,rads:25},
-  {n:"Griffin Caravan",lat:35.9000,lng:-115.2500,lvl:7,rads:20},
-  {n:"Nevada Highway Patrol",lat:35.9500,lng:-115.1500,lvl:6,rads:15},
-  {n:"Sarsaparilla HQ",lat:36.0000,lng:-115.2000,lvl:10,rads:60},
-  {n:"HELIOS One Entrance",lat:35.7600,lng:-114.9500,lvl:13,rads:90},
-  {n:"Camp Searchlight",lat:35.4600,lng:-114.9200,lvl:11,rads:130},
-  {n:"Quarry Junction",lat:35.9200,lng:-115.1800,lvl:20,rads:70},
-  {n:"Vikki Vance Museum",lat:35.6150,lng:-115.3850,lvl:4,rads:18},
-  {n:"Mesquite Mountains",lat:35.8500,lng:-115.9500,lvl:17,rads:100},
-  {n:"Devil's Gullet",lat:35.7000,lng:-115.3000,lvl:23,rads:150},
-  {n:"Primm Schoolhouse",lat:35.6150,lng:-115.3850,lvl:3,rads:12},
-  {n:"Nipton Hall",lat:35.4667,lng:-115.2722,lvl:5,rads:50},
-  {n:"Boulder City Ruins",lat:35.9775,lng:-114.8364,lvl:7,rads:20},
-  {n:"Megaton",lat:38.863,lng:-77.085,lvl:5,rads:20},
-  {n:"Jefferson Memorial",lat:38.876,lng:-77.012,lvl:15,rads:80},
-  {n:"Raven Rock",lat:39.732,lng:-77.421,lvl:25,rads:120},
-  {n:"The Citadel",lat:38.875,lng:-77.018,lvl:20,rads:30},
-  {n:"Vault 101",lat:38.948,lng:-77.334,lvl:1,rads:5},
-  {n:"Rivet City",lat:38.874,lng:-77.022,lvl:8,rads:25},
-  {n:"Point Lookout",lat:38.043,lng:-76.003,lvl:22,rads:200},
-  {n:"Dunwich Building",lat:38.920,lng:-77.220,lvl:30,rads:400},
-  {n:"Tenpenny Tower",lat:38.920,lng:-77.200,lvl:18,rads:15},
-  {n:"Paradise Falls",lat:38.900,lng:-77.250,lvl:12,rads:35},
-  {n:"Evergreen Mills",lat:38.850,lng:-77.300,lvl:15,rads:60},
-  {n:"Vault 108",lat:38.880,lng:-77.100,lvl:14,rads:90},
-  {n:"Little Lamplight",lat:38.820,lng:-77.380,lvl:10,rads:25},
-  {n:"Andale",lat:38.900,lng:-77.120,lvl:8,rads:40},
-  {n:"Arefu",lat:38.920,lng:-77.180,lvl:6,rads:18},
-  {n:"Arlington Cemetery",lat:38.880,lng:-77.070,lvl:20,rads:90},
-  {n:"Springvale School",lat:38.910,lng:-77.310,lvl:8,rads:25},
-  {n:"Super-Duper Mart",lat:38.920,lng:-77.290,lvl:6,rads:18},
-  {n:"Grayditch",lat:38.880,lng:-77.170,lvl:10,rads:40},
-  {n:"Minefield",lat:38.860,lng:-77.130,lvl:12,rads:30},
-  {n:"Vault 87",lat:38.950,lng:-77.850,lvl:30,rads:300},
-  {n:"Old Olney",lat:39.050,lng:-77.150,lvl:22,rads:100},
-  {n:"Enclave Camp",lat:39.200,lng:-77.500,lvl:28,rads:120},
-  {n:"Mama Dolce's",lat:38.850,lng:-77.200,lvl:15,rads:60},
-  {n:"Junction 109",lat:38.840,lng:-77.100,lvl:14,rads:50},
-  {n:"Robotics Facility",lat:38.820,lng:-77.080,lvl:16,rads:70},
-  {n:"Germantown Police",lat:38.970,lng:-77.170,lvl:18,rads:85},
-  {n:"Murder Pass",lat:39.000,lng:-77.200,lvl:20,rads:110},
-  {n:"Point Lookout Lighthouse",lat:38.043,lng:-76.003,lvl:25,rads:220},
-  {n:"Turtledove Detention Camp",lat:38.100,lng:-76.400,lvl:18,rads:80},
-  {n:"The Pitt",lat:40.4406,lng:-79.9959,lvl:40,rads:600},
-  {n:"Diamond City",lat:42.360,lng:-71.058,lvl:10,rads:15},
-  {n:"Goodneighbor",lat:42.356,lng:-71.061,lvl:12,rads:40},
-  {n:"The Institute",lat:42.358,lng:-71.057,lvl:35,rads:10},
-  {n:"Glowing Sea",lat:42.200,lng:-71.400,lvl:40,rads:800},
-  {n:"Nuka-World",lat:42.300,lng:-72.900,lvl:30,rads:300},
-  {n:"Far Harbor",lat:44.300,lng:-68.300,lvl:33,rads:500},
-  {n:"Vault 111",lat:42.390,lng:-71.300,lvl:5,rads:20},
-  {n:"Sanctuary Hills",lat:42.210,lng:-71.410,lvl:3,rads:8},
-  {n:"Concord",lat:42.450,lng:-71.350,lvl:7,rads:12},
-  {n:"Bunker Hill",lat:42.370,lng:-71.070,lvl:15,rads:25},
-  {n:"Vault 114",lat:42.370,lng:-71.050,lvl:18,rads:60},
-  {n:"Boston Common",lat:42.356,lng:-71.065,lvl:20,rads:100},
-  {n:"Trinity Plaza",lat:42.360,lng:-71.060,lvl:22,rads:80},
-  {n:"Vault 95",lat:42.100,lng:-71.500,lvl:28,rads:200},
-  {n:"Spectacle Island",lat:42.350,lng:-70.950,lvl:25,rads:150},
-  {n:"Vault 76",lat:39.500,lng:-79.900,lvl:1,rads:10},
-  {n:"Whitespring Resort",lat:38.050,lng:-79.800,lvl:25,rads:30},
-  {n:"Appalachian Workshop",lat:38.200,lng:-80.000,lvl:12,rads:40},
-  {n:"The Crater",lat:37.900,lng:-79.700,lvl:35,rads:150},
-  {n:"West Tek",lat:38.300,lng:-80.100,lvl:28,rads:200},
-  {n:"Toxic Valley",lat:38.400,lng:-80.200,lvl:22,rads:300},
-  {n:"Ash Heap",lat:37.700,lng:-81.100,lvl:18,rads:120},
-  {n:"Area 51",lat:37.2431,lng:-115.7930,lvl:45,rads:600},
-  {n:"Los Alamos Lab",lat:35.875,lng:-106.300,lvl:50,rads:900},
-  {n:"Trinity Site",lat:33.677,lng:-106.475,lvl:55,rads:1200},
-  {n:"Chernobyl Pripyat",lat:51.389,lng:30.099,lvl:60,rads:3000},
-  {n:"Fukushima Daiichi",lat:37.421,lng:141.032,lvl:65,rads:5000},
-  {n:"Three Mile Island",lat:40.1522,lng:-77.1581,lvl:20,rads:150},
-  {n:"Hanford Site",lat:46.5494,lng:-119.4762,lvl:40,rads:400},
-  {n:"Savannah River",lat:33.247,lng:-81.402,lvl:35,rads:300},
-  {n:"Yucca Mountain",lat:37.000,lng:-116.800,lvl:50,rads:1000},
-  {n:"Nevada Test Site",lat:37.100,lng:-116.000,lvl:48,rads:800},
-  {n:"Windscale",lat:54.417,lng:-3.487,lvl:42,rads:700},
-  {n:"Kyshtym",lat:55.767,lng:60.867,lvl:55,rads:2000},
-  {n:"Vault 13",lat:37.500,lng:-121.900,lvl:15,rads:25},
-  {n:"Shady Sands",lat:34.0522,lng:-118.2437,lvl:8,rads:12},
-  {n:"The Hub",lat:34.0522,lng:-118.2437,lvl:12,rads:18},
-  {n:"Gecko Reactor",lat:37.8000,lng:-121.9000,lvl:25,rads:150},
-  {n:"Broken Hills",lat:37.6000,lng:-121.7000,lvl:18,rads:80},
-  {n:"Vault City",lat:39.7392,lng:-104.9903,lvl:22,rads:40},
-  {n:"New Reno",lat:39.5296,lng:-119.8138,lvl:28,rads:35},
-  {n:"Redding Mines",lat:40.6066,lng:-122.1488,lvl:20,rads:60},
-  {n:"NCR Base",lat:36.1699,lng:-115.1398,lvl:15,rads:20},
-  {n:"Brotherhood Bunker",lat:34.0522,lng:-118.2437,lvl:30,rads:50},
-  {n:"Klamath",lat:42.0000,lng:-121.8000,lvl:10,rads:15},
-  {n:"The Den",lat:37.7749,lng:-122.4194,lvl:14,rads:25},
-  {n:"Modoc",lat:41.6331,lng:-120.0294,lvl:16,rads:30},
-  {n:"Ghost Farm",lat:41.5000,lng:-120.0000,lvl:12,rads:20},
-  {n:"Vault 15",lat:34.5000,lng:-118.5000,lvl:18,rads:40},
-  {n:"Junktown",lat:37.7749,lng:-122.4194,lvl:6,rads:10},
-  {n:"The Cathedral",lat:34.0522,lng:-118.2437,lvl:35,rads:100},
-  {n:"Military Base",lat:36.0000,lng:-115.0000,lvl:40,rads:120},
-  {n:"Glow",lat:35.0000,lng:-115.0000,lvl:55,rads:1000},
-  {n:"Mariposa Base",lat:37.5000,lng:-120.5000,lvl:45,rads:300},
-  {n:"Sierra Army Depot",lat:40.0000,lng:-120.0000,lvl:38,rads:200},
-  {n:"EPA",lat:38.0000,lng:-122.0000,lvl:25,rads:80},
-  {n:"The Master Lair",lat:34.0522,lng:-118.2437,lvl:60,rads:500},
-  {n:"Children of the Cathedral",lat:34.0522,lng:-118.2437,lvl:32,rads:90},
-  {n:"Followers Outpost",lat:36.1699,lng:-115.1398,lvl:12,rads:15},
-  {n:"Gun Runners",lat:36.1699,lng:-115.1398,lvl:20,rads:25},
-  {n:"Free Economic Zone",lat:36.1699,lng:-115.1398,lvl:18,rads:20},
-  {n:"New California Republic",lat:36.1699,lng:-115.1398,lvl:25,rads:30},
-  {n:"Shale Bridge",lat:37.7749,lng:-122.4194,lvl:8,rads:12},
-  {n:"Sulphur Pits",lat:40.0000,lng:-122.0000,lvl:22,rads:70},
-  {n:"Raided Caravan",lat:37.0000,lng:-121.0000,lvl:10,rads:18},
-  {n:"Mutant Camp",lat:37.5000,lng:-121.5000,lvl:28,rads:60},
-  {n:"Raider Outpost",lat:38.0000,lng:-122.0000,lvl:15,rads:25},
-  {n:"Scavenger Camp",lat:39.0000,lng:-123.0000,lvl:12,rads:20},
-  {n:"Abandoned Mine",lat:40.0000,lng:-124.0000,lvl:20,rads:50},
-  {n:"Super Mutant Base",lat:41.0000,lng:-125.0000,lvl:35,rads:100},
-  {n:"Deathclaw Nest",lat:42.0000,lng:-126.0000,lvl:40,rads:150},
-  {n:"Radscorpion Den",lat:43.0000,lng:-127.0000,lvl:25,rads:80},
-  {n:"Cazador Hive",lat:36.0000,lng:-115.0000,lvl:30,rads:90},
-  {n:"Gecko Town",lat:37.8000,lng:-121.9000,lvl:22,rads:150},
-  {n:"Vault 8",lat:37.0000,lng:-121.0000,lvl:28,rads:40},
-  {n:"Vault 12",lat:37.7749,lng:-122.4194,lvl:35,rads:200},
-  {n:"Vault 17",lat:36.1699,lng:-115.1398,lvl:32,rads:120},
-  {n:"Enclave Oil Rig",lat:33.000,lng:-118.000,lvl:50,rads:200},
-  {n:"Brotherhood HQ",lat:34.0522,lng:-118.2437,lvl:35,rads:60},
-  {n:"NCR Capital",lat:36.1699,lng:-115.1398,lvl:30,rads:25},
-  {n:"Raider Stronghold",lat:37.0000,lng:-121.0000,lvl:22,rads:45},
-  {n:"Mutant Stronghold",lat:37.5000,lng:-121.5000,lvl:38,rads:120},
-  {n:"Deathclaw Promontory",lat:38.0000,lng:-122.0000,lvl:45,rads:180},
-  {n:"Oil Rig",lat:33.0000,lng:-118.0000,lvl:55,rads:250},
-  {n:"Vault 11",lat:35.5000,lng:-117.0000,lvl:28,rads:90},
-  {n:"Vault 22",lat:36.1699,lng:-115.1398,lvl:32,rads:150},
-  {n:"Vault 3",lat:36.2000,lng:-115.8000,lvl:25,rads:80},
-  {n:"Vault 19",lat:36.1000,lng:-115.9000,lvl:22,rads:60},
-  {n:"Vault 21",lat:36.1699,lng:-115.1398,lvl:18,rads:40},
-  {n:"Vault 29",lat:36.0000,lng:-116.0000,lvl:30,rads:100},
-  {n:"Vault 32",lat:35.8000,lng:-116.2000,lvl:28,rads:90},
-  {n:"Vault 36",lat:35.6000,lng:-116.4000,lvl:35,rads:150},
-  {n:"Vault 87",lat:38.950,lng:-77.850,lvl:30,rads:300},
-  {n:"Vault 92",lat:38.900,lng:-77.300,lvl:25,rads:80},
-  {n:"Vault 106",lat:38.800,lng:-77.400,lvl:32,rads:120},
-  {n:"Vault 112",lat:38.700,lng:-77.500,lvl:28,rads:100},
-  {n:"Mothership Zeta",lat:0,lng:0,lvl:99,rarity:"legendary"}
+// Audio (use your hosted files to avoid CORS)
+const lootSound = new Audio('https://freesound.org/data/previews/571/571551_12117998-lq.mp3');
+const hitSound = new Audio('https://freesound.org/data/previews/276/276481_4043684-lq.mp3');
+const deathSound = new Audio('https://freesound.org/data/previews/249/249522_4397579-lq.mp3');
 
-];
-
-let map, playerMarker, markers = {}, watchId;
-let player = {lat:36.1146,lng:-115.1728,hp:100,maxHp:100,lvl:1,caps:0,stimpaks:0,gear:[]};
-let claimed = new Set(), currentEnemy = null, wallet = null;
-
-const gearTable = [
-  {name:"Rusty 10mm Pistol",rarity:"common",lvl:1},
-  {name:"Worn Leather Armor",rarity:"common",lvl:3},
-  {name:"Pipe Rifle",rarity:"common",lvl:5},
-  {name:"Service Rifle",rarity:"rare",lvl:10},
-  {name:"Combat Shotgun",rarity:"rare",lvl:12},
-  {name:"Anti-Materiel Rifle",rarity:"epic",lvl:25},
-  {name:"T-51b Power Armor",rarity:"epic",lvl:30},
-  {name:"Gauss Rifle",rarity:"epic",lvl:35},
-  {name:"Alien Blaster (Fully Charged)",rarity:"legendary",lvl:40},
-  {name:"Experimental MIRV",rarity:"legendary",lvl:50},
-  {name:"Holy Hand Grenade of Antioch",rarity:"legendary",lvl:77},
-  {name:"Vault 77 Golden Jumpsuit",rarity:"legendary",lvl:77}
-];
-
-const enemies = [
-  {name:"Raiders",hp:80,dmg:25},
-  {name:"Super Mutants",hp:140,dmg:40},
-  {name:"Deathclaw",hp:250,dmg:80},
-  {name:"Feral Ghouls",hp:60,dmg:30}
-];
-
-// Wallet Connect
-document.getElementById("connectBtn").onclick = async () => {
-  if (window.solana?.isPhantom) {
+// Wallet connect
+async function connectWallet() {
+  if (window.solana) {
     try {
-      const resp = await window.solana.connect();
-      wallet = window.solana;
-      const addr = resp.publicKey.toString();
-      document.getElementById("status").innerHTML = `<span style="color:#0f0">CONNECTED<br>${addr.slice(0,6)}...${addr.slice(-4)}</span>`;
-      document.getElementById("connectBtn").textContent = "CONNECTED";
-      document.getElementById("connectBtn").disabled = true;
-    } catch (e) { alert("Wallet connection rejected"); }
-  } else alert("Phantom Wallet not found → https://phantom.app");
-};
-
-// Mint NFT (safe fallback)
-async function mintWeaponOrArmor(name, rarity) {
-  if (!wallet?.publicKey) {
-    alert(`Found ${rarity.toUpperCase()} ${name}\nConnect wallet to mint real NFT!`);
-    player.gear.push(name); updateUI(); return;
-  }
-  try {
-    const connection = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
-    const metaplex = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
-    await metaplex.nfts().create({uri:"https://arweave.net/placeholder",name,symbol:"FIZZ",sellerFeeBasisPoints:500,creators:[{address:wallet.publicKey,share:100}]});
-    alert(`MINTED ${rarity.toUpperCase()} ${name}!`);
-  } catch (e) {
-    console.error(e);
-    alert("Mint failed (network/no funds) — item still added");
-    player.gear.push(name);
-    updateUI();
-  }
+      wallet = await window.solana.connect();
+      document.getElementById('status').textContent = 'CONNECTED';
+      document.getElementById('connectBtn').disabled = true;
+      await loadPlayer();
+    } catch (e) { alert('Connection failed: ' + e.message); }
+  } else alert('Install Phantom: https://phantom.app');
 }
 
-// MAP — NOW 100% GUARANTEED TO LOAD
-function initMap() {
-  map = L.map('map', {zoomControl:true}).setView([36.1146, -115.1728], 12);
+// Load player
+async function loadPlayer() {
+  if (!wallet?.publicKey) return;
+  try {
+    const res = await fetch(`${API_BASE}/player/${wallet.publicKey.toString()}`);
+    if (!res.ok) throw new Error('Fetch failed - is backend running?');
+    const data = await res.json();
+    player.caps = data.caps || 0;
+    player.hp = data.hp || 100;
+    player.gear = data.gear || [];
+    player.stimpaks = data.stimpaks || [];
+    player.maxHp = 100 + (Math.floor(player.caps / 1000) * 50);
+    player.lvl = Math.floor(player.caps / 1000) + 1;
+    updateUI();
+  } catch (e) { console.error(e); alert('Load failed—check console and backend'); }
+}
+
+// Claim loot
+async function claimLoot(loc) {
+  if (claimed.has(loc.n) || player.lvl < loc.lvl) {
+    alert(player.lvl < loc.lvl ? `LEVEL ${loc.lvl} REQUIRED!` : 'Already claimed');
+    return;
+  }
+  if (!wallet?.publicKey) return alert('Connect wallet!');
+  try {
+    const res = await fetch(`${API_BASE}/claim-survival`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet: wallet.publicKey.toString(), spot: loc.n })
+    });
+    if (!res.ok) throw new Error('Claim failed - check backend');
+    const data = await res.json();
+    claimed.add(loc.n);
+    player.caps += data.caps;
+    if (data.gear) player.gear.push(data.gear);
+    if (data.raid) {
+      player.hp = data.raid.hp;
+      player.gear = data.raid.gear;
+      currentEnemy = { name: data.raid.enemy, hp: 0 };
+      document.getElementById('enemyName').textContent = data.raid.enemy;
+      document.getElementById('enemyHp').textContent = 'DEFEATED';
+      document.getElementById('combatOverlay').style.display = 'flex';
+      if (data.raid.revived) alert(`Revived with ${data.raid.stimpakUsed}!`);
+      else if (!data.raid.won) die();
+    } else {
+      let msg = data.message + '<br>+25 CAPS';
+      if (data.gear) msg += `<br><span class="rar ${data.gear.rarity}">Got ${data.gear.rarity.toUpperCase()} ${data.gear.name}!</span>`;
+      document.getElementById('lootMsg').innerHTML = msg;
+      document.getElementById('lootOverlay').style.display = 'flex';
+      lootSound.play().catch((e) => console.error('Audio fail: ' + e));
+    }
+    const oldLvl = player.lvl;
+    player.lvl = Math.floor(player.caps / 1000) + 1;
+    if (player.lvl > oldLvl) {
+      player.maxHp += 50;
+      player.hp = player.maxHp;
+    }
+    markers[loc.n].setStyle({ fillColor: '#003300' });
+    updateUI();
+  } catch (e) { alert(`Error: ${e.message} - Check console`); }
+}
+
+// Buy stimpak
+async function buyStimpak(tier, cost) {
+  if (!wallet?.publicKey) return alert('Connect wallet!');
+  if (player.caps < cost) return alert('Not enough CAPS!');
+  try {
+    const res = await fetch(`${API_BASE}/buy-stimpak`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet: wallet.publicKey.toString(), tier, cost })
+    });
+    if (!res.ok) throw new Error('Buy failed');
+    const data = await res.json();
+    player.stimpaks.push({ name: data.stimpak, tier });
+    player.caps -= cost;
+    updateUI();
+    alert(`Bought ${data.stimpak}! Cooldown: ${data.cooldown}`);
+  } catch (e) { alert(`Error: ${e.message}`); }
+}
+
+// Combat
+function fight() {
+  hitSound.play().catch(() => {});
+  document.getElementById('combatOverlay').style.display = 'none';
+  alert('Battle resolved!');
+}
+
+function flee() {
+  document.getElementById('combatOverlay').style.display = 'none';
+  alert('Escaped!');
+}
+
+function die() {
+  deathSound.play().catch(() => {});
+  player.caps = Math.floor(player.caps * 0.5);
+  player.hp = player.maxHp;
+  alert('YOU DIED — Lost 50% CAPS');
+  document.getElementById('combatOverlay').style.display = 'none';
+  updateUI();
+}
+
+function closeLoot() {
+  document.getElementById('lootOverlay').style.display = 'none';
+}
+
+function updateUI() {
+  document.getElementById('lvl').textContent = player.lvl || 1;
+  document.getElementById('hp').textContent = `${player.hp}/${player.maxHp}`;
+  document.getElementById('caps').textContent = player.caps || 0;
+  document.getElementById('stimpaks').textContent = player.stimpaks.length || 0;
+  document.getElementById('claimed').textContent = claimed.size || 0;
+}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const mode = tab.dataset.tab;
+    document.getElementById('map').style.display = mode === 'map' ? 'block' : 'none';
+    document.getElementById('grid').style.display = mode === 'map' ? 'none' : 'grid';
+    if (mode === 'inventory') {
+      let html = player.gear.length ? player.gear.map(g => `<div class="item">• ${g.name} (${g.rarity})</div>`).join('') : '<div class="item">Inventory Empty</div>';
+      html += '<div class="item">Stimpaks: ' + player.stimpaks.length + '</div>';
+      html += '<button class="btn" onclick="buyStimpak(\'common\', 50)">Buy Stimpak (50 CAPS)</button>';
+      html += '<button class="btn" onclick="buyStimpak(\'rare\', 150)">Buy Super Stimpak (150 CAPS)</button>';
+      html += '<button class="btn" onclick="buyStimpak(\'legendary\', 500)">Buy Med-X + Stimpak (500 CAPS)</button>';
+      document.getElementById('grid').innerHTML = html;
+    }
+    if (mode === 'quest') document.getElementById('grid').innerHTML = '<div class="item">Main Quest: Reach Vault 77</div>';
+  };
+});
+
+// Map init
+async function initMap() {
+  if (typeof L === 'undefined') return console.error('Leaflet not loaded');
+  map = L.map('map', { zoomControl: true }).setView([36.1146, -115.1728], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap', maxZoom: 19
   }).addTo(map);
-
-  playerMarker = L.circleMarker([36.1146, -115.1728], {
-    radius:18, color:'#000', weight:5, fillColor:'#00ff00', fillOpacity:1
-  }).addTo(map)
-    .bindPopup("YOU ARE HERE", {permanent:true, className:"you-popup"})
-    .openPopup();
-  playerMarker.getElement().style.filter = "drop-shadow(0 0 20px #00ff00)";
-
-  locations.forEach(loc => {
-    const color = loc.rarity==="legendary"?"#ffff00":loc.rarity==="epic"?"#ff6200":loc.rarity==="rare"?"#00ffff":"#00ff00";
-    const m = L.circleMarker([loc.lat, loc.lng], {radius:14,color:"#000",weight:4,fillColor:color,fillOpacity:0.9})
-      .bindPopup(`<b style="color:#0f0">${loc.n}</b><br><span class="rar ${loc.rarity||'common'}">${(loc.rarity||'common').toUpperCase()}</span><br>Level ${loc.lvl}`)
-      .on('click', () => claimLoot(loc))
-      .addTo(map);
-    markers[loc.n] = m;
-  });
-
-  if ("geolocation" in navigator) {
+  playerMarker = L.circleMarker([player.lat, player.lng], { radius: 18, color: '#000', weight: 5, fillColor: '#00ff00', fillOpacity: 1 })
+    .addTo(map).bindPopup('YOU ARE HERE', { permanent: true, className: 'you-popup' }).openPopup();
+  playerMarker.getElement().style.filter = 'drop-shadow(0 0 20px #00ff00)';
+  try {
+    const res = await fetch(`${API_BASE}/locations`);
+    if (!res.ok) throw new Error('Locations fetch failed');
+    const locations = await res.json();
+    locations.forEach(loc => {
+      const color = loc.rarity === 'legendary' ? '#ffff00' : loc.rarity === 'epic' ? '#ff6200' : loc.rarity === 'rare' ? '#00ffff' : '#00ff00';
+      const m = L.circleMarker([loc.lat, loc.lng], { radius: 14, color: '#000', weight: 4, fillColor: color, fillOpacity: 0.9 })
+        .bindPopup(`<b style="color:#0f0">${loc.n}</b><br><span class="rar ${loc.rarity || 'common'}">${(loc.rarity || 'common').toUpperCase()}</span><br>Level ${loc.lvl}`)
+        .on('click', () => claimLoot(loc))
+        .addTo(map);
+      markers[loc.n] = m;
+    });
+  } catch (e) { console.error(e); alert('Failed to load locations—add to server.js'); }
+  if ('geolocation' in navigator) {
     watchId = navigator.geolocation.watchPosition(pos => {
       player.lat = pos.coords.latitude;
       player.lng = pos.coords.longitude;
       playerMarker.setLatLng([player.lat, player.lng]);
       map.panTo([player.lat, player.lng]);
-    }, err => console.log("GPS error:", err), {enableHighAccuracy:true, maximumAge:5000, timeout:10000});
+    }, err => console.error('GPS error:', err), { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 });
   }
 }
 
-// Loot & Combat
-function claimLoot(loc) {
-  if (claimed.has(loc.n) || player.lvl < loc.lvl) { alert(player.lvl < loc.lvl ? `LEVEL ${loc.lvl} REQUIRED!` : "Already claimed"); return; }
-  claimed.add(loc.n); player.caps += 100; player.stimpaks += 1;
-  let msg = "+100 CAPS<br>+1 Stimpak";
-  if (Math.random() < 0.45) {
-    const possible = gearTable.filter(g => player.lvl >= g.lvl);
-    if (possible.length) {
-      const item = possible[Math.floor(Math.random()*possible.length)];
-      player.gear.push(item.name);
-      msg += `<br><span style="color:${item.rarity==='legendary'?'#ffff00':item.rarity==='epic'?'#ff6200':'#00ffff'};font-size:3rem">${item.rarity.toUpperCase()} ${item.name}</span>`;
-      mintWeaponOrArmor(item.name, item.rarity);
-    }
-  }
-  const oldLvl = player.lvl;
-  player.lvl = Math.floor(player.caps/1000)+1;
-  if (player.lvl > oldLvl) { player.maxHp += 50; player.hp = player.maxHp; msg += `<br><span style="color:#0f0">LEVEL UP ${player.lvl}!</span>`; }
-  if (Math.random() < 0.28) {
-    currentEnemy = enemies[Math.floor(Math.random()*enemies.length)];
-    document.getElementById("enemyName").textContent = currentEnemy.name;
-    document.getElementById("enemyHp").textContent = "HP: " + currentEnemy.hp;
-    document.getElementById("combatOverlay").style.display = "flex";
-  } else {
-    document.getElementById("lootMsg").innerHTML = msg;
-    document.getElementById("lootOverlay").style.display = "flex";
-    document.getElementById("loot").play().catch(()=>{});
-  }
-  markers[loc.n].setStyle({fillColor:"#003300"});
+// Mint stub
+async function mintLegendaryNFT(itemName) {
+  alert(`MINTING: ${itemName} (Backend handles)`);
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
   updateUI();
-}
-
-function fight() {
-  document.getElementById("hit").play().catch(()=>{});
-  const dmg = 35 + player.lvl * 9;
-  currentEnemy.hp -= dmg;
-  if (currentEnemy.hp <= 0) {
-    player.caps += 180;
-    document.getElementById("lootMsg").innerHTML = "Victory!<br>+180 CAPS";
-    document.getElementById("combatOverlay").style.display = "none";
-    document.getElementById("lootOverlay").style.display = "flex";
-  } else {
-    player.hp -= currentEnemy.dmg;
-    if (player.hp <= 0) die();
-  }
-  updateUI();
-}
-
-function flee() {
-  if (Math.random() < 0.65) {
-    alert("Escaped!");
-    document.getElementById("combatOverlay").style.display = "none";
-  } else {
-    player.hp -= Math.floor(currentEnemy.dmg * 1.5);
-    alert("Failed to flee!");
-    if (player.hp <= 0) die();
-    updateUI();
-  }
-}
-
-function die() {
-  document.getElementById("death").play().catch(()=>{});
-  player.caps = Math.floor(player.caps * 0.5);
-  alert("YOU DIED — Lost 50% CAPS");
-  player.hp = player.maxHp;
-  document.getElementById("combatOverlay").style.display = "none";
-  updateUI();
-}
-
-function closeLoot() { document.getElementById("lootOverlay").style.display = "none"; }
-
-function updateUI() {
-  document.getElementById("lvl").textContent = player.lvl;
-  document.getElementById("hp").textContent = player.hp + "/" + player.maxHp;
-  document.getElementById("caps").textContent = player.caps;
-  document.getElementById("stimpaks").textContent = player.stimpaks;
-  document.getElementById("claimed").textContent = claimed.size;
-}
-
-// Tabs
-document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-  t.classList.add('active');
-  const mode = t.dataset.tab;
-  document.getElementById("map").style.display = mode==="map"?"block":"none";
-  document.getElementById("grid").style.display = mode==="map"?"none":"grid";
-  if (mode==="inventory") document.getElementById("grid").innerHTML = player.gear.length ? player.gear.map(g=>`<div class="item">• ${g}</div>`).join('') : `<div class="item">Inventory Empty</div>`;
-  if (mode==="quest") document.getElementById("grid").innerHTML = `<div class="item">Main Quest: Reach Vault 77</div>`;
 });
-
-// START — this now runs without any errors
-initMap();
-updateUI();
 </script>
 </body>
 </html>
