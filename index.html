@@ -244,10 +244,9 @@ function initMap() {
     .addTo(map).bindPopup('YOU ARE HERE', { permanent:true, className:'you-popup' }).openPopup();
 
   // LOAD YOUR 300+ LOCATIONS HERE
-  fetch(LOCATIONS_URL)
-    .then(r => r.ok ? r.json() : [])
-    .then(locations => {
-      if (locations.length === 0) console.log("No locations loaded — check your /locations endpoint or JSON URL");
+  fetch('/locations')
+  .then(r => r.json())
+  .then(data => { window.locations = data; initMap(); })
 
       locations.forEach(loc => {
         const color = loc.rarity === 'legendary' ? '#ffff00' :
