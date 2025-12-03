@@ -8,17 +8,17 @@
 <meta name="theme-color" content="#001100">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-* {margin:0;padding:0;box-sizing:border-box}
-html,body {height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;font-weight:bold;text-shadow:0 0 6px #00ff00}
-body {background:radial-gradient(circle at center,#002200,#000)}
-.crt::before {content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.08) 0px,transparent 2px,transparent 4px);pointer-events:none;animation:scan 7s linear infinite;mix-blend-mode:screen}
-.crt::after {content:"";position:fixed;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,0,0.04) 50%,transparent);pointer-events:none;animation:scan2 10s linear infinite}
-@keyframes scan {0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
-@keyframes scan2 {0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.pipboy {position:fixed;inset:0;background:linear-gradient(145deg,#001100,#000);box-shadow:0 0 140px #00ff00,0 0 280px #00aa00,inset 0 0 180px rgba(0,0,0,0.9);padding:10px}
-.pip-screen {position:absolute;inset:10px;background:#000;overflow:hidden;box-shadow:inset 0 0 90px #003300,0 0 90px rgba(0,255,0,0.8);padding:18px;border-radius:18px}
-#map {width:100%;height:100%;border-radius:12px}
-.ui {position:absolute;top:20px;left:20px;right:20px;z-index:1000;background:rgba(0,20,0,0.8);padding:12px;border-radius:8px;font-size:1.1rem}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;font-weight:bold;text-shadow:0 0 6px #00ff00}
+  body{background:radial-gradient(circle at center,#002200,#000)}
+  .crt::before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.08) 0px,transparent 2px,transparent 4px);pointer-events:none;animation:scan 7s linear infinite;mix-blend-mode:screen}
+  .crt::after{content:"";position:fixed;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,0,0.04) 50%,transparent);pointer-events:none;animation:scan2 10s linear infinite}
+  @keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+  @keyframes scan2{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+  .pipboy{position:fixed;inset:0;background:linear-gradient(145deg,#001100,#000);box-shadow:0 0 140px #00ff00,0 0 280px #00aa00,inset 0 0 180px rgba(0,0,0,0.9);padding:10px}
+  .pip-screen{position:absolute;inset:10px;background:#000;overflow:hidden;box-shadow:inset 0 0 90px #003300,0 0 90px rgba(0,255,0,0.8);padding:18px;border-radius:18px}
+  #map{width:100%;height:100%;border-radius:12px}
+  .ui{position:absolute;top:20px;left:20px;right:20px;z-index:1000;background:rgba(0,20,0,0.8);padding:12px;border-radius:8px;font-size:1.1rem}
 </style>
 </head>
 <body class="crt">
@@ -35,48 +35,77 @@ body {background:radial-gradient(circle at center,#002200,#000)}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const walletAddress = "YOUR_WALLET_HERE"; // ← you can leave this or connect wallet later
-let player = { lat: 36.1699, lng: -115.1398, caps: 0, inventory: [], stimpaks: [], level: 1 };
-let map, playerMarker, markers = {}, claimed = new Set();
+  // CHANGE THIS TO YOUR WALLET WHEN READY (or leave blank for now)
+  const walletAddress = ""; 
 
-// ===== FULLY WORKING INIT =====
-async function initMap() {
-  map = L.map('map').setView([player.lat, player.lng], 16);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-    maxZoom: 19
-  }).addTo(map);
+  let player = { lat: 36.1699, lng: -115.1398, caps: 0, inventory: [], stimpaks: [], level: 1 };
+  let map, playerMarker, markers = {}, claimed = new Set();
 
-  playerMarker = L.circleMarker([player.lat, player.lng], {
-    radius: 22, color: '#000', weight: 7, fillColor: '#00ff00', fillOpacity: 1
-  }).addTo(map).bindPopup('YOU ARE HERE', { permanent: true, className: 'you-popup' }).openPopup();
+  async function loadPlayerData() {
+    if (!walletAddress) return;
+    try {
+      const res = await fetch(`/api/player/${walletAddress}`);
+      if (res.ok) {
+        const data = await res.json();
+        player = { ...player, ...data };
+        claimed = new Set(data.claimed || []);
+        updateUI();
+      }
+    } catch(e) { console.log("No player data yet"); }
+  }
 
-  // Load player data first
-  await loadPlayerData();
+  function updateUI() {
+    document.getElementById("caps").textContent = player.caps || 0;
+    document.getElementById("level").textContent = player.level || 1;
+    document.getElementById("inventory").textContent = player.inventory?.length ? player.inventory.join(", ") : "—";
+    document.getElementById("stimpaks").textContent = player.stimpaks?.length || 0;
+  }
 
-  // Load locations from backend
-  fetch('/locations')
-    .then(r => r.ok ? r.json() : [])
-    .then(locations => {
-      console.log('Loaded locations:', locations.length);
-      locations.forEach(loc => {
-        const color = loc.rarity === 'legendary' ? '#ffff00' 
-          : loc.rarity === 'epic' ? '#ff6200' 
-          : loc.rarity === 'rare' ? '#00ffff' 
-          : '#00ff00';
-        const m = L.circleMarker([loc.lat, loc.lng], { 
-          radius: 18, color: '#000', weight: 6, fillColor: color, fillOpacity: 0.95 
-        })
-        .bindPopup(`<b style="color:#0f0;font-size:1.2rem">${loc.n}</b><br><span style="color:${color}">${(loc.rarity||'common').toUpperCase()}</span><br>Level ${loc.lvl}`)
-        .addTo(map);
-        markers[loc.n] = m;
-        if (claimed.has(loc.n)) m.setStyle({ fillColor: '#003300' });
-      });
-    })
-    .catch(err => console.error('Locations failed:', err));
+  async function initMap() {
+    map = L.map("map").setView([player.lat, player.lng], 16);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap", maxZoom: 19
+    }).addTo(map);
 
-  // Watch real GPS
-  if ('geolocation' in navigator) {
-    navigator.geolocation.watchPosition(pos => {
-      player.lat = pos.coords.latitude;
-      player.lng = pos.coords.longitude
+    playerMarker = L.circleMarker([player.lat, player.lng], {
+      radius: 22, color: "#000", weight: 7, fillColor: "#00ff00", fillOpacity: 1
+    }).addTo(map).bindPopup("YOU ARE HERE", { permanent: true }).openPopup();
+
+    await loadPlayerData();
+
+    fetch("/locations")
+      .then(r => r.ok ? r.json() : [])
+      .then(locations => {
+        console.log("Locations loaded:", locations.length);
+        locations.forEach(loc => {
+          const color = loc.rarity === "legendary" ? "#ffff00" :
+                        loc.rarity === "epic" ? "#ff6200" :
+                        loc.rarity === "rare" ? "#00ffff" : "#00ff00";
+          const m = L.circleMarker([loc.lat, loc.lng], {
+            radius: 18, color: "#000", weight: 6, fillColor: color, fillOpacity: 0.95
+          })
+          .bindPopup(`<b style="color:#0f0;font-size:1.2rem">${loc.n}</b><br><span style="color:${color}">${(loc.rarity||"common").toUpperCase()}</span><br>Level ${loc.lvl}`)
+          .addTo(map);
+          markers[loc.n] = m;
+          if (claimed.has(loc.n)) m.setStyle({ fillColor: "#003300" });
+        });
+      })
+      .catch(err => console.error("Failed to load locations:", err));
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.watchPosition(pos => {
+        player.lat = pos.coords.latitude;
+        player.lng = pos.coords.longitude;
+        playerMarker.setLatLng([player.lat, player.lng]);
+        map.panTo([player.lat, player.lng]);
+      }, null, { enableHighAccuracy: true });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initMap();
+    updateUI();
+  });
+</script>
+</body>
+</html>
