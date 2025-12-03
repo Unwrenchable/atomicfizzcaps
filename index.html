@@ -244,9 +244,10 @@ function initMap() {
     .addTo(map).bindPopup('YOU ARE HERE', { permanent:true, className:'you-popup' }).openPopup();
 
   // LOAD YOUR 300+ LOCATIONS HERE
-  fetch('/locations')
-  .then(r => r.json())
-  .then(data => { window.locations = data; initMap(); })
+  app.get('/locations', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.json(locations);
+  });
 
       locations.forEach(loc => {
         const color = loc.rarity === 'legendary' ? '#ffff00' :
