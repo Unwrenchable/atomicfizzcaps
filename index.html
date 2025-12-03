@@ -2,298 +2,160 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PIP-BOY 3000 Mk IV • ATOMIC FIZZ • VAULT 77</title>
+<title>ATOMIC FIZZ • VAULT 77 • WASTELAND GPS</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#001100">
 <style>
 * {margin:0;padding:0;box-sizing:border-box}
-html,body {height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;font-weight:bold;text-shadow:0 0 6px #00ff00}
+html,body {height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;text-shadow:0 0 6px #00ff00}
 body {background:radial-gradient(circle at center,#002200,#000)}
-
-/* CRT SCANLINES & GLOW */
-.crt::before {content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.08) 0px,transparent 2px,transparent 4px);pointer-events:none;animation:scan 7s linear infinite;mix-blend-mode:screen}
-.crt::after {content:"";position:fixed;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,0,0.04) 50%,transparent);pointer-events:none;animation:scan2 10s linear infinite}
+.crt::before {content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.08) 0px,transparent 2px);pointer-events:none;animation:scan 7s linear infinite}
 @keyframes scan {0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
-@keyframes scan2 {0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.pipboy {position:fixed;inset:0;background:linear-gradient(145deg,#001100,#000);box-shadow:0 0 140px #00ff00,0 0 280px #00aa00,inset 0 0 180px rgba(0,0,0,0.9);padding:10px}
-.pip-screen {position:absolute;inset:10px;background:#000;overflow-y:auto;box-shadow:inset 0 0 90px #003300,0 0 90px rgba(0,255,0,0.8);padding:18px;border-radius:18px}
-.pip-screen{overflow-y:scroll;-ms-overflow-style:none;scrollbar-width:none} .pip-screen::-webkit-scrollbar{display:none}
-
-h1{font-size:2.5rem;text-align:center;margin:10px 0;letter-spacing:8px;background:linear-gradient(90deg,#00ff00,#44ff44,#00ff00,#44ff44,#00ff00);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 50px #00ff00;animation:glow 1.8s ease-in-out infinite}
-@keyframes glow{0%,100%{text-shadow:0 0 40px #00ff00}50%{text-shadow:0 0 80px #00ff00,0 0 160px #00ff00}}
-
-.statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin:18px 0}
-.stat{background:#000;border:4px ridge #00aa00;padding:10px;text-align:center;border-radius:10px;box-shadow:0 0 20px rgba(0,255,0,0.7)}
-.val{font-size:2rem;color:#ffff00;text-shadow:0 0 15px #ffff00;font-weight:900}
-
-.btn{background:#000;color:#00ff00;border:4px ridge #00aa00;padding:14px 28px;margin:10px;border-radius:24px;cursor:pointer;font-weight:bold;transition:.2s;box-shadow:0 0 15px #00ff00}
-.btn:hover,.btn:active{background:rgba(0,255,0,0.3);box-shadow:0 0 60px #00ff00;transform:scale(1.07)}
-
-#map-container {position:relative;height:380px;margin:22px 0;border:7px ridge #00ff00;border-radius:20px;overflow:hidden;box-shadow:0 0 80px #00ff00,inset 0 0 100px #001100;background:#000}
-#map {width:100%;height:100%;filter:sepia(0.4) hue-rotate(90deg) saturate(2.5) brightness(1.15) contrast(1.5)}
-#scanner-label {position:absolute;top:12px;left:16px;z-index:1000;background:rgba(0,0,0,0.85);color:#00ff00;padding:8px 16px;border:3px ridge #00ff00;border-radius:10px;font-size:1rem;font-weight:bold;pointer-events:none;animation:blink 2.5s infinite}
-@keyframes blink {0%,100%{opacity:1}50%{opacity:0.5}}
-
-.tabs{display:flex;justify-content:center;gap:12px;margin:20px 0;flex-wrap:wrap}
-.tab{background:rgba(0,0,0,0.8);border:3px ridge #00aa00;padding:12px 24px;border-radius:24px;cursor:pointer;transition:.2s}
-.tab.active,.tab:hover{background:#00ff00;color:#000;box-shadow:0 0 30px #00ff00}
-
+.pipboy {position:fixed;inset:0;background:#001100;padding:10px;box-shadow:0 0 140px #00ff00,inset 0 0 180px rgba(0,0,0,0.9)}
+.pip-screen {position:absolute;inset:10px;background:#000;overflow-y:auto;padding:18px;border-radius:18px;box-shadow:inset 0 0 90px #003300}
+h1{font-size:2.5rem;text-align:center;letter-spacing:8px;background:linear-gradient(90deg,#00ff00,#44ff44);-webkit-background-clip:text;color:transparent;animation:glow 2s infinite}
+@keyframes glow{0%,100%{text-shadow:0 0 40px #00ff00}50%{text-shadow:0 0 100px #00ff00}}
+.statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin:20px 0}
+.stat{background:#000;border:4px ridge #00aa00;padding:10px;text-align:center;border-radius:10px}
+.val{font-size:2rem;color:#ffff00;text-shadow:0 0 15px #ffff00}
+.btn{background:#000;color:#00ff00;border:4px ridge #00aa00;padding:14px 28px;margin:10px;border-radius:24px;cursor:pointer;font-weight:bold}
+.btn:hover{background:rgba(0,255,0,0.3);box-shadow:0 0 60px #00ff00;transform:scale(1.07)}
+#map-container {height:380px;margin:22px 0;border:7px ridge #00ff00;border-radius:20px;overflow:hidden;position:relative}
+#map {width:100%;height:100%;filter:hue-rotate(90deg) saturate(2) brightness(1.2)}
+.tabs{display:flex;justify-content:center;gap:12px;margin:20px 0}
+.tab{background:rgba(0,0,0,0.8);border:3px ridge #00aa00;padding:12px 24px;border-radius:24px;cursor:pointer}
+.tab.active,.tab:hover{background:#00ff00;color:#000}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
-.item{background:rgba(0,30,0,0.9);border:4px ridge #00aa00;padding:16px;border-radius:12px;transition:.3s;box-shadow:0 0 15px rgba(0,255,0,0.6)}
-.item:hover{transform:translateY(-8px);box-shadow:0 0 60px #00ff00;background:rgba(0,255,0,0.25)}
-
-.rar{padding:8px 16px;border-radius:24px;font-size:1rem;margin-top:10px;display:inline-block;font-weight:bold}
+.item{background:rgba(0,30,0,0.9);border:4px ridge #00aa00;padding:16px;border-radius:12px}
+.rar{padding:8px 16px;border-radius:24px;margin-top:10px;display:inline-block}
 .legendary{background:#ffff00;color:#000;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 20px #ffff00}50%{box-shadow:0 0 60px #00ff00}}
 .epic{background:#ff6200;color:#000}.rare{background:#00ffff;color:#000}.common{background:#006600;color:#0f0}
-
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.98);z-index:9999;justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:20px;color:#0f0}
-.crate{width:360px;height:360px;background:#111 url('https://i.ibb.co/4p7vK3B/nuka-crate.png') center/75% no-repeat;border:12px solid #ff6200;border-radius:30px;display:flex;align-items:flex-end;justify-content:center;font-size:5.5rem;color:#ff6200;text-shadow:0 0 40px #f90;animation:shake 0.6s infinite}
-@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-20px,20px)rotate(-10deg)}75%{transform:translate(20px,-20px)rotate(10deg)}}
-
-.you-popup .leaflet-popup-content-wrapper,.you-popup .leaflet-popup-tip{background:transparent !important;box-shadow:none !important;border:none !important}
-.you-popup .leaflet-popup-content{color:#0ff;font-weight:bold;text-shadow:0 0 20px #0ff;margin:0;padding:0}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/@solana/wallet-adapter-phantom@latest"></script>
 </head>
 <body class="crt">
 <div class="pipboy">
   <div class="pip-screen">
     <h1>ATOMIC FIZZ</h1>
-    <p style="text-align:center;letter-spacing:5px;margin-bottom:18px">VAULT 77 • REAL GPS • MOJAVE WASTELAND</p>
+    <p style="text-align:center;letter-spacing:5px">VAULT 77 • GPS • WASTELAND</p>
     
     <div class="statbar">
       <div class="stat"><div class="val" id="lvl">1</div><div>LEVEL</div></div>
       <div class="stat"><div class="val" id="hp">100/100</div><div>HP</div></div>
       <div class="stat"><div class="val" id="caps">0</div><div>CAPS</div></div>
-      <div class="stat"><div class="val" id="stimpaks">0</div><div>STIMPAKS</div></div>
       <div class="stat"><div class="val" id="claimed">0</div><div>CLAIMED</div></div>
     </div>
 
-    <button class="btn" id="connectBtn" onclick="connectWallet()">CONNECT WALLET</button>
-    <div id="status" style="text-align:center;margin:12px;font-size:1.4rem;color:#f66">NOT CONNECTED</div>
+    <button class="btn" id="connectBtn">CONNECT PHANTOM</button>
+    <div id="status" style="text-align:center;margin:12px;color:#f66;font-size:1.4rem">NOT CONNECTED</div>
 
     <div id="map-container">
-      <div id="scanner-label">RADIATION SCANNER • GPS LOCKED</div>
       <div id="map"></div>
     </div>
 
     <div class="tabs">
       <button class="tab active" data-tab="map">SCANNER</button>
       <button class="tab" data-tab="inventory">INVENTORY</button>
-      <button class="tab" data-tab="quest">QUEST LOG</button>
     </div>
 
     <div class="grid" id="grid" style="display:none"></div>
   </div>
 </div>
 
-<div class="overlay" id="lootOverlay" style="display:none">
-  <div class="crate">LOOT</div>
-  <h2 id="lootMsg" style="margin:40px;font-size:2.8rem;"></h2>
-  <button class="btn" onclick="closeLoot()">CLAIM & CONTINUE</button>
-</div>
-
-<div class="overlay" id="combatOverlay" style="display:none;background:#300;border:10px ridge #f66;padding:50px">
-  <h2 style="color:#f66;font-size:3.5rem" id="enemyName">DEATHCLAW</h2>
-  <p style="font-size:2.2rem" id="enemyHp">HP: 250</p>
-  <button class="btn" style="background:#f66;color:#000" onclick="fight()">V.A.T.S. ATTACK</button>
-  <button class="btn" onclick="flee()">FLEE</button>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// === GLOBALS ===
-let map, playerMarker, watchId;
-let player = { lvl: 1, hp: 100, maxHp: 100, caps: 0, stimpaks: [], gear: [], lat: 36.1146, lng: -115.1728 };
-let claimed = new Set();
-let markers = {};
-let wallet = null;
-const API_BASE = 'http://localhost:3000'; // Change to your live URL when deployed
+// AUTO DETECT API
+const API_BASE = window.location.origin;
 
-// === AUDIO ===
-const lootSound = new Audio('https://freesound.org/data/previews/571/571551_12117998-lq.mp3');
-const hitSound = new Audio('https://freesound.org/data/previews/276/276481_4043684-lq.mp3');
-const deathSound = new Audio('https://freesound.org/data/previews/249/249522_4397579-lq.mp3');
+let map, playerMarker, wallet, player = {lvl:1,hp:100,maxHp:100,caps:0,gear:[],claimed:[]}, markers = {}, claimed = new Set();
 
-// === WALLET ===
 async function connectWallet() {
-  if (window.solana && window.solana.isPhantom) {
     try {
-      wallet = await window.solana.connect();
-      document.getElementById('status').textContent = 'CONNECTED';
-      document.getElementById('connectBtn').disabled = true;
-      await loadPlayer();
-    } catch (e) { alert('Connection failed: ' + e.message); }
-  } else alert('Install Phantom Wallet: https://phantom.app');
+        const provider = window.solana;
+        if (!provider?.isPhantom) return alert("Phantom not found!");
+        await provider.connect();
+        wallet = provider;
+        document.getElementById('status').textContent = "CONNECTED: " + provider.publicKey.toBase58().slice(0,8) + "...";
+        document.getElementById('connectBtn').textContent = "CONNECTED";
+        loadPlayer();
+    } catch(e) { alert("Connection failed"); }
 }
 
 async function loadPlayer() {
-  if (!wallet?.publicKey) return;
-  try {
-    const res = await fetch(`${API_BASE}/player/${wallet.publicKey.toString()}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    player.caps = data.caps || 0;
-    player.hp = data.hp || 100;
-    player.gear = data.gear || [];
-    player.stimpaks = data.stimpaks || [];
-    player.maxHp = 100 + Math.floor(player.caps / 1000) * 50;
-    player.lvl = Math.floor(player.caps / 1000) + 1;
-    updateUI();
-  } catch (e) { console.error(e); }
+    if (!wallet) return;
+    const res = await fetch(`${API_BASE}/locations`);
+    if (res.ok) initMap(await res.json());
 }
 
-// === CLAIM & LOOT ===
 async function claimLoot(loc) {
-  if (claimed.has(loc.n) || player.lvl < loc.lvl) {
-    alert(player.lvl < loc.lvl ? `LEVEL ${loc.lvl} REQUIRED!` : 'Already claimed');
-    return;
-  }
-  if (!wallet?.publicKey) return alert('Connect wallet!');
-  try {
-    const res = await fetch(`${API_BASE}/claim-survival`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wallet: wallet.publicKey.toString(), spot: loc.n })
+    if (!wallet) return alert("Connect wallet!");
+    if (player.lvl < loc.lvl) return alert(`Need Level ${loc.lvl}`);
+    if (claimed.has(loc.n)) return alert("Already looted!");
+
+    try {
+        const res = await fetch(`${API_BASE}/claim-survival`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ wallet: wallet.publicKey.toBase58(), spot: loc.n })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Failed");
+
+        player.caps += 25;
+        if (data.gear) player.gear.push(data.gear);
+        player.lvl = data.lvl || player.lvl;
+        claimed.add(loc.n);
+        markers[loc.n].setStyle({fillColor: '#003300'});
+        updateUI();
+        alert(data.message);
+    } catch(e) { alert("Claim failed: " + e.message); }
+}
+
+function initMap(locations) {
+    map = L.map('map').setView([36.1146, -115.1728], 10);
+    L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
+
+    playerMarker = L.circleMarker([36.1146, -115.1728], {radius:22,color:'#000',weight:7,fillColor:'#00ff00',fillOpacity:1})
+        .addTo(map).bindPopup("YOU ARE HERE").openPopup();
+
+    locations.forEach(loc => {
+        const color = loc.rarity === 'legendary' ? '#ffff00' : loc.rarity === 'epic' ? '#ff6200' : loc.rarity === 'rare' ? '#00ffff' : '#00ff00';
+        const m = L.circleMarker([loc.lat, loc.lng], {radius:18,color:'#000',weight:6,fillColor:color,fillOpacity:0.95})
+            .bindPopup(`<b>${loc.n}</b><br><span class="rar ${loc.rarity}">${loc.rarity.toUpperCase()}</span><br>Level ${loc.lvl}`)
+            .on('click', () => claimLoot(loc))
+            .addTo(map);
+        markers[loc.n] = m;
     });
-    if (!res.ok) throw new Error('Claim failed');
-    const data = await res.json();
-    claimed.add(loc.n);
-    player.caps += data.caps;
-    if (data.gear) player.gear.push(data.gear);
-    if (data.raid) {
-      player.hp = data.raid.hp;
-      player.gear = data.raid.gear;
-      document.getElementById('enemyName').textContent = data.raid.enemy;
-      document.getElementById('enemyHp').textContent = 'DEFEATED';
-      document.getElementById('combatOverlay').style.display = 'flex';
-      if (!data.raid.won) die();
-    } else {
-      let msg = data.message + '<br>+25 CAPS';
-      if (data.gear) msg += `<br><span class="rar ${data.gear.rarity}">Got ${data.gear.rarity.toUpperCase()} ${data.gear.name}!</span>`;
-      document.getElementById('lootMsg').innerHTML = msg;
-      document.getElementById('lootOverlay').style.display = 'flex';
-      lootSound.play().catch(() => {});
+
+    if ('geolocation' in navigator) {
+        navigator.geolocation.watchPosition(pos => {
+            playerMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
+            map.panTo([pos.coords.latitude, pos.coords.longitude]);
+        }, null, {enableHighAccuracy:true});
     }
-    const oldLvl = player.lvl;
-    player.lvl = Math.floor(player.caps / 1000) + 1;
-    if (player.lvl > oldLvl) { player.maxHp += 50; player.hp = player.maxHp; }
-    markers[loc.n].setStyle({ fillColor: '#003300' });
-    updateUI();
-  } catch (e) { alert('Error: ' + e.message); }
 }
-
-async function buyStimpak(tier, cost) {
-  if (!wallet?.publicKey) return alert('Connect wallet!');
-  if (player.caps < cost) return alert('Not enough CAPS!');
-  const res = await fetch(`${API_BASE}/buy-stimpak`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ wallet: wallet.publicKey.toString(), tier, cost })
-  });
-  if (!res.ok) return alert('Buy failed');
-  const data = await res.json();
-  player.stimpaks.push({ name: data.stimpak, tier });
-  player.caps -= cost;
-  updateUI();
-  alert(`Bought ${data.stimpak}!`);
-}
-
-// === COMBAT
-function fight() { hitSound.play(); document.getElementById('combatOverlay').style.display = 'none'; alert('Battle resolved!'); }
-function flee() { document.getElementById('combatOverlay').style.display = 'none'; alert('Escaped!'); }
-function die() { deathSound.play(); player.caps = Math.floor(player.caps * 0.5); player.hp = player.maxHp; alert('YOU DIED — Lost 50% CAPS'); updateUI(); }
-function closeLoot() { document.getElementById('lootOverlay').style.display = 'none'; }
 
 function updateUI() {
-  document.getElementById('lvl').textContent = player.lvl;
-  document.getElementById('hp').textContent = `${player.hp}/${player.maxHp}`;
-  document.getElementById('caps').textContent = player.caps;
-  document.getElementById('stimpaks').textContent = player.stimpaks.length;
-  document.getElementById('claimed').textContent = claimed.size;
+    document.getElementById('lvl').textContent = player.lvl;
+    document.getElementById('hp').textContent = `${player.hp}/${player.maxHp}`;
+    document.getElementById('caps').textContent = player.caps;
+    document.getElementById('claimed').textContent = claimed.size;
 }
 
-// === TABS ===
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const mode = tab.dataset.tab;
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const mode = t.dataset.tab;
     document.getElementById('map-container').style.display = mode === 'map' ? 'block' : 'none';
     document.getElementById('grid').style.display = mode === 'map' ? 'none' : 'grid';
     if (mode === 'inventory') {
-      let html = player.gear.length ? player.gear.map(g => `<div class="item">• ${g.name} (${g.rarity})</div>`).join('') : '<div class="item">Inventory Empty</div>';
-      html += `<div class="item">Stimpaks: ${player.stimpaks.length}</div>`;
-      html += '<button class="btn" onclick="buyStimpak(\'common\', 50)">Buy Stimpak (50 CAPS)</button>';
-      html += '<button class="btn" onclick="buyStimpak(\'rare\', 150)">Buy Super Stimpak (150 CAPS)</button>';
-      html += '<button class="btn" onclick="buyStimpak(\'legendary\', 500)">Buy Med-X + Stimpak (500 CAPS)</button>';
-      document.getElementById('grid').innerHTML = html;
+        document.getElementById('grid').innerHTML = player.gear.map(g => `<div class="item">• ${g.name} <span class="rar ${g.rarity}">${g.rarity}</span></div>`).join('') || "<div class='item'>No gear yet</div>";
     }
-    if (mode === 'quest') document.getElementById('grid').innerHTML = '<div class="item">Main Quest: Survive the Wasteland • Reach Vault 77</div>';
-  };
 });
 
-// === MAP — FALLOUT PERFECTION ===
-async function initMap() {
-  map = L.map('map', { zoomControl: true, attributionControl: false }).setView([36.1146, -115.1728], 16);
-
-  // GOOGLE SATELLITE — NO API KEY REQUIRED
-  L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-    maxZoom: 20,
-    attribution: ''
-  }).addTo(map);
-
-  // PLAYER MARKER — GLOWING GREEN BEACON
-  playerMarker = L.circleMarker([player.lat, player.lng], {
-    radius: 22,
-    color: '#000',
-    weight: 7,
-    fillColor: '#00ff00',
-    fillOpacity: 1
-  }).addTo(map)
-    .bindPopup('YOU ARE HERE', { permanent: true, className: 'you-popup' })
-    .openPopup();
-  playerMarker.getElement().style.filter = 'drop-shadow(0 0 35px #00ff00)';
-
-  // LOAD LOCATIONS FROM YOUR BACKEND
-  try {
-    const res = await fetch(`${API_BASE}/locations`);
-    if (res.ok) {
-      const locations = await res.json();
-      locations.forEach(loc => {
-        const color = loc.rarity === 'legendary' ? '#ffff00' : loc.rarity === 'epic' ? '#ff6200' : loc.rarity === 'rare' ? '#00ffff' : '#00ff00';
-        const m = L.circleMarker([loc.lat, loc.lng], { radius: 18, color: '#000', weight: 6, fillColor: color, fillOpacity: 0.95 })
-          .bindPopup(`<b style="color:#0f0;font-size:1.2rem">${loc.n}</b><br><span class="rar ${loc.rarity||'common'}">${(loc.rarity||'common').toUpperCase()}</span><br>Level ${loc.lvl}`)
-          .on('click', () => claimLoot(loc))
-          .addTo(map);
-        markers[loc.n] = m;
-        if (claimed.has(loc.n)) m.setStyle({ fillColor: '#003300' });
-      });
-    }
-  } catch (e) { console.log("No locations loaded — normal in dev"); }
-
-  // LIVE GPS TRACKING
-  if ('geolocation' in navigator) {
-    watchId = navigator.geolocation.watchPosition(pos => {
-      player.lat = pos.coords.latitude;
-      player.lng = pos.coords.longitude;
-      playerMarker.setLatLng([player.lat, player.lng]);
-      map.panTo([player.lat, player.lng], { animate: true, duration: 1 });
-    }, err => console.error(err), {
-      enableHighAccuracy: true,
-      maximumAge: 2000,
-      timeout: 10000
-    });
-  }
-}
-
-// === START GAME ===
-document.addEventListener('DOMContentLoaded', () => {
-  initMap();
-  updateUI();
-});
+document.getElementById('connectBtn').onclick = connectWallet;
 </script>
 </body>
 </html>
