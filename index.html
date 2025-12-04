@@ -2,160 +2,455 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ATOMIC FIZZ • VAULT 77 • WASTELAND GPS</title>
+<title>PIP-BOY 3000 Mk IV • ATOMIC FIZZ • VAULT 77</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<style>
-* {margin:0;padding:0;box-sizing:border-box}
-html,body {height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;text-shadow:0 0 6px #00ff00}
-body {background:radial-gradient(circle at center,#002200,#000)}
-.crt::before {content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.08) 0px,transparent 2px);pointer-events:none;animation:scan 7s linear infinite}
-@keyframes scan {0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
-.pipboy {position:fixed;inset:0;background:#001100;padding:10px;box-shadow:0 0 140px #00ff00,inset 0 0 180px rgba(0,0,0,0.9)}
-.pip-screen {position:absolute;inset:10px;background:#000;overflow-y:auto;padding:18px;border-radius:18px;box-shadow:inset 0 0 90px #003300}
-h1{font-size:2.5rem;text-align:center;letter-spacing:8px;background:linear-gradient(90deg,#00ff00,#44ff44);-webkit-background-clip:text;color:transparent;animation:glow 2s infinite}
-@keyframes glow{0%,100%{text-shadow:0 0 40px #00ff00}50%{text-shadow:0 0 100px #00ff00}}
-.statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin:20px 0}
-.stat{background:#000;border:4px ridge #00aa00;padding:10px;text-align:center;border-radius:10px}
-.val{font-size:2rem;color:#ffff00;text-shadow:0 0 15px #ffff00}
-.btn{background:#000;color:#00ff00;border:4px ridge #00aa00;padding:14px 28px;margin:10px;border-radius:24px;cursor:pointer;font-weight:bold}
-.btn:hover{background:rgba(0,255,0,0.3);box-shadow:0 0 60px #00ff00;transform:scale(1.07)}
-#map-container {height:380px;margin:22px 0;border:7px ridge #00ff00;border-radius:20px;overflow:hidden;position:relative}
-#map {width:100%;height:100%;filter:hue-rotate(90deg) saturate(2) brightness(1.2)}
-.tabs{display:flex;justify-content:center;gap:12px;margin:20px 0}
-.tab{background:rgba(0,0,0,0.8);border:3px ridge #00aa00;padding:12px 24px;border-radius:24px;cursor:pointer}
-.tab.active,.tab:hover{background:#00ff00;color:#000}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:12px 0}
-.item{background:rgba(0,30,0,0.9);border:4px ridge #00aa00;padding:16px;border-radius:12px}
-.rar{padding:8px 16px;border-radius:24px;margin-top:10px;display:inline-block}
-.legendary{background:#ffff00;color:#000;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 20px #ffff00}50%{box-shadow:0 0 60px #00ff00}}
-.epic{background:#ff6200;color:#000}.rare{background:#00ffff;color:#000}.common{background:#006600;color:#0f0}
-</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#001100">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
-<script src="https://unpkg.com/@solana/wallet-adapter-phantom@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#000;overflow:hidden;font-family:"Courier New",monospace;color:#00ff00;font-weight:bold;text-shadow:0 0 6px #00ff00}
+body{background:radial-gradient(circle at center,#002200,#000)}
+.crt::before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.08) 0px,transparent 2px,transparent 4px);pointer-events:none;animation:scan 7s linear infinite;mix-blend-mode:screen}
+.crt::after{content:"";position:fixed;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,0,0.04) 50%,transparent);pointer-events:none;animation:scan2 10s linear infinite}
+@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+@keyframes scan2{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.pipboy{position:fixed;inset:0;background:linear-gradient(145deg,#001100,#000);box-shadow:0 0 140px #00ff00,0 0 280px #00aa00,inset 0 0 180px #000;padding:10px}
+.pip-screen{position:absolute;inset:10px;background:#000;overflow:hidden;box-shadow:inset 0 0 90px #003300,0 0 90px rgba(0,255,0,0.8);padding:18px;border-radius:18px}
+.tabs{position:absolute;top:20px;left:20px;right:20px;height:50px;background:rgba(0,20,0,0.95);border:4px ridge #00aa00;border-radius:10px 10px 0 0;display:flex;z-index:1001}
+.tab-btn{flex:1;text-align:center;padding:12px;font-size:1.4rem;cursor:pointer;border-right:2px solid #003300;transition:0.3s}
+.tab-btn:last-child{border-right:none}
+.tab-btn.active{background:#003300;box-shadow:inset 0 0 30px #00ff00;color:#39FF14}
+.tab-content{position:absolute;top:80px;left:20px;right:20px;bottom:20px;background:rgba(0,20,0,0.95);border:4px ridge #00aa00;border-top:none;border-radius:0 0 10px 10px;padding:20px;overflow-y:auto;z-index:1000}
+#leaflet-map{width:100%;height:100%;filter:sepia(0.35) hue-rotate(85deg) saturate(3) brightness(1.1) contrast(1.4)}
+#lootOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.98);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:#00ff00;font-size:3rem;text-shadow:0 0 30px #00ff00}
+#lootOverlay button{margin-top:60px;padding:20px 80px;background:#000;border:6px solid #00ff00;color:#00ff00;font-size:2.5rem;cursor:pointer;border-radius:15px}
+.leaflet-popup-content-wrapper{background:rgba(0,20,0,0.95);color:#00ff00;border:3px ridge #00aa00;border-radius:8px}
+.leaflet-popup-content{font-family:"Courier New",monospace;font-weight:bold;font-size:1.4rem;text-align:center;line-height:1.6}
+.active-quest-icon{filter:drop-shadow(0 0 10px #39FF14);}
+</style>
 </head>
 <body class="crt">
 <div class="pipboy">
   <div class="pip-screen">
-    <h1>ATOMIC FIZZ</h1>
-    <p style="text-align:center;letter-spacing:5px">VAULT 77 • GPS • WASTELAND</p>
-    
-    <div class="statbar">
-      <div class="stat"><div class="val" id="lvl">1</div><div>LEVEL</div></div>
-      <div class="stat"><div class="val" id="hp">100/100</div><div>HP</div></div>
-      <div class="stat"><div class="val" id="caps">0</div><div>CAPS</div></div>
-      <div class="stat"><div class="val" id="claimed">0</div><div>CLAIMED</div></div>
-    </div>
-
-    <button class="btn" id="connectBtn">CONNECT PHANTOM</button>
-    <div id="status" style="text-align:center;margin:12px;color:#f66;font-size:1.4rem">NOT CONNECTED</div>
-
-    <div id="map-container">
-      <div id="map"></div>
-    </div>
-
     <div class="tabs">
-      <button class="tab active" data-tab="map">SCANNER</button>
-      <button class="tab" data-tab="inventory">INVENTORY</button>
+      <div class="tab-btn" onclick="openTab('stat')">STAT</div>
+      <div class="tab-btn" onclick="openTab('items')">ITEMS</div>
+      <div class="tab-btn" onclick="openTab('data')">DATA</div>
+      <div class="tab-btn active" onclick="openTab('map')">MAP</div>
     </div>
-
-    <div class="grid" id="grid" style="display:none"></div>
+    <div id="stat" class="tab-content" style="display:none">
+      <div style="font-size:1.8rem">CAPS: <span id="caps">0</span></div>
+      <div style="font-size:1.8rem">LEVEL: <span id="level">1</span></div>
+      <div style="margin-top:30px;color:#39FF14;font-size:2rem" id="active-quest">Escape Goodsprings</div>
+    </div>
+    <div id="items" class="tab-content" style="display:none">
+      <div style="font-size:1.8rem;margin-bottom:20px">INVENTORY</div>
+      <div id="inventory-list">—</div>
+      <div id="stimpak-line" style="display:none;margin-top:20px">
+        STIMPAK x<span id="stimpak-count">0</span>
+        <span style="background:rgba(0,255,0,0.2);padding:6px 16px;margin-left:12px;border:2px solid #00ff00;border-radius:6px;cursor:pointer" onclick="useStimpak()">USE</span>
+      </div>
+    </div>
+    <div id="data" class="tab-content" style="display:none">
+      <div style="font-size:1.6rem">ATOMIC FIZZ VAULT-TEC OS v77.7</div>
+      <div style="margin-top:20px">TIME: <span id="clock"></span></div>
+      <div>MAIN OBJECTIVE: <span id="quest-data">Escape Goodsprings</span></div>
+    </div>
+    <div id="map" class="tab-content" style="padding:0">
+      <div id="leaflet-map"></div>
+    </div>
   </div>
 </div>
+<div id="lootOverlay">
+  <div id="lootMessage"></div>
+  <button onclick="this.parentNode.style.display='none'">CONTINUE</button>
+</div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// AUTO DETECT API
-const API_BASE = window.location.origin;
+const mainQuestTargets = [
+  "Goodsprings (Pioneer Saloon)","Primm (Buffalo Bill's)","New Vegas Strip (Bellagio)","Lucky 38 (The Strat)","Vault 77 (Secret)"
+];
+const quests = mainQuestTargets.map((t,i)=>({name:["Escape Goodsprings","Reach Primm","Enter New Vegas","Meet Mr. House","Find Vault 77"][i], target:t}));
 
-let map, playerMarker, wallet, player = {lvl:1,hp:100,maxHp:100,caps:0,gear:[],claimed:[]}, markers = {}, claimed = new Set();
+let activeQuest = quests[0];
+let player = { caps: 0, level: 1, inventory: [], stimpaks: 0, claimed: [] };
+let map, playerMarker, markers = {}, claimed = new Set();
 
-async function connectWallet() {
-    try {
-        const provider = window.solana;
-        if (!provider?.isPhantom) return alert("Phantom not found!");
-        await provider.connect();
-        wallet = provider;
-        document.getElementById('status').textContent = "CONNECTED: " + provider.publicKey.toBase58().slice(0,8) + "...";
-        document.getElementById('connectBtn').textContent = "CONNECTED";
-        loadPlayer();
-    } catch(e) { alert("Connection failed"); }
+// ==================== LOCALSTORAGE SAVE/LOAD ====================
+function loadGame() {
+  const saved = localStorage.getItem('fallout77save');
+  if (saved) {
+    const data = JSON.parse(saved);
+    Object.assign(player, data);
+    claimed = new Set(player.claimed || []);
+    // Restore active quest based on what’s already claimed
+    const next = quests.find(q => !claimed.has(q.target));
+    if (next) activeQuest = next;
+  }
+}
+function saveGame() {
+  player.claimed = Array.from(claimed);
+  localStorage.setItem('fallout77save', JSON.stringify(player));
+}
+// ================================================================
+
+const allLocations = [{n:"Goodsprings Saloon",lat:35.8324,lng:-115.4320,lvl:1,rarity:"common"},
+  {n:"Primm Rollercoaster",lat:35.6145,lng:-115.3845,lvl:2,rarity:"common"},
+  {n:"Novac Motel",lat:35.0525,lng:-114.8247,lvl:5,rarity:"rare"},
+  {n:"Hoover Dam",lat:36.016,lng:-114.738,lvl:12,rarity:"epic"},
+  {n:"The Strip Gate",lat:36.1147,lng:-115.1728,lvl:15,rarity:"epic"},
+  {n:"Lucky 38",lat:36.147,lng:-115.156,lvl:18,rarity:"epic"},
+  {n:"Black Mountain",lat:35.9310,lng:-115.0440,lvl:20,rarity:"epic"},
+  {n:"Area 51 Gate",lat:37.2431,lng:-115.7930,lvl:45,rarity:"legendary"},
+  {n:"Vault 77 (Secret)",lat:36.170,lng:-115.140,lvl:77,rarity:"legendary"},
+  {n:"Chernobyl Pripyat",lat:51.389,lng:30.099,lvl:99,rarity:"legendary"},
+  {n:"Fukushima Daiichi",lat:37.421,lng:141.032,lvl:99,rarity:"legendary"},
+  {n:"Three Mile Island",lat:40.1522,lng:-77.1581,lvl:40,rarity:"legendary"},
+  {n:"Dead Wind Cavern",lat:35.8000,lng:-115.4000,lvl:40,rarity:"legendary"},
+  {n:"Vault 34",lat:36.1750,lng:-114.7500,lvl:20,rarity:"epic"},
+  {n:"Jacobstown",lat:36.3000,lng:-115.6500,lvl:22,rarity:"rare"},
+  {n:"Searchlight Church",lat:35.46434,lng:-114.91844,lvl:10,rarity:"rare"},
+  {n:"Cottonwood Cove",lat:35.9990,lng:-114.5000,lvl:14,rarity:"rare"},
+  {n:"Deathclaw Promontory",lat:36.1000,lng:-114.9000,lvl:45,rarity:"legendary"},
+  {n:"Los Alamos Lab",lat:35.875,lng:-106.300,lvl:50,rarity:"legendary"},
+  {n:"Yucca Mountain",lat:37.000,lng:-116.800,lvl:50,rarity:"legendary"},
+  {n:"Nevada Test Site",lat:37.100,lng:-116.000,lvl:48,rarity:"legendary"},
+  {n:"Trinity Test Site",lat:33.6773,lng:-106.4754,lvl:80,rarity:"legendary"},
+  {n:"Hanford Site",lat:46.549,lng:-119.476,lvl:55,rarity:"legendary"},
+  {n:"Pantex Plant",lat:35.311,lng:-101.560,lvl:65,rarity:"legendary"},
+  {n:"Oak Ridge Y-12",lat:35.990,lng:-84.250,lvl:50,rarity:"legendary"},
+  {n:"Rocky Flats Plant",lat:39.892,lng:-105.202,lvl:45,rarity:"legendary"},
+  {n:"Windscale Sellafield",lat:54.417,lng:-3.487,lvl:60,rarity:"legendary"},
+  {n:"Kyshtym Disaster",lat:55.767,lng:60.867,lvl:70,rarity:"legendary"},
+  {n:"Nipton Trading Post",lat:35.46667,lng:-115.27222,lvl:4,rarity:"common"},
+  {n:"Boulder City Hotel",lat:35.97750,lng:-114.83639,lvl:6,rarity:"rare"},
+  {n:"New Vegas Strip",lat:36.112740,lng:-115.174301,lvl:10,rarity:"epic"},
+  {n:"Freeside Market",lat:36.170719,lng:-115.143929,lvl:5,rarity:"common"},
+  {n:"Red Rock Canyon",lat:36.13514,lng:-115.4283,lvl:8,rarity:"rare"},
+  {n:"Nellis Air Force Base",lat:36.2361,lng:-115.0342,lvl:25,rarity:"epic"},
+  {n:"Helios One",lat:35.7580,lng:-114.9530,lvl:13,rarity:"epic"},
+  {n:"REPCONN Test Site",lat:36.0360,lng:-115.0880,lvl:12,rarity:"rare"},
+  {n:"Quarry Junction",lat:35.9200,lng:-115.1800,lvl:35,rarity:"epic"},
+  {n:"Bonnie Springs Ranch",lat:36.06007,lng:-115.45027,lvl:7,rarity:"common"},
+  {n:"Callville Bay Marina",lat:36.14400,lng:-114.72200,lvl:9,rarity:"common"},
+  {n:"Sloan Station",lat:35.94361,lng:-115.21722,lvl:5,rarity:"common"},
+  {n:"Jean Airport",lat:35.7677,lng:-115.3245,lvl:6,rarity:"common"},
+  {n:"McCarran Airport",lat:36.0801,lng:-115.1522,lvl:8,rarity:"rare"},
+  {n:"Old Mormon Fort",lat:36.1694,lng:-115.1305,lvl:6,rarity:"common"},
+  {n:"Ultra-Luxe Casino",lat:36.0972,lng:-115.1787,lvl:11,rarity:"epic"},
+  {n:"Gomorrah Casino",lat:36.1100,lng:-115.1720,lvl:10,rarity:"epic"},
+  {n:"Silver Rush",lat:36.1498,lng:-115.1390,lvl:9,rarity:"rare"},
+  {n:"Atomic Wrangler",lat:36.1499,lng:-115.1383,lvl:8,rarity:"rare"},
+  {n:"Nelson Ghost Town",lat:35.4189,lng:-114.7133,lvl:9,rarity:"rare"},
+  {n:"Rhyolite Ghost Town",lat:36.9033,lng:-116.8283,lvl:11,rarity:"rare"},
+  {n:"Mt Charleston",lat:36.2650,lng:-115.6500,lvl:16,rarity:"epic"},
+  {n:"Luxor Pyramid",lat:36.0965,lng:-115.1769,lvl:9,rarity:"rare"},
+  {n:"Whiskey Pete's",lat:35.6167,lng:-115.3900,lvl:3,rarity:"common"},
+  {n:"Primm Valley Resort",lat:35.6160,lng:-115.3900,lvl:3,rarity:"common"},
+  {n:"Westgate Hotel",lat:36.1311,lng:-115.1564,lvl:10,rarity:"epic"},
+  {n:"Coca Cola Factory",lat:36.1025,lng:-115.1738,lvl:8,rarity:"rare"},
+  {n:"Nellis Solar Array",lat:36.2460,lng:-115.0320,lvl:15,rarity:"epic"},
+  {n:"Ivanpah Solar",lat:35.2000,lng:-115.4667,lvl:18,rarity:"epic"},
+  {n:"REPCONN Headquarters",lat:36.0500,lng:-115.1000,lvl:13,rarity:"rare"},
+  {n:"188 Trading Post",lat:35.9500,lng:-115.2000,lvl:8,rarity:"common"},
+  {n:"Nevada Highway Patrol",lat:35.9500,lng:-115.1500,lvl:6,rarity:"common"},
+  {n:"Sunset Sarsaparilla HQ",lat:36.0000,lng:-115.2000,lvl:10,rarity:"rare"},
+  {n:"HELIOS One Entrance",lat:35.7600,lng:-114.9500,lvl:13,rarity:"epic"},
+  {n:"Camp Searchlight",lat:35.4600,lng:-114.9200,lvl:11,rarity:"rare"},
+  {n:"Vikki & Vance Museum",lat:35.6150,lng:-115.3850,lvl:4,rarity:"common"},
+  {n:"Mesquite Mountains",lat:35.8500,lng:-115.9500,lvl:17,rarity:"rare"},
+  {n:"Devil's Gullet",lat:35.7000,lng:-115.3000,lvl:23,rarity:"epic"},
+  {n:"Primm Schoolhouse",lat:35.6150,lng:-115.3850,lvl:3,rarity:"common"},
+  {n:"Nipton Hall",lat:35.4667,lng:-115.2722,lvl:5,rarity:"common"},
+  {n:"Boulder City Ruins",lat:35.9775,lng:-114.8364,lvl:7,rarity:"rare"},
+  {n:"Megaton",lat:38.863,lng:-77.085,lvl:8,rarity:"rare"},
+  {n:"Vault 101",lat:38.948,lng:-77.334,lvl:1,rarity:"common"},
+  {n:"Rivet City",lat:38.874,lng:-77.022,lvl:10,rarity:"epic"},
+  {n:"The Citadel",lat:38.871,lng:-77.056,lvl:25,rarity:"epic"},
+  {n:"Jefferson Memorial",lat:38.876,lng:-77.012,lvl:15,rarity:"rare"},
+  {n:"Raven Rock",lat:39.732,lng:-77.421,lvl:35,rarity:"legendary"},
+  {n:"Tenpenny Tower",lat:38.920,lng:-77.200,lvl:18,rarity:"rare"},
+  {n:"Paradise Falls",lat:38.900,lng:-77.250,lvl:12,rarity:"rare"},
+  {n:"Little Lamplight",lat:38.820,lng:-77.380,lvl:10,rarity:"rare"},
+  {n:"Dunwich Building",lat:38.920,lng:-77.220,lvl:40,rarity:"legendary"},
+  {n:"Evergreen Mills",lat:38.850,lng:-77.300,lvl:15,rarity:"rare"},
+  {n:"Vault 112",lat:38.889,lng:-77.025,lvl:20,rarity:"epic"},
+  {n:"Point Lookout Lighthouse",lat:38.043,lng:-76.003,lvl:30,rarity:"legendary"},
+  {n:"The Pitt",lat:40.4406,lng:-79.9959,lvl:40,rarity:"legendary"},
+  {n:"Mama Dolce's",lat:38.850,lng:-77.200,lvl:15,rarity:"rare"},
+  {n:"Diamond City",lat:42.3467,lng:-71.0972,lvl:15,rarity:"epic"},
+  {n:"Vault 111",lat:42.390,lng:-71.300,lvl:5,rarity:"common"},
+  {n:"Sanctuary Hills",lat:42.450,lng:-71.450,lvl:3,rarity:"common"},
+  {n:"Concord",lat:42.460,lng:-71.349,lvl:7,rarity:"common"},
+  {n:"Goodneighbor",lat:42.356,lng:-71.061,lvl:12,rarity:"rare"},
+  {n:"The Institute",lat:42.360,lng:-71.094,lvl:35,rarity:"legendary"},
+  {n:"Boston Common",lat:42.354,lng:-71.066,lvl:30,rarity:"epic"},
+  {n:"Glowing Sea",lat:42.200,lng:-71.400,lvl:50,rarity:"legendary"},
+  {n:"Nuka-World",lat:42.300,lng:-72.900,lvl:35,rarity:"epic"},
+  {n:"Far Harbor",lat:44.300,lng:-68.300,lvl:40,rarity:"legendary"},
+  {n:"Vault 81",lat:42.363,lng:-71.508,lvl:20,rarity:"rare"},
+  {n:"Vault 114",lat:42.356,lng:-71.061,lvl:18,rarity:"rare"},
+  {n:"Vault 76",lat:39.500,lng:-79.900,lvl:1,rarity:"common"},
+  {n:"The Whitespring Resort",lat:38.050,lng:-79.800,lvl:25,rarity:"epic"},
+  {n:"West Tek",lat:38.300,lng:-80.100,lvl:40,rarity:"legendary"},
+  {n:"Sugar Grove",lat:38.300,lng:-79.300,lvl:35,rarity:"legendary"},
+  {n:"The Crater",lat:37.900,lng:-79.700,lvl:35,rarity:"epic"},
+  {n:"Fort Atlas",lat:38.100,lng:-79.900,lvl:30,rarity:"epic"},
+  {n:"Vault 13",lat:37.500,lng:-121.900,lvl:15,rarity:"epic"},
+  {n:"Shady Sands",lat:34.0522,lng:-118.2437,lvl:20,rarity:"rare"},
+  {n:"The Hub",lat:34.0522,lng:-118.2437,lvl:12,rarity:"common"},
+  {n:"Junktown",lat:34.000,lng:-118.400,lvl:8,rarity:"common"},
+  {n:"Necropolis",lat:35.370,lng:-119.020,lvl:25,rarity:"epic"},
+  {n:"The Glow",lat:33.800,lng:-115.900,lvl:55,rarity:"legendary"},
+  {n:"Mariposa Military Base",lat:37.500,lng:-120.500,lvl:45,rarity:"legendary"},
+  {n:"Lost Hills Bunker",lat:34.800,lng:-118.600,lvl:30,rarity:"epic"},
+  {n:"Vault 15",lat:37.700,lng:-121.900,lvl:18,rarity:"rare"},
+  {n:"New Reno",lat:39.5296,lng:-119.8138,lvl:28,rarity:"epic"},
+  {n:"Broken Hills",lat:39.400,lng:-121.200,lvl:20,rarity:"rare"},
+    {n:"Minuteman III Silo",lat:41.133,lng:-104.867,lvl:70,rarity:"legendary"},
+  {n:"Mothership Zeta",lat:0,lng:0,lvl:99,rarity:"legendary"},
+  {n:"Dunwich Borers Quarry",lat:42.374,lng:-71.433,lvl:45,rarity:"legendary"},
+  {n:"UFO Crash Site",lat:37.644,lng:-116.850,lvl:50,rarity:"legendary"},
+  {n:"Havasu Falls",lat:36.240,lng:-112.690,lvl:30,rarity:"rare"},
+  {n:"The Devil’s Throat",lat:36.100,lng:-114.900,lvl:40,rarity:"legendary"},
+  {n:"Sunken Vault 22",lat:36.1699,lng:-115.1398,lvl:35,rarity:"epic"},
+  {n:"The Divide",lat:37.000,lng:-116.000,lvl:55,rarity:"legendary"},
+  {n:"Vault 3",lat:36.2000,lng:-115.8000,lvl:25,rarity:"rare"},
+  {n:"Vault 11",lat:35.5000,lng:-117.0000,lvl:28,rarity:"epic"},
+  {n:"Vault 19",lat:36.1000,lng:-115.9000,lvl:22,rarity:"rare"},
+  {n:"Vault 21",lat:36.1699,lng:-115.1398,lvl:18,rarity:"rare"},
+  {n:"Vault 22",lat:36.1699,lng:-115.1398,lvl:32,rarity:"epic"},
+  {n:"Vault 29",lat:36.0000,lng:-116.0000,lvl:30,rarity:"rare"},
+  {n:"Vault 87",lat:38.950,lng:-77.850,lvl:30,rarity:"legendary"},
+  {n:"Vault 92",lat:38.900,lng:-77.300,lvl:25,rarity:"rare"},
+  {n:"Vault 106",lat:38.800,lng:-77.400,lvl:32,rarity:"epic"},
+  {n:"Enclave Oil Rig",lat:33.000,lng:-118.000,lvl:50,rarity:"legendary"},
+  {n:"Gecko Reactor",lat:37.8000,lng:-121.9000,lvl:25,rarity:"rare"},
+  {n:"Klamath",lat:42.0000,lng:-121.8000,lvl:10,rarity:"common"},
+  {n:"The Den",lat:37.7749,lng:-122.4194,lvl:14,rarity:"rare"},
+  {n:"Modoc",lat:41.6331,lng:-120.0294,lvl:16,rarity:"common"},
+  {n:"Ghost Farm",lat:41.5000,lng:-120.0000,lvl:12,rarity:"rare"},
+  {n:"Redding Mines",lat:40.6066,lng:-122.1488,lvl:20,rarity:"rare"},
+  {n:"NCR Capital",lat:36.1699,lng:-115.1398,lvl:30,rarity:"epic"},
+  {n:"Brotherhood Bunker",lat:34.0522,lng:-118.2437,lvl:35,rarity:"epic"},
+  {n:"Sierra Army Depot",lat:40.0000,lng:-120.0000,lvl:38,rarity:"epic"},
+  {n:"EPA Facility",lat:38.000,lng:-122.0000,lvl:25,rarity:"rare"},
+  {n:"The Master's Lair",lat:34.0522,lng:-118.2437,lvl:60,rarity:"legendary"},
+  {n:"Cazador Hive",lat:36.0000,lng:-115.0000,lvl:30,rarity:"epic"},
+  {n:"Deathclaw Nest",lat:42.0000,lng:-126.0000,lvl:40,rarity:"legendary"},
+  {n:"Radscorpion Den",lat:43.0000,lng:-127.0000,lvl:25,rarity:"rare"},
+  {n:"Raider Stronghold",lat:37.0000,lng:-121.0000,lvl:22,rarity:"rare"},
+  {n:"Super Mutant Base",lat:41.0000,lng:-125.0000,lvl:35,rarity:"epic"},
+  {n:"Abandoned Mine",lat:40.0000,lng:-124.0000,lvl:20,rarity:"common"},
+  {n:"Scavenger Camp",lat:39.0000,lng:-123.0000,lvl:12,rarity:"common"},
+  {n:"Raided Caravan",lat:37.0000,lng:-121.0000,lvl:10,rarity:"common"},
+  {n:"Sulphur Pits",lat:40.0000,lng:-122.0000,lvl:22,rarity:"rare"},
+  {n:"Shale Bridge",lat:37.7749,lng:-122.4194,lvl:8,rarity:"common"},
+  {n:"Andale",lat:38.900,lng:-77.120,lvl:8,rarity:"rare"},
+  {n:"Arefu",lat:38.920,lng:-77.180,lvl:6,rarity:"common"},
+  {n:"Arlington Cemetery",lat:38.880,lng:-77.070,lvl:20,rarity:"epic"},
+  {n:"Springvale School",lat:38.910,lng:-77.310,lvl:8,rarity:"common"},
+  {n:"Super-Duper Mart",lat:38.920,lng:-77.290,lvl:6,rarity:"common"},
+  {n:"Grayditch",lat:38.880,lng:-77.170,lvl:10,rarity:"rare"},
+  {n:"Minefield",lat:38.860,lng:-77.130,lvl:12,rarity:"rare"},
+  {n:"Old Olney",lat:39.050,lng:-77.150,lvl:22,rarity:"epic"},
+  {n:"Germantown Police",lat:38.970,lng:-77.170,lvl:18,rarity:"rare"},
+  {n:"Murder Pass",lat:39.000,lng:-77.200,lvl:20,rarity:"epic"},
+  {n:"Turtledove Detention Camp",lat:38.100,lng:-76.400,lvl:18,rarity:"rare"},
+  {n:"Bunker Hill",lat:42.370,lng:-71.070,lvl:15,rarity:"rare"},
+  {n:"Trinity Plaza",lat:42.360,lng:-71.060,lvl:22,rarity:"epic"},
+  {n:"Vault 95",lat:42.100,lng:-71.500,lvl:28,rarity:"epic"},
+  {n:"Spectacle Island",lat:42.350,lng:-70.950,lvl:25,rarity:"rare"},
+  {n:"Appalachian Workshop",lat:38.200,lng:-80.000,lvl:12,rarity:"common"},
+  {n:"Toxic Valley",lat:38.400,lng:-80.200,lvl:22,rarity:"rare"},
+  {n:"Ash Heap",lat:37.700,lng:-81.100,lvl:18,rarity:"rare"},
+  {n:"Savannah River Site",lat:33.247,lng:-81.402,lvl:50,rarity:"legendary"},
+  {n:"Fernald Feed Materials",lat:39.290,lng:-84.680,lvl:40,rarity:"legendary"},
+{n:"Malmstrom AFB Silo Field",lat:47.5047,lng:-111.1833,lvl:70,rarity:"legendary"},
+  {n:"Minot AFB Silo Field",lat:48.4167,lng:-101.3586,lvl:72,rarity:"legendary"},
+  {n:"F.E. Warren AFB Silo Field",lat:41.1333,lng:-104.8667,lvl:74,rarity:"legendary"},
+  {n:"Vandenberg Space Force Base",lat:34.7333,lng:-120.5667,lvl:65,rarity:"legendary"},
+  {n:"Ellsworth AFB Silo Cluster",lat:44.1450,lng:-103.1036,lvl:68,rarity:"legendary"},
+  {n:"Whiteman AFB Silo",lat:38.7303,lng:-93.5583,lvl:66,rarity:"legendary"},
+
+  // RUSSIAN ICBM FIELDS
+  {n:"Dombarovsky (Yasny)",lat:51.0333,lng:59.8667,lvl:78,rarity:"legendary"},
+  {n:"Tatishchevo",lat:51.6667,lng:45.5667,lvl:80,rarity:"legendary"},
+  {n:"Uzhur-4",lat:55.3167,lng:89.8333,lvl:77,rarity:"legendary"},
+  {n:"Kozelsk",lat:54.0333,lng:35.7667,lvl:75,rarity:"legendary"},
+  {n:"Yoshkar-Ola",lat:56.6333,lng:47.8833,lvl:73,rarity:"legendary"},
+
+  // CHINESE ICBM FIELDS (2024-2025 confirmed)
+  {n:"Yumen Silo Field",lat:40.2667,lng:97.0167,lvl:85,rarity:"legendary"},
+  {n:"Hami Silo Field",lat:42.8000,lng:93.5000,lvl:84,rarity:"legendary"},
+  {n:"Lop Nur Silos",lat:40.7167,lng:89.7667,lvl:88,rarity:"legendary"},
+  {n:"Delingha Silo Field",lat:37.3667,lng:97.3667,lvl:82,rarity:"legendary"},
+
+  // MAJOR NUCLEAR POWER PLANTS (global)
+  {n:"Zaporizhzhia NPP",lat:47.5122,lng:34.5844,lvl:60,rarity:"legendary"},
+  {n:"Kashiwazaki-Kariwa",lat:37.4283,lng:138.6017,lvl:70,rarity:"legendary"},
+  {n:"Bruce Nuclear",lat:44.3267,lng:-81.5997,lvl:55,rarity:"epic"},
+  {n:"Gravelines NPP",lat:51.0153,lng:2.1358,lvl:52,rarity:"epic"},
+  {n:"Cattenom NPP",lat:49.4167,lng:6.2167,lvl:50,rarity:"epic"},
+  {n:"Kudankulam NPP",lat:8.1689,lng:77.7125,lvl:58,rarity:"epic"},
+  {n:"Tianwan NPP",lat:34.6869,lng:119.4600,lvl:56,rarity:"epic"},
+  {n:"Olkiluoto NPP",lat:61.2333,lng:21.4500,lvl:54,rarity:"epic"},
+  {n:"Hanul NPP",lat:37.0933,lng:129.3833,lvl:53,rarity:"epic"},
+  {n:"Paks NPP",lat:46.5667,lng:18.8500,lvl:48,rarity:"epic"},
+
+  // HISTORICAL DISASTROPHYSICS DISASTERS & TEST SITES
+  {n:"Semipalatinsk Test Site",lat:50.4333,lng:78.7500,lvl:90,rarity:"legendary"},
+  {n:"Novaya Zemlya",lat:73.5000,lng:54.0000,lvl:95,rarity:"legendary"},
+  {n:"Bikini Atoll",lat:11.6000,lng:165.3833,lvl:92,rarity:"legendary"},
+  {n:"Enewetak Atoll",lat:11.3500,lng:162.3500,lvl:90,rarity:"legendary"},
+  {n:"Maralinga Test Site",lat:-30.1667,lng:131.6167,lvl:85,rarity:"legendary"},
+  {n:"Reggane Test Site",lat:26.7167,lng:0.0500,lvl:82,rarity:"legendary"},
+  {n:"Fangataufa Atoll",lat:-22.2333,lng:-138.7500,lvl:88,rarity:"legendary"},
+
+  // INFAMOUS ACCIDENT SITES
+  {n:"Mayak Production Facility (Kyshtym)",lat:55.7167,lng:60.8500,lvl:99,rarity:"legendary"},
+  {n:"Windscale Piles",lat:54.4167,lng:-3.5000,lvl:80,rarity:"legendary"},
+  {n:"Santa Susana Field Lab",lat:34.2333,lng:-118.7000,lvl:75,rarity:"legendary"},
+  {n:"Rocky Flats Plant",lat:39.8917,lng:-105.2033,lvl:78,rarity:"legendary"},
+  {n:"Church Rock Uranium Spill",lat:35.5667,lng:-108.6167,lvl:70,rarity:"legendary"},
+  {n:"Goiânia Radiation Accident",lat:-16.6667,lng:-49.2667,lvl:85,rarity:"legendary"},
+
+  // REMAINING HIGH-RADS ZONES
+  {n:"Cheyenne Mountain Complex",lat:38.7442,lng:-104.8467,lvl:80,rarity:"legendary"},
+  {n:"Raven Rock Site R",lat:39.7300,lng:-77.4192,lvl:82,rarity:"legendary"},
+  {n:"Mount Weather",lat:39.0642,lng:-77.8883,lvl:78,rarity:"legendary"},
+  {n:"Pantex Plant",lat:35.3117,lng:-101.5600,lvl:90,rarity:"legendary"},
+  {n:"Y-12 Oak Ridge",lat:35.9900,lng:-84.2500,lvl:88,rarity:"legendary"},
+  {n:"Hanford Site",lat:46.5500,lng:-119.5500,lvl:92,rarity:"legendary"},
+  {n:"Savannah River Site",lat:33.2708,lng:-81.6708,lvl:85,rarity:"legendary"},
+
+  // BONUS EASTER EGG / MYTHICAL
+  {n:"Sedan Crater",lat:37.1769,lng:-116.0461,lvl:99,rarity:"legendary"},
+  {n:"Tsar Bomba Ground Zero",lat:73.4828,lng:54.6333,lvl:99,rarity:"legendary"},
+  {n:"Castle Bravo Crater",lat:11.7000,lng:165.2833,lvl:99,rarity:"legendary"}
+];
+
+function openTab(name){
+  document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(name).style.display='block';
+  document.querySelector(`[onclick="openTab('${name}')"]`).classList.add('active');
+  if(name==='map') setTimeout(()=>map.invalidateSize(),150);
 }
 
-async function loadPlayer() {
-    if (!wallet) return;
-    const res = await fetch(`${API_BASE}/locations`);
-    if (res.ok) initMap(await res.json());
+function updateQuest(){
+  const next = quests.find(q => !claimed.has(q.target));
+  if(next){
+    activeQuest = next;
+    document.getElementById("active-quest").textContent = activeQuest.name;
+    document.getElementById("quest-data").textContent = activeQuest.name;
+  } else {
+    document.getElementById("active-quest").textContent = "WASTELAND CONQUERED";
+    document.getElementById("quest-data").textContent = "WASTELAND CONQUERED";
+  }
 }
 
-async function claimLoot(loc) {
-    if (!wallet) return alert("Connect wallet!");
-    if (player.lvl < loc.lvl) return alert(`Need Level ${loc.lvl}`);
-    if (claimed.has(loc.n)) return alert("Already looted!");
-
-    try {
-        const res = await fetch(`${API_BASE}/claim-survival`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ wallet: wallet.publicKey.toBase58(), spot: loc.n })
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Failed");
-
-        player.caps += 25;
-        if (data.gear) player.gear.push(data.gear);
-        player.lvl = data.lvl || player.lvl;
-        claimed.add(loc.n);
-        markers[loc.n].setStyle({fillColor: '#003300'});
-        updateUI();
-        alert(data.message);
-    } catch(e) { alert("Claim failed: " + e.message); }
+function updateInventory(){
+  document.getElementById("inventory-list").innerHTML = player.inventory.length 
+    ? player.inventory.map(i=>`<div style="padding:8px 0;border-bottom:1px dashed #004400">${i}</div>`).join("") 
+    : "—";
+  document.getElementById("stimpak-count").textContent = player.stimpaks;
+  document.getElementById("stimpak-line").style.display = player.stimpaks>0?"block":"none";
+  document.getElementById("caps").textContent = player.caps;
+  document.getElementById("level").textContent = player.level;
 }
 
-function initMap(locations) {
-    map = L.map('map').setView([36.1146, -115.1728], 10);
-    L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
+function useStimpak(){
+  if(player.stimpaks > 0){
+    player.stimpaks--;
+    alert("STIMPAK USED — RADS PURGED");
+    updateInventory();
+    saveGame();
+  }
+}
 
-    playerMarker = L.circleMarker([36.1146, -115.1728], {radius:22,color:'#000',weight:7,fillColor:'#00ff00',fillOpacity:1})
-        .addTo(map).bindPopup("YOU ARE HERE").openPopup();
+function loadLocations(){
+  Object.values(markers).forEach(m=>map.removeLayer(m)); 
+  markers={};
+  allLocations.forEach(loc => {
+    const isActive = loc.n === activeQuest.target;
+    if(isActive){
+      const icon = L.divIcon({
+        html: '<div style="font-size:36px;color:#39FF14;text-shadow:0 0 10px #39FF14">DIAMOND</div>',
+        className: 'active-quest-icon',
+        iconSize: [36,36],
+        iconAnchor: [18,18]
+      });
+      const m = L.marker([loc.lat, loc.lng], {icon, zIndexOffset:1000}).addTo(map);
+      m.bindPopup(`<b style="font-size:1.6rem;color:#39FF14">DIAMOND ${loc.n}</b><br>MAIN QUEST • LEVEL ${loc.lvl}`);
+      markers[loc.n] = m;
+    } else {
+      let color = loc.rarity==="legendary"?"#ffff00":loc.rarity==="epic"?"#ff8800":loc.rarity==="rare"?"#00ffff":"#ffffff";
+      const m = L.circleMarker([loc.lat, loc.lng], {
+        radius:10, weight:3, color:"#000", fillColor:color, fillOpacity:0.9
+      }).addTo(map);
+      m.bindPopup(`<b style="font-size:1.5rem">${loc.n}</b><br>${(loc.rarity||"common").toUpperCase()} • LEVEL ${loc.lvl}`);
+      markers[loc.n] = m;
+    }
+    if(claimed.has(loc.n) && markers[loc.n].setStyle)
+      markers[loc.n].setStyle({fillColor:"#003300",fillOpacity:0.4});
+  });
+}
 
-    locations.forEach(loc => {
-        const color = loc.rarity === 'legendary' ? '#ffff00' : loc.rarity === 'epic' ? '#ff6200' : loc.rarity === 'rare' ? '#00ffff' : '#00ff00';
-        const m = L.circleMarker([loc.lat, loc.lng], {radius:18,color:'#000',weight:6,fillColor:color,fillOpacity:0.95})
-            .bindPopup(`<b>${loc.n}</b><br><span class="rar ${loc.rarity}">${loc.rarity.toUpperCase()}</span><br>Level ${loc.lvl}`)
-            .on('click', () => claimLoot(loc))
-            .addTo(map);
-        markers[loc.n] = m;
+function init(){
+  map = L.map('leaflet-map',{zoomControl:false,attributionControl:false}).setView([36.1699,-115.1398],10);
+  L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20}).addTo(map);
+
+  playerMarker = L.circleMarker([36.1699,-115.1398],{radius:30,weight:12,color:"#000",fillColor:"#00ff00",fillOpacity:1})
+    .addTo(map)
+    .bindPopup("<b style='font-size:2rem;color:#0ff'>COURIER LOCATION</b><br>GPS LOCKED");
+
+  if(navigator.geolocation){
+    navigator.geolocation.watchPosition(pos=>{
+      playerMarker.setLatLng([pos.coords.latitude,pos.coords.longitude]);
+      map.panTo([pos.coords.latitude,pos.coords.longitude]);
+    },null,{enableHighAccuracy:true});
+  }
+
+  loadGame();           // ← load saved progress
+  updateQuest();
+  updateInventory();
+  loadLocations();
+
+  setInterval(()=>document.getElementById("clock").textContent = moment().format("YYYY-MM-DD HH:mm:ss"),1000);
+
+  map.on('click', e => {
+    let closest = null, minDist = 250;
+    Object.keys(markers).forEach(name => {
+      const d = map.distance(e.latlng, markers[name].getLatLng());
+      if(d < minDist && !claimed.has(name)){
+        minDist = d;
+        closest = name;
+      }
     });
+    if(closest){
+      player.caps += 250;
+      player.stimpaks += 7;
+      player.inventory.push("Atomic Fizz Cap");
+      player.level = Math.floor(player.caps/1000) + 1;
+      claimed.add(closest);
 
-    if ('geolocation' in navigator) {
-        navigator.geolocation.watchPosition(pos => {
-            playerMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
-            map.panTo([pos.coords.latitude, pos.coords.longitude]);
-        }, null, {enableHighAccuracy:true});
+      document.getElementById("lootMessage").innerHTML = `+250 CAPS!<br>+7 STIMPAKS!<br>+ATOMIC FIZZ CAP<br><br>${closest} DISCOVERED`;
+      document.getElementById("lootOverlay").style.display = "flex";
+
+      saveGame();         // ← critical save
+      updateInventory();
+      updateQuest();
+      loadLocations();
     }
+  });
 }
 
-function updateUI() {
-    document.getElementById('lvl').textContent = player.lvl;
-    document.getElementById('hp').textContent = `${player.hp}/${player.maxHp}`;
-    document.getElementById('caps').textContent = player.caps;
-    document.getElementById('claimed').textContent = claimed.size;
-}
-
-document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    const mode = t.dataset.tab;
-    document.getElementById('map-container').style.display = mode === 'map' ? 'block' : 'none';
-    document.getElementById('grid').style.display = mode === 'map' ? 'none' : 'grid';
-    if (mode === 'inventory') {
-        document.getElementById('grid').innerHTML = player.gear.map(g => `<div class="item">• ${g.name} <span class="rar ${g.rarity}">${g.rarity}</span></div>`).join('') || "<div class='item'>No gear yet</div>";
-    }
-});
-
-document.getElementById('connectBtn').onclick = connectWallet;
+openTab('map');
+document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
