@@ -67,6 +67,54 @@
     /* small screens */
     @media (max-width:900px){ .side-panel{width:300px;right:12px} }
     @media (max-width:640px){ .side-panel{width:260px;right:8px;top:64px} .header{font-size:1.1rem} }
+
+    /* --- Pip‑Boy green: Leaflet zoom control --- */
+    .leaflet-control-zoom { box-shadow: none; border-radius: 8px; overflow: hidden; }
+    .leaflet-control-zoom a {
+      background: #002200;                 /* dark green background */
+      color: #00ff41 !important;           /* neon green icon color */
+      border: 1px solid rgba(0,255,65,0.12);
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      font-weight: bold;
+      font-family: VT323, monospace;
+      box-shadow: 0 0 10px rgba(0,255,65,0.06);
+      transition: background 120ms ease, color 120ms ease;
+    }
+    .leaflet-control-zoom a:hover {
+      background: #003300;
+      color: #baffb0 !important;
+    }
+    .leaflet-control-zoom.leaflet-bar { margin-left: 10px; margin-top: 10px; }
+
+    /* --- Side panel scrollbar (QUESTS/STAT/ITEMS) --- */
+    .side-panel { scrollbar-width: thin; scrollbar-color: #00ff41 rgba(0,0,0,0.18); }
+
+    /* WebKit browsers (Chrome, Edge, Safari) */
+    .side-panel::-webkit-scrollbar { width: 8px; }
+    .side-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.12); border-radius:6px; }
+    .side-panel::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg,#00ff41,#66ff99);
+      border-radius:6px;
+      border:2px solid rgba(0,0,0,0.12);
+    }
+    .side-panel::-webkit-scrollbar-thumb:hover { background: #baffb0; }
+
+    /* --- Page scrollbar (make the browser scrollbar match) --- */
+    body { scrollbar-width: thin; scrollbar-color: #00ff41 rgba(0,0,0,0.12); }
+
+    /* WebKit page scrollbar */
+    body::-webkit-scrollbar { width: 10px; }
+    body::-webkit-scrollbar-track { background: #001100; }
+    body::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg,#00ff41,#66ff99);
+      border-radius:6px;
+      border:2px solid #001100;
+    }
+    body::-webkit-scrollbar-thumb:hover { background: #baffb0; }
+
   </style>
 </head>
 <body>
@@ -117,11 +165,13 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     /************************************************************************
-     * Final integrated index.html
+     * Single-file final index.html
      * - Full POI list included
      * - STAT / ITEMS / QUESTS panels
      * - Phantom wallet connect/disconnect
      * - Pip-Boy scanlines + CRT vignette
+     * - Zoom and scrollbars recolored to match Pip-Boy green (visual only)
+     * - Robust player marker, event delegation, consumable/equip logic, persistence
      ************************************************************************/
 
     // Player stats and inventory (sample)
@@ -130,7 +180,7 @@
       HP: "86/105", LEVEL: 1, AP: "100/100"
     };
 
-    const inventory = [
+    let inventory = [
       {name:"Stimpak",qty:5,rarity:"common"},
       {name:"RadAway",qty:2,rarity:"rare"},
       {name:"10mm Ammo",qty:120,rarity:"common"},
@@ -138,7 +188,7 @@
     ];
 
     // Quests sample
-    const quests = [
+    let quests = [
       { id: 'q1', title: "Find Vault 77 Key", desc: "Search the Goodsprings area for the Vault 77 key.", reward: "500 CAPS", state: "available" },
       { id: 'q2', title: "Repair Helios One", desc: "Collect 3 solar cells and return to Helios One.", reward: "Energy Cells", state: "available" },
       { id: 'q3', title: "Clear Dead Wind Cavern", desc: "Eliminate the radscorpion nest inside Dead Wind Cavern.", reward: "Rare loot", state: "accepted" },
@@ -216,50 +266,6 @@
   {n:"Primm Schoolhouse",lat:35.6150,lng:-115.3850,lvl:3,rarity:"common"},
   {n:"Nipton Hall",lat:35.4667,lng:-115.2722,lvl:5,rarity:"common"},
   {n:"Boulder City Ruins",lat:35.9775,lng:-114.8364,lvl:7,rarity:"rare"},
-  {n:"Megaton",lat:38.863,lng:-77.085,lvl:8,rarity:"rare"},
-  {n:"Vault 101",lat:38.948,lng:-77.334,lvl:1,rarity:"common"},
-  {n:"Rivet City",lat:38.874,lng:-77.022,lvl:10,rarity:"epic"},
-  {n:"The Citadel",lat:38.871,lng:-77.056,lvl:25,rarity:"epic"},
-  {n:"Jefferson Memorial",lat:38.876,lng:-77.012,lvl:15,rarity:"rare"},
-  {n:"Raven Rock",lat:39.732,lng:-77.421,lvl:35,rarity:"legendary"},
-  {n:"Tenpenny Tower",lat:38.920,lng:-77.200,lvl:18,rarity:"rare"},
-  {n:"Paradise Falls",lat:38.900,lng:-77.250,lvl:12,rarity:"rare"},
-  {n:"Little Lamplight",lat:38.820,lng:-77.380,lvl:10,rarity:"rare"},
-  {n:"Dunwich Building",lat:38.920,lng:-77.220,lvl:40,rarity:"legendary"},
-  {n:"Evergreen Mills",lat:38.850,lng:-77.300,lvl:15,rarity:"rare"},
-  {n:"Vault 112",lat:38.889,lng:-77.025,lvl:20,rarity:"epic"},
-  {n:"Point Lookout Lighthouse",lat:38.043,lng:-76.003,lvl:30,rarity:"legendary"},
-  {n:"The Pitt",lat:40.4406,lng:-79.9959,lvl:40,rarity:"legendary"},
-  {n:"Mama Dolce's",lat:38.850,lng:-77.200,lvl:15,rarity:"rare"},
-  {n:"Diamond City",lat:42.3467,lng:-71.0972,lvl:15,rarity:"epic"},
-  {n:"Vault 111",lat:42.390,lng:-71.300,lvl:5,rarity:"common"},
-  {n:"Sanctuary Hills",lat:42.450,lng:-71.450,lvl:3,rarity:"common"},
-  {n:"Concord",lat:42.460,lng:-71.349,lvl:7,rarity:"common"},
-  {n:"Goodneighbor",lat:42.356,lng:-71.061,lvl:12,rarity:"rare"},
-  {n:"The Institute",lat:42.360,lng:-71.094,lvl:35,rarity:"legendary"},
-  {n:"Boston Common",lat:42.354,lng:-71.066,lvl:30,rarity:"epic"},
-  {n:"Glowing Sea",lat:42.200,lng:-71.400,lvl:50,rarity:"legendary"},
-  {n:"Nuka-World",lat:42.300,lng:-72.900,lvl:35,rarity:"epic"},
-  {n:"Far Harbor",lat:44.300,lng:-68.300,lvl:40,rarity:"legendary"},
-  {n:"Vault 81",lat:42.363,lng:-71.508,lvl:20,rarity:"rare"},
-  {n:"Vault 114",lat:42.356,lng:-71.061,lvl:18,rarity:"rare"},
-  {n:"Vault 76",lat:39.500,lng:-79.900,lvl:1,rarity:"common"},
-  {n:"The Whitespring Resort",lat:38.050,lng:-79.800,lvl:25,rarity:"epic"},
-  {n:"West Tek",lat:38.300,lng:-80.100,lvl:40,rarity:"legendary"},
-  {n:"Sugar Grove",lat:38.300,lng:-79.300,lvl:35,rarity:"legendary"},
-  {n:"The Crater",lat:37.900,lng:-79.700,lvl:35,rarity:"epic"},
-  {n:"Fort Atlas",lat:38.100,lng:-79.900,lvl:30,rarity:"epic"},
-  {n:"Vault 13",lat:37.500,lng:-121.900,lvl:15,rarity:"epic"},
-  {n:"Shady Sands",lat:34.0522,lng:-118.2437,lvl:20,rarity:"rare"},
-  {n:"The Hub",lat:34.0522,lng:-118.2437,lvl:12,rarity:"common"},
-  {n:"Junktown",lat:34.000,lng:-118.400,lvl:8,rarity:"common"},
-  {n:"Necropolis",lat:35.370,lng:-119.020,lvl:25,rarity:"epic"},
-  {n:"The Glow",lat:33.800,lng:-115.900,lvl:55,rarity:"legendary"},
-  {n:"Mariposa Military Base",lat:37.500,lng:-120.500,lvl:45,rarity:"legendary"},
-  {n:"Lost Hills Bunker",lat:34.800,lng:-118.600,lvl:30,rarity:"epic"},
-  {n:"Vault 15",lat:37.700,lng:-121.900,lvl:18,rarity:"rare"},
-  {n:"New Reno",lat:39.5296,lng:-119.8138,lvl:28,rarity:"epic"},
-  {n:"Broken Hills",lat:39.400,lng:-121.200,lvl:20,rarity:"rare"},
   {n:"Minuteman III Silo",lat:41.133,lng:-104.867,lvl:70,rarity:"legendary"},
   {n:"Mothership Zeta",lat:0,lng:0,lvl:99,rarity:"legendary"},
   {n:"Dunwich Borers Quarry",lat:42.374,lng:-71.433,lvl:45,rarity:"legendary"},
@@ -274,9 +280,6 @@
   {n:"Vault 21",lat:36.1699,lng:-115.1398,lvl:18,rarity:"rare"},
   {n:"Vault 22",lat:36.1699,lng:-115.1398,lvl:32,rarity:"epic"},
   {n:"Vault 29",lat:36.0000,lng:-116.0000,lvl:30,rarity:"rare"},
-  {n:"Vault 87",lat:38.950,lng:-77.850,lvl:30,rarity:"legendary"},
-  {n:"Vault 92",lat:38.900,lng:-77.300,lvl:25,rarity:"rare"},
-  {n:"Vault 106",lat:38.800,lng:-77.400,lvl:32,rarity:"epic"},
   {n:"Enclave Oil Rig",lat:33.000,lng:-118.000,lvl:50,rarity:"legendary"},
   {n:"Gecko Reactor",lat:37.8000,lng:-121.9000,lvl:25,rarity:"rare"},
   {n:"Klamath",lat:42.0000,lng:-121.8000,lvl:10,rarity:"common"},
@@ -375,7 +378,6 @@
     googleTiles.on('load', () => {
       tilesLoaded = true;
       document.getElementById('status').textContent = 'Status: map loaded';
-      // ensure map renders correctly after tiles
       setTimeout(()=>map.invalidateSize(), 250);
     });
     googleTiles.on('tileerror', () => {
@@ -424,13 +426,21 @@
       setTimeout(()=>map.invalidateSize(), 200);
     }
 
+    // Robust player marker creation
     function ensurePlayerMarker(lat, lng) {
       playerLatLng = L.latLng(lat, lng);
-      if (!playerMarker) {
+      try {
+        if (!playerMarker || !map.hasLayer(playerMarker)) {
+          if (playerMarker) try { map.removeLayer(playerMarker); } catch(e){}
+          const pip = L.divIcon({ html: '<div class="player-dot"></div>', className: '', iconSize: [22,22], iconAnchor: [11,11] });
+          playerMarker = L.marker([lat, lng], { icon: pip }).addTo(map).bindPopup("You");
+        } else {
+          playerMarker.setLatLng(playerLatLng);
+        }
+      } catch (err) {
+        // fallback: create new marker
         const pip = L.divIcon({ html: '<div class="player-dot"></div>', className: '', iconSize: [22,22], iconAnchor: [11,11] });
         playerMarker = L.marker([lat, lng], { icon: pip }).addTo(map).bindPopup("You");
-      } else {
-        playerMarker.setLatLng(playerLatLng);
       }
     }
 
@@ -458,6 +468,7 @@
           if (layer && layer.setIcon) {
             layer.setIcon(L.divIcon({ html: `<div class="marker-dot" style="opacity:0.35;color:#003300"></div>`, className:'', iconSize:[18,18], iconAnchor:[9,9] }));
           }
+          saveState();
         } else {
           document.getElementById('status').textContent = `${name} already claimed`;
         }
@@ -510,53 +521,188 @@
     }
     connectBtn.addEventListener('click', async () => { if (connectedWallet) await disconnectPhantom(); else await connectPhantom(); });
 
-    // --- PANEL UI wiring (STAT / ITEMS / QUESTS)
-    const sidePanel = document.getElementById('sidePanel');
-    const panelTitle = document.getElementById('panelTitle');
-    const panelBody = document.getElementById('panelBody');
-    const panelClose = document.getElementById('panelClose');
-    const tabs = document.querySelectorAll('.tab');
-
-    function openPanel(name) {
-      tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
-      panelBody.innerHTML = '';
-      panelTitle.textContent = name.toUpperCase();
-      if (name === 'stat') renderStats();
-      else if (name === 'items') renderItems();
-      else if (name === 'quests') renderQuests();
-      sidePanel.style.display = 'block';
-      sidePanel.setAttribute('aria-hidden','false');
-    }
-    function closePanel() {
-      sidePanel.style.display = 'none';
-      sidePanel.setAttribute('aria-hidden','true');
-      tabs.forEach(t => t.classList.toggle('active', t.id === 'tab-map'));
-    }
-    panelClose.addEventListener('click', closePanel);
-
-    // render helpers
-    function renderStats() {
-      const container = document.createElement('div');
-      Object.keys(playerStats).forEach(k => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        div.innerHTML = `<div><strong>${k}</strong></div><div class="muted">${playerStats[k]}</div>`;
-        container.appendChild(div);
+    // --- Persistence (localStorage) and stable ids for inventory items
+    function ensureItemIds() {
+      inventory.forEach((it, idx) => {
+        if (!it.id) it.id = `item_${idx}_${it.name.replace(/\s+/g,'_')}`;
+        if (!it.type) it.type = (it.rarity === 'epic' || it.rarity === 'legendary') ? 'equip' : 'consumable';
       });
-      panelBody.appendChild(container);
     }
+    ensureItemIds();
+
+    function saveState() {
+      try {
+        localStorage.setItem('af_state', JSON.stringify({
+          inventory,
+          quests,
+          claimed: Array.from(claimed),
+          equippedItemId
+        }));
+      } catch(e) {}
+    }
+    function loadState() {
+      try {
+        const s = JSON.parse(localStorage.getItem('af_state') || 'null');
+        if (s) {
+          if (Array.isArray(s.inventory)) {
+            // merge by id
+            s.inventory.forEach(si => {
+              const existing = inventory.find(x => x.id === si.id);
+              if (existing) Object.assign(existing, si);
+              else inventory.push(si);
+            });
+          }
+          if (Array.isArray(s.quests)) {
+            s.quests.forEach(sq => {
+              const q = quests.find(x => x.id === sq.id);
+              if (q) q.state = sq.state;
+            });
+          }
+          if (Array.isArray(s.claimed)) {
+            claimed = new Set(s.claimed);
+          }
+          if (s.equippedItemId) equippedItemId = s.equippedItemId;
+        }
+      } catch(e) {}
+    }
+    let equippedItemId = null;
+    loadState();
+    ensureItemIds();
+
+    // --- Items: use/equip logic and rendering with event delegation
+    function useItem(id) {
+      const idx = inventory.findIndex(it => it.id === id);
+      if (idx === -1) { document.getElementById('status').textContent = 'Status: item not found'; return; }
+      const item = inventory[idx];
+
+      if (item.type === 'consumable') {
+        // Example effects (expand as needed)
+        if (item.name.toLowerCase().includes('stimpak')) {
+          document.getElementById('status').textContent = `Used ${item.name} — +HP`;
+        } else if (item.name.toLowerCase().includes('radaway')) {
+          document.getElementById('status').textContent = `Used ${item.name} — radiation reduced`;
+        } else {
+          document.getElementById('status').textContent = `Used ${item.name}`;
+        }
+
+        // decrement or remove
+        if (typeof item.qty === 'number' && item.qty > 1) {
+          item.qty -= 1;
+        } else {
+          inventory.splice(idx, 1);
+        }
+        saveState();
+        // optional: check quests that might be satisfied by this use
+        onItemUsedForQuest(item.name);
+        // re-render if items panel open
+        if (currentOpenPanel === 'items') renderItems();
+        return;
+      }
+
+      if (item.type === 'equip') {
+        equipItem(id);
+        return;
+      }
+
+      document.getElementById('status').textContent = `Used ${item.name}`;
+      saveState();
+      if (currentOpenPanel === 'items') renderItems();
+    }
+
+    function equipItem(id) {
+      const item = inventory.find(it => it.id === id);
+      if (!item) { document.getElementById('status').textContent = 'Status: item not found'; return; }
+
+      if (equippedItemId === id) {
+        equippedItemId = null;
+        item.equipped = false;
+        document.getElementById('status').textContent = `Unequipped ${item.name}`;
+      } else {
+        if (equippedItemId) {
+          const prev = inventory.find(it => it.id === equippedItemId);
+          if (prev) prev.equipped = false;
+        }
+        equippedItemId = id;
+        item.equipped = true;
+        document.getElementById('status').textContent = `Equipped ${item.name}`;
+      }
+      saveState();
+      if (currentOpenPanel === 'items') renderItems();
+    }
+
+    function onItemUsedForQuest(itemName) {
+      // naive example: if quest description mentions the item name, mark complete
+      quests.forEach(q => {
+        if (q.state === 'accepted' && q.desc.toLowerCase().includes(itemName.toLowerCase())) {
+          q.state = 'completed';
+          document.getElementById('status').textContent = `Quest completed: ${q.title} — reward: ${q.reward}`;
+        }
+      });
+      if (currentOpenPanel === 'quests') renderQuests();
+      saveState();
+    }
+
+    // Render items into panelBody (used by openPanel)
     function renderItems() {
       const container = document.createElement('div');
       inventory.forEach(it => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.innerHTML = `<div><strong>${it.name}</strong></div><div class="muted">x${it.qty} • ${it.rarity}</div>`;
+        const left = document.createElement('div');
+        left.innerHTML = `<strong>${it.name}</strong><div class="muted">${it.rarity}</div>`;
+        const right = document.createElement('div');
+        right.style.display = 'flex';
+        right.style.alignItems = 'center';
+        right.style.gap = '8px';
+
+        const qty = document.createElement('div');
+        qty.className = 'muted';
+        qty.textContent = (typeof it.qty === 'number') ? `x${it.qty}` : '';
+        right.appendChild(qty);
+
+        if (it.type === 'consumable') {
+          const useBtn = document.createElement('button');
+          useBtn.textContent = 'Use';
+          useBtn.dataset.action = 'use';
+          useBtn.dataset.id = it.id;
+          right.appendChild(useBtn);
+        }
+
+        if (it.type === 'equip') {
+          const eqBtn = document.createElement('button');
+          eqBtn.textContent = it.equipped ? 'Unequip' : 'Equip';
+          eqBtn.dataset.action = 'equip';
+          eqBtn.dataset.id = it.id;
+          right.appendChild(eqBtn);
+        }
+
+        div.appendChild(left);
+        div.appendChild(right);
+
+        if (it.equipped) div.style.borderLeft = '4px solid #00ff41';
+
         container.appendChild(div);
       });
-      panelBody.appendChild(container);
+      const panelBody = document.getElementById('panelBody');
+      if (panelBody) {
+        panelBody.innerHTML = '';
+        panelBody.appendChild(container);
+      }
     }
 
-    // QUESTS: render list with Accept / Complete actions
+    // Event delegation for panel actions
+    document.getElementById('panelBody').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      if (action === 'use') useItem(id);
+      if (action === 'equip') equipItem(id);
+      if (action === 'accept') acceptQuest(id);
+      if (action === 'complete') completeQuest(id);
+    });
+
+    // --- Quests rendering and actions
     function renderQuests() {
       const container = document.createElement('div');
       quests.forEach(q => {
@@ -576,12 +722,14 @@
         if (q.state === 'available') {
           const acceptBtn = document.createElement('button');
           acceptBtn.textContent = 'Accept';
-          acceptBtn.addEventListener('click', () => { acceptQuest(q.id); });
+          acceptBtn.dataset.action = 'accept';
+          acceptBtn.dataset.id = q.id;
           right.appendChild(acceptBtn);
         } else if (q.state === 'accepted') {
           const completeBtn = document.createElement('button');
           completeBtn.textContent = 'Complete';
-          completeBtn.addEventListener('click', () => { completeQuest(q.id); });
+          completeBtn.dataset.action = 'complete';
+          completeBtn.dataset.id = q.id;
           right.appendChild(completeBtn);
         } else {
           const done = document.createElement('div');
@@ -592,7 +740,11 @@
         div.appendChild(right);
         container.appendChild(div);
       });
-      panelBody.appendChild(container);
+      const panelBody = document.getElementById('panelBody');
+      if (panelBody) {
+        panelBody.innerHTML = '';
+        panelBody.appendChild(container);
+      }
     }
 
     function acceptQuest(id) {
@@ -600,14 +752,54 @@
       if (!q) return;
       q.state = 'accepted';
       document.getElementById('status').textContent = `Quest accepted: ${q.title}`;
-      renderQuests();
+      saveState();
+      if (currentOpenPanel === 'quests') renderQuests();
     }
     function completeQuest(id) {
       const q = quests.find(x => x.id === id);
       if (!q) return;
       q.state = 'completed';
       document.getElementById('status').textContent = `Quest completed: ${q.title} — reward: ${q.reward}`;
-      renderQuests();
+      saveState();
+      if (currentOpenPanel === 'quests') renderQuests();
+    }
+
+    // --- Panel UI wiring (STAT / ITEMS / QUESTS)
+    const sidePanel = document.getElementById('sidePanel');
+    const panelTitle = document.getElementById('panelTitle');
+    const panelBody = document.getElementById('panelBody');
+    const panelClose = document.getElementById('panelClose');
+    const tabs = document.querySelectorAll('.tab');
+    let currentOpenPanel = null;
+
+    function openPanel(name) {
+      currentOpenPanel = name;
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+      panelBody.innerHTML = '';
+      panelTitle.textContent = name.toUpperCase();
+      if (name === 'stat') renderStats();
+      else if (name === 'items') renderItems();
+      else if (name === 'quests') renderQuests();
+      sidePanel.style.display = 'block';
+      sidePanel.setAttribute('aria-hidden','false');
+    }
+    function closePanel() {
+      currentOpenPanel = null;
+      sidePanel.style.display = 'none';
+      sidePanel.setAttribute('aria-hidden','true');
+      tabs.forEach(t => t.classList.toggle('active', t.id === 'tab-map'));
+    }
+    panelClose.addEventListener('click', closePanel);
+
+    function renderStats() {
+      const container = document.createElement('div');
+      Object.keys(playerStats).forEach(k => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<div><strong>${k}</strong></div><div class="muted">${playerStats[k]}</div>`;
+        container.appendChild(div);
+      });
+      panelBody.appendChild(container);
     }
 
     // tab click handlers
@@ -619,18 +811,31 @@
     // close panel on Escape
     window.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
-    // Boot
+    // Boot sequence: load locations, then UI wiring and geolocation
     function boot() {
+      ensureItemIds();
+      loadState();
       loadLocations();
+      // small nudge to ensure map paints correctly on load
+      setTimeout(()=>map.invalidateSize(), 300);
       checkRadiation();
+
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
           ensurePlayerMarker(pos.coords.latitude, pos.coords.longitude);
           setTimeout(()=>map.flyTo([pos.coords.latitude, pos.coords.longitude], 16, { duration: 0.7 }), 600);
         }, err => { document.getElementById('status').textContent = 'Status: GPS blocked or unavailable'; }, { enableHighAccuracy:true, timeout:5000 });
-        navigator.geolocation.watchPosition(pos => { ensurePlayerMarker(pos.coords.latitude, pos.coords.longitude); }, ()=>{}, { enableHighAccuracy:true, maximumAge:3000, timeout:5000 });
-      } else { document.getElementById('status').textContent = 'Status: geolocation not supported'; }
-      setTimeout(()=>map.invalidateSize(), 300);
+
+        navigator.geolocation.watchPosition(pos => {
+          ensurePlayerMarker(pos.coords.latitude, pos.coords.longitude);
+        }, ()=>{}, { enableHighAccuracy:true, maximumAge:3000, timeout:5000 });
+      } else {
+        document.getElementById('status').textContent = 'Status: geolocation not supported';
+      }
+
+      // ensure UI shows inventory/quests state if panel open
+      if (currentOpenPanel === 'items') renderItems();
+      if (currentOpenPanel === 'quests') renderQuests();
     }
 
     boot();
