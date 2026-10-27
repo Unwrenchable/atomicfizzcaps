@@ -14,7 +14,7 @@
     "worker:mint:list": "node workers/mint_worker.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "node scripts/check-declare-id.cjs && node scripts/run-security-tests.cjs && node --test --test-force-exit backend/tests/voucherV1.test.js backend/tests/kmsSigner.test.js backend/tests/claimVoucher.test.js",
+    "test": "node scripts/check-declare-id.cjs && node scripts/check-no-deploy-keypairs.cjs && node scripts/run-security-tests.cjs && node --test --test-force-exit backend/tests/voucherV1.test.js backend/tests/kmsSigner.test.js backend/tests/claimVoucher.test.js",
     "test:load": "node tests/concurrent-load-test.js",
     "test:load:full": "node tests/concurrent-load-test.js --players 1000 --batch-size 50",
     "test:playtest": "node tests/playtest-agent.js",

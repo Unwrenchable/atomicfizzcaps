@@ -24,13 +24,16 @@ compile_error!(
 
 // Each cluster has its own program id. These are not the canonical ids in
 // Unwrenchable/ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS. Do not deploy this copy.
+// Devnet and mainnet ids are placeholders. Their keypairs are not in this
+// repo. Travis generates the real deploy keypairs offline and replaces these
+// ids before any deploy. Never reuse an id whose keypair was committed.
 // CI checks that each declare_id matches the matching Anchor.toml section.
 #[cfg(all(feature = "localnet", not(feature = "devnet"), not(feature = "mainnet")))]
 declare_id!("3mPuzEmF6YrMP3Lfn4qm9TY2tSKsanJDhsr6ZkSbSURP"); // cluster:localnet
 #[cfg(all(feature = "devnet", not(feature = "localnet"), not(feature = "mainnet")))]
-declare_id!("9uc8Tvas9j4SYnvHYYiCbQiv7DqdzkYQU4vv5mag5bcA"); // cluster:devnet
+declare_id!("CRF3R219WJGS4WM41jZuER3X9rPJ3Ac6JMG38t2zzSfV"); // cluster:devnet
 #[cfg(all(feature = "mainnet", not(feature = "localnet"), not(feature = "devnet")))]
-declare_id!("6DnVzBtMzQcnSUeLGX93d68WZ8cz4qwq6GQvbhhnA2s8"); // cluster:mainnet
+declare_id!("8pKQTv64QZw2F4qjpm1unPSVJj1WsYYQiTCspeS4XTFY"); // cluster:mainnet
 
 pub mod voucher;
 use voucher::{

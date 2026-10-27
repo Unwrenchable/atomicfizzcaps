@@ -2,7 +2,17 @@
 
 `claim_loot` trusts only the Ed25519 key stored on `FizzConfig` for the cluster the binary was compiled for. It does not accept a key supplied by the transaction.
 
-This repository's program id is `DXxzKfZh6aJCff7sEusMU1E9w4ZDwgJkYGgKStRRGRyP` on localnet, devnet, and mainnet. The canonical program lives in `Unwrenchable/ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS`. Do not deploy this copy. The steps below are the runbook for an operator who already holds the upgrade authority.
+The canonical program lives in `Unwrenchable/ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS`. Do not deploy this copy. The steps below are the runbook for an operator who already holds the upgrade authority.
+
+## Program ids
+
+This duplicate has one program id per cluster. Only the localnet test key is in git (`programs/fizzcaps-onchain/keys/localnet-keypair.json`). It is unfunded and is only for `anchor test`.
+
+Devnet and mainnet ids in `declare_id!`, `Anchor.toml`, and `backend/lib/voucherV1.js` are placeholders. The keypairs that match those placeholders were never committed. They cannot be used to deploy.
+
+The devnet id `9uc8Tvas9j4SYnvHYYiCbQiv7DqdzkYQU4vv5mag5bcA` and the mainnet id `6DnVzBtMzQcnSUeLGX93d68WZ8cz4qwq6GQvbhhnA2s8` are burned. Their keypairs were committed to this public repo. Never use those ids again. Do not put a devnet or mainnet keypair JSON file in this repo. CI rejects any such file.
+
+Before any deploy, Travis generates the real devnet and mainnet deploy keypairs offline, on a machine that does not commit them, and updates `declare_id!`, the matching `Anchor.toml` sections, and `EXPECTED_PROGRAM_ID` to those new public keys. The secret keys stay offline. Rewriting git history to drop the burned keypairs is Travis's call; this tree only stops tracking them.
 
 ## Keys
 

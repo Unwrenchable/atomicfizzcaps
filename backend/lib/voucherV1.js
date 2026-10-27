@@ -17,10 +17,12 @@ const CLUSTER_TAG = { "mainnet-beta": 1, devnet: 2, localnet: 3 };
 
 // This duplicate's declare_id is different on every cluster. The canonical
 // program in ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS uses its own ids.
+// Devnet and mainnet values are placeholders. Travis replaces them after
+// generating deploy keypairs offline. No keypair for these ids is in the repo.
 const EXPECTED_PROGRAM_ID = {
   localnet: "3mPuzEmF6YrMP3Lfn4qm9TY2tSKsanJDhsr6ZkSbSURP",
-  devnet: "9uc8Tvas9j4SYnvHYYiCbQiv7DqdzkYQU4vv5mag5bcA",
-  "mainnet-beta": "6DnVzBtMzQcnSUeLGX93d68WZ8cz4qwq6GQvbhhnA2s8",
+  devnet: "CRF3R219WJGS4WM41jZuER3X9rPJ3Ac6JMG38t2zzSfV",
+  "mainnet-beta": "8pKQTv64QZw2F4qjpm1unPSVJj1WsYYQiTCspeS4XTFY",
 };
 
 const CLUSTER_SECRET_ENV = {

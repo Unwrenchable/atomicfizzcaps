@@ -3,17 +3,18 @@ seeds = false
 skip-lint = false
 
 # One program id per cluster. These are not the canonical program's ids.
-# Keypairs (test only, unfunded) live in programs/fizzcaps-onchain/keys/.
+# Only the localnet test key is in programs/fizzcaps-onchain/keys/.
+# Devnet and mainnet ids are placeholders with no keypair in this repo.
 # Do not deploy this copy. The canonical program is in
 # Unwrenchable/ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS.
 [programs.localnet]
 fizzcaps_onchain = "3mPuzEmF6YrMP3Lfn4qm9TY2tSKsanJDhsr6ZkSbSURP"
 
 [programs.devnet]
-fizzcaps_onchain = "9uc8Tvas9j4SYnvHYYiCbQiv7DqdzkYQU4vv5mag5bcA"
+fizzcaps_onchain = "CRF3R219WJGS4WM41jZuER3X9rPJ3Ac6JMG38t2zzSfV"
 
 [programs.mainnet]
-fizzcaps_onchain = "6DnVzBtMzQcnSUeLGX93d68WZ8cz4qwq6GQvbhhnA2s8"
+fizzcaps_onchain = "8pKQTv64QZw2F4qjpm1unPSVJj1WsYYQiTCspeS4XTFY"
 
 [registry]
 url = "https://api.apr.dev"

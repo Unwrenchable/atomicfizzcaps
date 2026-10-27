@@ -32,6 +32,9 @@ logs/
 target/
 **/target/
 .anchor/
+# Deploy keypairs are generated offline. Only the localnet test key is tracked.
+programs/fizzcaps-onchain/keys/*
+!programs/fizzcaps-onchain/keys/localnet-keypair.json
 *.so
 *.a
 *.rlib
