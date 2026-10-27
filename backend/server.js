@@ -39,42 +39,27 @@ const criticalOrigins = [
 ];
 
 // Always included regardless of FRONTEND_ORIGIN env var (required for Vercel preview and Render deployments)
-const permanentPatterns = [
-  "https://*.vercel.app",
-  "https://*.onrender.com"
-];
-
-const defaultOrigins = [
-  "http://localhost:3000",
-  ...permanentPatterns
-];
+// No wildcard origins. Preview hosts must be listed explicitly in FRONTEND_ORIGIN.
+const defaultOrigins = NODE_ENV === "production" ? [] : ["http://localhost:3000", "http://127.0.0.1:3000"];
 
 // Merge critical origins with env-configured or default origins
-const envOrigins = process.env.FRONTEND_ORIGIN 
+const envOrigins = process.env.FRONTEND_ORIGIN
   ? process.env.FRONTEND_ORIGIN.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean)
   : defaultOrigins;
 
-// Combine critical origins, permanent patterns, and environment origins, removing duplicates
-const allowedOrigins = [...new Set([...criticalOrigins, ...permanentPatterns, ...envOrigins])];
-
-function wildcardToRegex(pattern) {
-  const escaped = pattern
-    .replace(/^https?:\/\//, '')
-    .replace(/\\/g, '\\\\')
-    .replace(/\./g, '\\.')
-    .replace(/\*/g, '[a-zA-Z0-9-]+');  // SECURITY FIX: Only allow valid hostname characters (alphanumeric and hyphens)
-  return new RegExp('^https?:\\/\\/' + escaped + '(\\:\\d+)?$');
-}
+// Combine critical origins and explicit environment origins. Drop wildcards.
+const allowedOrigins = [...new Set([...criticalOrigins, ...envOrigins])].filter((origin) => {
+  if (origin.includes("*")) {
+    console.warn("[server] ignoring wildcard CORS origin:", origin);
+    return false;
+  }
+  return origin === "null" ? false : true;
+});
 
 const corsOptions = {
   origin: function(origin, callback) {
     if (!origin) return callback(null, true); // server-side/curl requests
-    const ok = allowedOrigins.some(pattern => {
-      if (pattern.includes('*')) {
-        return wildcardToRegex(pattern).test(origin);
-      }
-      return origin === pattern;
-    });
+    const ok = allowedOrigins.some((allowed) => origin === allowed);
     if (ok) return callback(null, true);
     console.warn('[server] CORS blocked origin:', origin);
     return callback(new Error('CORS not allowed'), false);
@@ -265,7 +250,7 @@ if (NODE_ENV !== "production") {
 // ------------------------------------------------------------
 // SAFE MOUNT HELPER
 // ------------------------------------------------------------
-function safeMount(mountPath, requirePath) {
+function safeMount(mountPath, requirePath, opts = {}) {
   try {
     const mod = require(requirePath);
     const router = (mod && (mod.router || mod.default)) || mod;
@@ -278,6 +263,12 @@ function safeMount(mountPath, requirePath) {
     app.use(mountPath, router);
     console.log(`[server] mounted ${requirePath} at ${mountPath}`);
   } catch (err) {
+    if (opts.required) {
+      console.error(
+        `[server] required route ${requirePath} failed to load: ${err && err.message}`
+      );
+      process.exit(1);
+    }
     console.warn(
       `[server] skipping ${requirePath} — failed to load: ${err && err.message}`
     );
@@ -316,6 +307,12 @@ safeMount("/api/narrative", api("narrative"));
 safeMount("/api/worldstate", api("worldstate"));
 
 // Core API endpoints
+safeMount("/api/claim-voucher", api("claim-voucher"), {
+  required: process.env.ONCHAIN_VOUCHERS !== "false",
+});
+safeMount("/claim-voucher", api("claim-voucher"), {
+  required: process.env.ONCHAIN_VOUCHERS !== "false",
+});
 safeMount("/api/loot-voucher", api("loot-voucher"));
 safeMount("/api/mintables", api("mintables"));  // Your mintables router - serves mintables.json
 // Minimal dev-only mint endpoint (mounted here so frontend claim flow works)

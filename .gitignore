@@ -31,6 +31,7 @@ logs/
 # --- Solana / Anchor Program ---
 target/
 **/target/
+.anchor/
 *.so
 *.a
 *.rlib

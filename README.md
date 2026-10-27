@@ -20,6 +20,18 @@
 
 > 📚 **[Complete Documentation Index](docs/DOCS_INDEX.md)** - All guides organized by category for easy navigation
 
+> **Canonical on-chain program.** The program in `programs/fizzcaps-onchain` is a duplicate. The canonical program lives in [Unwrenchable/ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS](https://github.com/Unwrenchable/ATOMIC-FIZZ-CAPS-VAULT-77-WASTELAND-GPS). Do not deploy this copy. A parallel fix is in progress in that repository.
+>
+> This copy does not share one program id across clusters. The ids below are unpublished test ids, not the canonical ids (`DXxzKfZh6aJCff7sEusMU1E9w4ZDwgJkYGgKStRRGRyP` / `GvTeKyGiFqtpJn2cJQxFb2iPVCYotvnMjMZKGAnPgZkc`). Keypairs in `programs/fizzcaps-onchain/keys/` are unfunded and exist so `anchor test` can deploy localnet. Do not fund them and do not deploy.
+>
+> | Cluster | Program id |
+> | --- | --- |
+> | localnet | `3mPuzEmF6YrMP3Lfn4qm9TY2tSKsanJDhsr6ZkSbSURP` |
+> | devnet | `9uc8Tvas9j4SYnvHYYiCbQiv7DqdzkYQU4vv5mag5bcA` |
+> | mainnet | `6DnVzBtMzQcnSUeLGX93d68WZ8cz4qwq6GQvbhhnA2s8` |
+
+Key rotation for this copy, if it is ever initialized: [docs/runbooks/fizz-server-key-rotation.md](docs/runbooks/fizz-server-key-rotation.md).
+
 ---
 
 ## 🎉 VAULT‑TEC ANNOUNCES THE RETURN OF THE ATOMIC FIZZ CAPS PROGRAM

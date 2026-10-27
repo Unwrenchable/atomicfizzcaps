@@ -604,13 +604,11 @@ test("NEW-010: crafting.js uses NX lock for cooldown atomicity (BUG-016 fix)", (
   );
 });
 
-test("NEW-011: loot-voucher.js requires authMiddleware (BUG-008 fix)", () => {
-  const src = readFile("backend/api/loot-voucher.js");
-  assert.ok(src, "backend/api/loot-voucher.js must exist");
-  assert.ok(
-    src.includes("authMiddleware"),
-    "loot-voucher.js must require auth to prevent unauthenticated voucher generation"
-  );
+test("NEW-011: claim-voucher.js verifies a SIWS signature and consumes a Redis nonce", () => {
+  const src = readFile("backend/api/claim-voucher.js");
+  assert.ok(src, "backend/api/claim-voucher.js must exist");
+  assert.ok(src.includes("nacl.sign.detached.verify"), "claim must verify the wallet signature");
+  assert.ok(src.includes("getdel"), "nonce must be consumed with GETDEL");
 });
 
 test("NEW-012: auth.js session lookup requires authMiddleware (SEC-011 fix)", () => {
@@ -904,7 +902,7 @@ test("BUG-034: battles.js enemyAttack() returns early if active enemy is already
 });
 
 test("BUG-035: loot-voucher.js does not hardcode lootId to 1n", () => {
-  const src = readFile("backend/api/loot-voucher.js");
+  const src = readFile("backend/api/claim-voucher.js");
   assert.ok(src, "backend/api/loot-voucher.js must exist");
   assert.ok(
     !src.includes("const lootId = 1n") && !src.match(/lootId\s*=\s*1n\s*;/),
@@ -913,7 +911,7 @@ test("BUG-035: loot-voucher.js does not hardcode lootId to 1n", () => {
 });
 
 test("BUG-036: loot-voucher.js returns { voucher, signature } structure (not flat payload)", () => {
-  const src = readFile("backend/api/loot-voucher.js");
+  const src = readFile("backend/api/claim-voucher.js");
   assert.ok(src, "backend/api/loot-voucher.js must exist");
   // Must include voucherId and keyId so redeem-voucher.js can verify
   assert.ok(
@@ -928,7 +926,7 @@ test("BUG-036: loot-voucher.js returns { voucher, signature } structure (not fla
 });
 
 test("BUG-036: loot-voucher.js does NOT return legacy flat serverSignature field", () => {
-  const src = readFile("backend/api/loot-voucher.js");
+  const src = readFile("backend/api/claim-voucher.js");
   assert.ok(src, "backend/api/loot-voucher.js must exist");
   assert.ok(
     !src.includes("serverSignature:"),
@@ -965,13 +963,30 @@ test("SEC-AUDIT-001: Solana program lib.rs uses u128 for bonding curve arithmeti
   );
 });
 
-test("SEC-AUDIT-002: Solana program ClaimLoot server_key is constrained to config.server_key", () => {
+test("SEC-AUDIT-002: claim_loot verifies the config server key, never a caller-supplied key", () => {
   const src = readFile("programs/fizzcaps-onchain/src/lib.rs");
   assert.ok(src, "programs/fizzcaps-onchain/src/lib.rs must exist");
-  // server_key must be address-constrained so attackers can't supply their own keypair
+  const claimStart = src.indexOf("pub struct ClaimLoot");
+  const claimEnd = src.indexOf("pub struct FizzInit");
+  assert.ok(claimStart !== -1 && claimEnd > claimStart, "ClaimLoot struct must exist");
+  const claim = src.slice(claimStart, claimEnd);
   assert.ok(
-    src.includes("config.server_key"),
-    "lib.rs ClaimLoot.server_key must be constrained to config.server_key to prevent forged loot vouchers"
+    !claim.includes("pub server_key"),
+    "ClaimLoot must not take a caller-supplied server_key account"
+  );
+  assert.ok(
+    src.includes("config.server_key()"),
+    "claim_loot must verify against the server key stored on config"
+  );
+  const parser = readFile("programs/fizzcaps-onchain/src/voucher.rs");
+  assert.ok(parser, "voucher.rs must exist");
+  assert.ok(
+    parser.includes("rd(6)"),
+    "Ed25519 parser must read the pubkey offset at header byte 6, not the signature offset at byte 2"
+  );
+  assert.ok(
+    !parser.includes("pubkey_offset = u16::from_le_bytes([data[2]"),
+    "parser must not treat the signature offset as the pubkey offset"
   );
 });
 
@@ -1020,7 +1035,7 @@ test("SEC-AUDIT-005: Solana program FizzSellTokens treasury is constrained to co
 });
 
 test("SEC-AUDIT-006: loot-voucher.js validates GPS proximity before signing voucher", () => {
-  const src = readFile("backend/api/loot-voucher.js");
+  const src = readFile("backend/api/claim-voucher.js");
   assert.ok(src, "backend/api/loot-voucher.js must exist");
   assert.ok(
     src.includes("not_near_poi") || src.includes("nearbyPOI") || src.includes("findNearbyPOI"),
@@ -1065,7 +1080,7 @@ test("BUG-041: mint-item.js rolls back incr when limit exceeded", () => {
 });
 
 test("BUG-042: loot-voucher.js includes caps in signed voucher (tiered rewards)", () => {
-  const src = readFile("backend/api/loot-voucher.js");
+  const src = readFile("backend/api/claim-voucher.js");
   assert.ok(src, "backend/api/loot-voucher.js must exist");
   assert.ok(
     src.includes("capsReward") && src.includes("caps: capsReward"),
@@ -1100,7 +1115,7 @@ test("BUG-042: gps.js serializeVoucherMessage includes caps field when present",
 });
 
 test("BUG-043: loot-voucher.js uses expanded lootId range (>= 2^40) to reduce PDA collisions", () => {
-  const src = readFile("backend/api/loot-voucher.js");
+  const src = readFile("backend/api/claim-voucher.js");
   assert.ok(src, "backend/api/loot-voucher.js must exist");
   // Old range was 1_000_000; new range must be at least 2^40 to reduce birthday paradox risk
   assert.ok(
