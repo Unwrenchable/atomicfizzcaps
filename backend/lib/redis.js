@@ -61,7 +61,8 @@ function createInMemoryClient() {
       if (opts && opts.EX) {
         const ttlMs = Number(opts.EX) * 1000;
         expiry.set(key, Date.now() + ttlMs);
-        setTimeout(() => { store.delete(key); expiry.delete(key); }, ttlMs);
+        const timer = setTimeout(() => { store.delete(key); expiry.delete(key); }, ttlMs);
+        if (typeof timer.unref === "function") timer.unref();
       }
       return "OK";
     },
@@ -121,7 +122,16 @@ function createInMemoryClient() {
       const removed = store.delete(key);
       hashes.delete(key);
       sets.delete(key);
+      expiry.delete(key);
       return removed ? 1 : 0;
+    },
+    async getdel(key) {
+      const value = store.has(key) ? store.get(key) : null;
+      store.delete(key);
+      hashes.delete(key);
+      sets.delete(key);
+      expiry.delete(key);
+      return value;
     },
     async incr(key) {
       const cur = parseInt(store.get(key) || "0", 10) + 1;
@@ -137,12 +147,13 @@ function createInMemoryClient() {
       if (!store.has(key) && !hashes.has(key) && !sets.has(key)) return 0;
       const ttlMs = Number(seconds) * 1000;
       expiry.set(key, Date.now() + ttlMs);
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         store.delete(key);
         hashes.delete(key);
         sets.delete(key);
         expiry.delete(key);
       }, ttlMs);
+      if (typeof timer.unref === "function") timer.unref();
       return 1;
     },
     async ttl(key) {
@@ -454,6 +465,17 @@ async function del(k) {
     handleRedisError(err, 'del');
   }
 }
+async function getdel(k) {
+  try {
+    const c = await ensureClient();
+    const prefixed = key(k);
+    if (c.isFallback) return c.getdel(prefixed);
+    if (typeof c.getdel === "function") return c.getdel(prefixed);
+    return c.call("GETDEL", prefixed);
+  } catch (err) {
+    handleRedisError(err, 'getdel');
+  }
+}
 async function incr(k) {
   try {
     const c = await ensureClient();
@@ -641,6 +663,7 @@ module.exports = {
   get,
   set,
   del,
+  getdel,
   incr,
   decr,
   expire,
@@ -675,6 +698,7 @@ const redisWrapper = {
   get,
   set,
   del,
+  getdel,
   incr,
   decr,
   expire,

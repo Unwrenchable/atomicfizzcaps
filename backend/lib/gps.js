@@ -49,8 +49,10 @@ async function updateLocation(player, lat, lng) {
 // ------------------------------------------------------------
 
 /**
- * Serialize a voucher object to a deterministic byte buffer for signing/verification.
- * Fields are joined with "|" to avoid ambiguity across fields.
+ * Serialize a legacy off-chain voucher to a deterministic byte buffer.
+ * NOT for on-chain vouchers. On-chain claims use backend/lib/voucherV1.js
+ * (169-byte LootVoucherV1). A V1 message must not verify here, and this
+ * pipe format must not verify on-chain.
  *
  * @param {Object} voucher
  * @returns {Buffer}
@@ -72,6 +74,11 @@ function serializeVoucherMessage(voucher) {
   // (which lack the caps field) still verify correctly with the old message format.
   if (voucher.caps !== undefined && voucher.caps !== null) {
     parts.push(String(voucher.caps));
+  }
+  // Bind the off-chain voucher to the player when the issuer included one.
+  // Absent on vouchers issued before this field existed.
+  if (voucher.player) {
+    parts.push(String(voucher.player));
   }
   return Buffer.from(parts.join("|"), "utf8");
 }

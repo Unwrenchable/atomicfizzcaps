@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 # Cancel in-progress runs on the same branch to avoid queuing duplicate jobs
 concurrency:
   group: ci-${{ github.ref }}
@@ -28,20 +31,25 @@ jobs:
       !startsWith(github.event.pull_request.title, 'chore(solana)')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Reject committed devnet or mainnet keypairs
+        run: node scripts/check-no-deploy-keypairs.cjs
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: '20'
+          node-version: "20"
           # Cache node_modules keyed on package-lock.json so installs are
           # skipped entirely on cache hits.
-          cache: 'npm'
+          cache: "npm"
 
-      # Full install only for test/lint jobs that need dev dependencies.
-      # Use ci (not install) for reproducible builds.
+      # package-lock.json is gitignored, so npm ci cannot resolve a lockfile.
       - name: Install dependencies
-        run: npm ci
+        run: npm install --ignore-scripts --no-audit --no-fund --no-package-lock
+
+      - name: Install backend deps for voucher tests
+        run: npm install --prefix backend --ignore-scripts --no-audit --no-fund --no-package-lock
 
       - name: Lint
         run: npm run lint
@@ -64,16 +72,21 @@ jobs:
     # Path filter: only trigger when Solana-related files change
     # (uses paths-filter action to avoid running Rust builds on every JS commit)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Reject committed devnet or mainnet keypairs
+        run: node scripts/check-no-deploy-keypairs.cjs
 
       - name: Check for Solana-related changes
         id: filter
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
         with:
           filters: |
             solana:
               - 'programs/**'
+              - 'tests/**'
               - 'Anchor.toml'
+              - 'tsconfig.json'
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'workers/**'
@@ -81,14 +94,14 @@ jobs:
 
       - name: Set up Rust toolchain (with incremental build cache)
         if: steps.filter.outputs.solana == 'true'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
 
       # Cache the Cargo registry + build artefacts.
       # Key includes Cargo.lock so it busts when dependencies change but
       # reuses the cache across identical lockfiles (most PRs).
       - name: Cache Rust / Cargo artefacts
         if: steps.filter.outputs.solana == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             ~/.cargo/registry
@@ -98,25 +111,78 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-
 
-      - name: Install Solana CLI
+      - name: Install Solana CLI 2.3.0
         if: steps.filter.outputs.solana == 'true'
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+          sh -c "$(curl -sSfL https://release.solana.com/v2.3.0/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
-      - name: Install Anchor CLI (cached via cargo)
+      - name: Install Anchor CLI 0.32.2
         if: steps.filter.outputs.solana == 'true'
         run: |
-          if ! command -v avm &> /dev/null; then
-            cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-          fi
-          avm install latest
-          avm use latest
+          curl -fsSL -o /tmp/anchor-0.32.2 \
+            https://github.com/coral-xyz/anchor/releases/download/v0.32.2/anchor-0.32.2-x86_64-unknown-linux-gnu
+          echo "b3cdc15f3db924c2b11a7c16ceff21ad3da239ddde4e53f33df18e52e0461645  /tmp/anchor-0.32.2" | sha256sum -c
+          install -m 755 /tmp/anchor-0.32.2 "$HOME/.local/bin/anchor"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          anchor --version
 
-      - name: Build Anchor program
+      - name: Install platform-tools v1.58
         if: steps.filter.outputs.solana == 'true'
-        run: anchor build
+        run: |
+          sh scripts/ensure-platform-tools.sh
+          install -m 755 scripts/cargo-build-sbf-v158.sh "$HOME/.local/bin/cargo-build-sbf"
 
-      - name: Run Anchor tests
+      - name: Fetch Metaplex token-metadata
         if: steps.filter.outputs.solana == 'true'
-        run: anchor test --skip-local-validator
+        run: sh scripts/fetch-mpl-token-metadata.sh
+
+      - name: Install the localnet program keypair
+        if: steps.filter.outputs.solana == 'true'
+        run: |
+          mkdir -p target/deploy "$HOME/.config/solana"
+          cp programs/fizzcaps-onchain/keys/localnet-keypair.json target/deploy/fizzcaps_onchain-keypair.json
+          solana-keygen new -o "$HOME/.config/solana/id.json" --no-bip39-passphrase --force
+
+      - name: Check declare_id matches Anchor.toml
+        if: steps.filter.outputs.solana == 'true'
+        run: node scripts/check-declare-id.cjs
+
+      - name: Unit-test the voucher verifier
+        if: steps.filter.outputs.solana == 'true'
+        run: cargo test -p fizzcaps_onchain --features localnet --lib
+
+      - name: Reject zero or multiple cluster features
+        if: steps.filter.outputs.solana == 'true'
+        run: |
+          set +e
+          cargo check -p fizzcaps_onchain --offline
+          zero=$?
+          cargo check -p fizzcaps_onchain --features localnet,devnet --offline
+          both=$?
+          set -e
+          test "$zero" -ne 0
+          test "$both" -ne 0
+          cargo check -p fizzcaps_onchain --features devnet --offline
+          cargo check -p fizzcaps_onchain --features mainnet --offline
+
+      # Localnet is last so target/deploy keeps the binary anchor test deploys.
+      # Each cluster feature is its own program id. There is no default feature.
+      - name: Build SBF and IDL (devnet, mainnet, localnet)
+        if: steps.filter.outputs.solana == 'true'
+        run: |
+          anchor build -- --features devnet
+          anchor build -- --features mainnet
+          anchor build -- --features localnet
+
+      - name: Run the local-validator claim_loot test
+        if: steps.filter.outputs.solana == 'true'
+        run: cargo test -p fizzcaps_onchain --features localnet --test claim_loot -- --test-threads=1
+
+      - name: Install TypeScript test runner
+        if: steps.filter.outputs.solana == 'true'
+        run: npm install --ignore-scripts --no-audit --no-fund --no-package-lock
+
+      - name: Run anchor test
+        if: steps.filter.outputs.solana == 'true'
+        run: anchor test --skip-build --skip-lint

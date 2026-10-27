@@ -62,6 +62,15 @@ router.post("/", redeemLimiter, authMiddleware, async (req, res) => {
 
     if (!voucher || typeof voucher !== "object") return res.status(400).json({ error: "Missing voucher" });
 
+    // V1 on-chain vouchers use a different domain and must not be redeemed here.
+    if (voucher.v === 2 || voucher.latE6 != null || voucher.lngE6 != null) {
+      return res.status(400).json({ error: "On-chain voucher cannot be redeemed off-chain" });
+    }
+    // When the legacy voucher is player-bound, only that wallet may redeem it.
+    if (voucher.player && voucher.player !== player.wallet) {
+      return res.status(403).json({ error: "Voucher is bound to a different player" });
+    }
+
     // Basic fields
     const { voucherId, keyId, timestamp, ttlSeconds } = voucher;
     if (!voucherId || !keyId || !timestamp) return res.status(400).json({ error: "Malformed voucher" });
